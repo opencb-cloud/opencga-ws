@@ -53,7 +53,7 @@ public class BamWSServer extends GcsWSServer {
 		start = parsedRegion.getStart();
 		end =parsedRegion.getEnd();
 		
-		BamUtils bu = new BamUtils();
+		BamUtils bu = new BamUtils(properties);
 		String result = bu.getByRegion(filename, chr, start, end);
 		
 		return createOkResponse(result);
@@ -63,11 +63,11 @@ public class BamWSServer extends GcsWSServer {
 	@GET
 	@Path("/list")
 	public Response getFileList() throws IOException{
-		return createOkResponse(new BamUtils().getFileList());
+		return createOkResponse(new BamUtils(properties).getFileList());
 	}
 	
 	
-	//XXX
+	//TODO
 //	public void testGetByRegion() {
 ////		File inputSamFile = new File("/tmp/input2.bam");
 ////		File indexFile = new File("/tmp/input2.bam.bai");
