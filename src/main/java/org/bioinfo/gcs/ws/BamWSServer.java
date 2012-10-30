@@ -10,7 +10,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.bioinfo.gcs.lib.bam.BamUtils;
+import org.bioinfo.gcs.lib.bam.BamManager;
 import org.bioinfo.infrared.lib.common.Region;
 
 
@@ -52,7 +52,7 @@ public class BamWSServer extends GcsWSServer {
 		start = parsedRegion.getStart();
 		end =parsedRegion.getEnd();
 		
-		BamUtils bu = new BamUtils(properties);
+		BamManager bu = new BamManager(properties);
 		String result = bu.getByRegion(filename, chr, start, end);
 		
 		return createOkResponse(result);
@@ -62,7 +62,7 @@ public class BamWSServer extends GcsWSServer {
 	@GET
 	@Path("/list")
 	public Response getFileList() throws IOException{
-		return createOkResponse(new BamUtils(properties).getFileList());
+		return createOkResponse(new BamManager(properties).getFileList());
 	}
 	
 	
