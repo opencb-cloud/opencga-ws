@@ -30,9 +30,9 @@ public class BamUtils {
 	protected Config config;
 	protected Logger logger;
 	
-	public BamUtils() throws IOException{
-		ResourceBundle databaseConfig = ResourceBundle.getBundle("org.bioinfo.dqs.ws.application");
-		config = new Config(databaseConfig);
+	public BamUtils(ResourceBundle properties) throws IOException{
+//		ResourceBundle properties = ResourceBundle.getBundle("application");
+		config = new Config(properties);
 		gson = new Gson();
 		logger = new Logger();
 		logger.setLevel(Logger.INFO_LEVEL);
