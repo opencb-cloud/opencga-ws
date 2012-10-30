@@ -10,9 +10,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.bioinfo.gcs.lib.Region;
 import org.bioinfo.gcs.lib.bam.BamUtils;
-import org.bioinfo.gcs.ws.GcsWSServer;
+import org.bioinfo.infrared.lib.common.Region;
 
 
 @Path("/bam")

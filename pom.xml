@@ -1,16 +1,23 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.bioinfo</groupId>
-  <artifactId>gcs-ws</artifactId>
-  <version>0.1.0</version>
-  <packaging>war</packaging>
-  <name>gcs-ws</name>
-  
-  <dependencies>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.bioinfo</groupId>
+	<artifactId>gcs-ws</artifactId>
+	<version>0.1.0</version>
+	<packaging>war</packaging>
+	<name>gcs-ws</name>
+
+	<dependencies>
 		<dependency>
 			<groupId>org.bioinfo</groupId>
 			<artifactId>bioinfo-commons</artifactId>
 			<version>0.10.0</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.bioinfo</groupId>
+			<artifactId>cellbase-lib</artifactId>
+			<version>2.1.1</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -35,20 +42,20 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.8.2</version>
-<!--			<scope>test</scope>-->
+			<!-- <scope>test</scope> -->
 		</dependency>
-		<!-- We need samtools for Tabix, Heng Li's rules!		-->
+		<!-- We need samtools for Tabix, Heng Li's rules! -->
 		<dependency>
 			<groupId>net.sf</groupId>
 			<artifactId>samtools</artifactId>
-			<version>1.72</version>			
+			<version>1.72</version>
 		</dependency>
-			<dependency>
+		<dependency>
 			<groupId>net.sf</groupId>
 			<artifactId>picardtools</artifactId>
-			<version>1.72</version>			
+			<version>1.72</version>
 		</dependency>
-        	<dependency>
+		<dependency>
 			<groupId>org.xerial</groupId>
 			<artifactId>sqlite-jdbc</artifactId>
 			<version>3.7.2</version>
@@ -110,5 +117,5 @@
 			<url>scp://gen28/var/local/commons/repository</url>
 		</repository>
 	</distributionManagement>
-  
+
 </project>
