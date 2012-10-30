@@ -34,7 +34,7 @@ public class GcsWSServer {
 		logger = new Logger();
 		logger.setLevel(Logger.INFO_LEVEL);
 		
-		properties = ResourceBundle.getBundle("application");
+		properties = ResourceBundle.getBundle("org.bioinfo.gcs.ws.application");
 		
 		File dqsDir = new File(properties.getString("DQS.PATH"));
 		if(dqsDir.exists()){
