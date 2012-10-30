@@ -24,13 +24,13 @@ import org.bioinfo.commons.log.Logger;
 import com.google.gson.Gson;
 
 
-public class BamUtils {
+public class BamManager {
 	
 	protected Gson gson = new Gson();
 	protected Config config;
 	protected Logger logger;
 	
-	public BamUtils(ResourceBundle properties) throws IOException{
+	public BamManager(ResourceBundle properties) throws IOException{
 //		ResourceBundle properties = ResourceBundle.getBundle("application");
 		config = new Config(properties);
 		gson = new Gson();
@@ -50,8 +50,13 @@ public class BamUtils {
 		System.out.println("chr: "+chr+" start: "+start+" end: "+end);
 
 		File inputSamFile = new File(config.getProperty("FILES.PATH")+"/bam/"+fileName+".bam");
-		File indexFile = new File(config.getProperty("FILES.PATH")+"/bam/"+fileName+".bam.bai");
-
+		File indexFile = null;
+		if(!new File(config.getProperty("FILES.PATH")+"/bam/"+fileName+".bam.bai").exists()) {
+			// crearlo!
+			
+		}
+		indexFile = new File(config.getProperty("FILES.PATH")+"/bam/"+fileName+".bam.bai");
+		
 		
 		long t = System.currentTimeMillis();
 		final SAMFileReader inputSam = new SAMFileReader(inputSamFile, indexFile);
