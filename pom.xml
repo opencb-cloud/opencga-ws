@@ -45,16 +45,16 @@
 			<!-- <scope>test</scope> -->
 		</dependency>
 		<!-- We need samtools for Tabix, Heng Li's rules! -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>net.sf</groupId>
 			<artifactId>samtools</artifactId>
 			<version>1.72</version>
-		</dependency>
-		<dependency>
+		</dependency> -->
+		<!-- <dependency>
 			<groupId>net.sf</groupId>
 			<artifactId>picardtools</artifactId>
 			<version>1.72</version>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>org.xerial</groupId>
 			<artifactId>sqlite-jdbc</artifactId>
@@ -107,6 +107,7 @@
 			<url>http://download.java.net/maven/2/</url>
 			<layout>default</layout>
 		</repository>
+		
 
 	</repositories>
 

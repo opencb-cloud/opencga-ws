@@ -2,14 +2,8 @@ package org.bioinfo.gcs.lib.bam;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 import java.util.ResourceBundle;
 
-import net.sf.picard.analysis.directed.HsMetricCollector;
-import net.sf.picard.analysis.directed.HsMetricCollector.Coverage;
-import net.sf.picard.util.Interval;
-import net.sf.samtools.AlignmentBlock;
 import net.sf.samtools.CigarOperator;
 import net.sf.samtools.SAMFileReader;
 import net.sf.samtools.SAMRecord;
@@ -18,7 +12,6 @@ import net.sf.samtools.SAMRecordIterator;
 
 import org.bioinfo.commons.Config;
 import org.bioinfo.commons.io.utils.FileUtils;
-import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.log.Logger;
 
 import com.google.gson.Gson;
@@ -53,7 +46,6 @@ public class BamManager {
 		File indexFile = null;
 		if(!new File(config.getProperty("FILES.PATH")+"/bam/"+fileName+".bam.bai").exists()) {
 			// crearlo!
-			
 		}
 		indexFile = new File(config.getProperty("FILES.PATH")+"/bam/"+fileName+".bam.bai");
 		
