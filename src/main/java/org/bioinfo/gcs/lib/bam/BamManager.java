@@ -2,14 +2,8 @@ package org.bioinfo.gcs.lib.bam;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 import java.util.ResourceBundle;
 
-import net.sf.picard.analysis.directed.HsMetricCollector;
-import net.sf.picard.analysis.directed.HsMetricCollector.Coverage;
-import net.sf.picard.util.Interval;
-import net.sf.samtools.AlignmentBlock;
 import net.sf.samtools.CigarOperator;
 import net.sf.samtools.SAMFileReader;
 import net.sf.samtools.SAMRecord;
@@ -18,7 +12,6 @@ import net.sf.samtools.SAMRecordIterator;
 
 import org.bioinfo.commons.Config;
 import org.bioinfo.commons.io.utils.FileUtils;
-import org.bioinfo.commons.io.utils.IOUtils;
 import org.bioinfo.commons.log.Logger;
 
 import com.google.gson.Gson;
@@ -103,6 +96,18 @@ public class BamManager {
 			
 			readStr = record.getReadString();
 			
+			/*
+			 *Base quality ascii conversion
+			 * */
+//			String baseQualityString = record.getBaseQualityString();
+//			int baseLen = baseQualityString.length();
+//			short[] baseQualityArray = new short[baseLen];
+//			for (int i = 0; i < baseLen; i++) {
+//				baseQualityArray[i] = (short)baseQualityString.charAt(i);
+//			}
+			/**/
+			
+			
 			sb.append("{");
 			sb.append("\"start\":"+record.getAlignmentStart()+",");
 			sb.append("\"end\":"+record.getAlignmentEnd()+",");
@@ -119,6 +124,7 @@ public class BamManager {
 			sb.append("\"readGroupLibrary\":\""+record.getReadGroup().getLibrary()+"\",");
 			sb.append("\"referenceName\":\""+record.getReferenceName()+"\",");
 			sb.append("\"baseQualityString\":\""+record.getBaseQualityString().replace("\\", "\\\\").replace("\"", "\\\"")+"\",");// the " char unables parse from javascript
+//			sb.append("\"baseQualityString\":\""+gson.toJson(baseQualityArray)+"\",");// the " char unables parse from javascript
 			sb.append("\"header\":\""+record.getHeader().toString()+"\",");
 			sb.append("\"readLength\":"+record.getReadLength()+",");
 			sb.append("\"mappingQuality\":"+record.getMappingQuality()+",");
@@ -204,7 +210,7 @@ public class BamManager {
 //			}
 		}
 		//Remove last comma
-		if(sb.length()>1){
+		if(sb.length()>1 && sb.charAt(sb.length()-1) == ','){
 			sb.replace(sb.length()-1, sb.length(), "");
 		}
 		
