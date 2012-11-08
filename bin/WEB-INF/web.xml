@@ -3,14 +3,14 @@
 	xmlns="http://java.sun.com/xml/ns/j2ee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
 
-	<display-name>Genomic Cloud Storage and Analysis</display-name>
+	<display-name>Genomic Cloud Storage</display-name>
 
 	<servlet>
 		<servlet-name>GcsWSServer</servlet-name>
 		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
 		<init-param>
 			<param-name>com.sun.jersey.config.property.packages</param-name>
-			<param-value>org.bioinfo.gcsa.ws</param-value>
+			<param-value>org.bioinfo.gcs.ws</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>

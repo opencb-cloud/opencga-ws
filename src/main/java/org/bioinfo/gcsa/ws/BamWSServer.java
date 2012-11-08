@@ -1,4 +1,4 @@
-package org.bioinfo.gcs.ws;
+package org.bioinfo.gcsa.ws;
 
 import java.io.IOException;
 
@@ -10,12 +10,12 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.bioinfo.gcs.lib.bam.BamManager;
+import org.bioinfo.gcsa.lib.storage.alignment.BamManager;
 import org.bioinfo.infrared.lib.common.Region;
 
 
 @Path("/bam")
-public class BamWSServer extends GcsWSServer {
+public class BamWSServer extends GenericWSServer {
 
 	
 	public BamWSServer(@Context UriInfo uriInfo) throws IOException {

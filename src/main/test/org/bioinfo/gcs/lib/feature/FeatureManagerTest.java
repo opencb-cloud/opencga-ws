@@ -2,6 +2,7 @@ package org.bioinfo.gcs.lib.feature;
 
 import java.io.IOException;
 
+import org.bioinfo.gcsa.lib.storage.feature.FeatureManager;
 import org.junit.Test;
 
 
