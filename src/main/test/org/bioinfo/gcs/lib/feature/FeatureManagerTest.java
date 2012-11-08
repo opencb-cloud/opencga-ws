@@ -9,7 +9,7 @@ import org.junit.Test;
 public class FeatureManagerTest {
 
 	@Test
-	public void test() {
+	public void testBed() {
 		FeatureManager fm = new FeatureManager("/home/echirivella/Downloads/testbed/","Homo.bed.gz");
 		try {
 			
@@ -18,5 +18,15 @@ public class FeatureManagerTest {
 			e.printStackTrace();
 		}
 	}
-
+	
+	@Test
+	public void testGff() {
+		FeatureManager fm = new FeatureManager("/home/echirivella/Downloads/testbed/","Homo.bed.gz");
+		try {
+			
+			System.out.println(fm.getByRegion("Homo.bed.gz","chr10", 80000, 100000));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
