@@ -115,7 +115,7 @@
 		<repository>
 			<id>default</id>
 			<name>Bioinfo Repository</name>
-			<url>scp://gen28/var/local/commons/repository</url>
+			<url>http://repos.bioinfo.cipf.es/maven2/</url>
 		</repository>
 	</distributionManagement>
 

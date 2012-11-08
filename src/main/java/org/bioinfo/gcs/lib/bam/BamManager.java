@@ -95,6 +95,18 @@ public class BamManager {
 			
 			readStr = record.getReadString();
 			
+			/*
+			 *Base quality ascii conversion
+			 * */
+//			String baseQualityString = record.getBaseQualityString();
+//			int baseLen = baseQualityString.length();
+//			short[] baseQualityArray = new short[baseLen];
+//			for (int i = 0; i < baseLen; i++) {
+//				baseQualityArray[i] = (short)baseQualityString.charAt(i);
+//			}
+			/**/
+			
+			
 			sb.append("{");
 			sb.append("\"start\":"+record.getAlignmentStart()+",");
 			sb.append("\"end\":"+record.getAlignmentEnd()+",");
@@ -111,6 +123,7 @@ public class BamManager {
 			sb.append("\"readGroupLibrary\":\""+record.getReadGroup().getLibrary()+"\",");
 			sb.append("\"referenceName\":\""+record.getReferenceName()+"\",");
 			sb.append("\"baseQualityString\":\""+record.getBaseQualityString().replace("\\", "\\\\").replace("\"", "\\\"")+"\",");// the " char unables parse from javascript
+//			sb.append("\"baseQualityString\":\""+gson.toJson(baseQualityArray)+"\",");// the " char unables parse from javascript
 			sb.append("\"header\":\""+record.getHeader().toString()+"\",");
 			sb.append("\"readLength\":"+record.getReadLength()+",");
 			sb.append("\"mappingQuality\":"+record.getMappingQuality()+",");
@@ -196,7 +209,7 @@ public class BamManager {
 //			}
 		}
 		//Remove last comma
-		if(sb.length()>1){
+		if(sb.length()>1 && sb.charAt(sb.length()-1) == ','){
 			sb.replace(sb.length()-1, sb.length(), "");
 		}
 		
