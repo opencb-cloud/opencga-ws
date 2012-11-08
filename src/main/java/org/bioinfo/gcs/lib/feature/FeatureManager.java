@@ -3,6 +3,8 @@ package org.bioinfo.gcs.lib.feature;
 import java.io.File;
 import java.io.IOException;
 
+import org.bioinfo.commons.io.utils.FileUtils;
+
 public class FeatureManager {
 	private static StringBuilder directory;
 	private static StringBuilder tmpDir;
@@ -18,35 +20,74 @@ public class FeatureManager {
 				fileName.lastIndexOf(".")));
 	}
 
-	public String getByRegion(final String fileName,final String chr,
+	public String getByRegion(final String fileName, final String chr,
 			final int start, final int end) throws IOException {
-
-		if (fileName.endsWith("gff")
-				|| fileName.toString().endsWith("gff.gz")) {
+		// FileUtils.checkFile(fileName);
+		if (fileName.endsWith("gff") || fileName.toString().endsWith("gff.gz")) {
 			return getByRegionGff(fileName, chr, start, end);
 		}
 
-		if (fileName.endsWith("bed")
-				|| fileName.toString().endsWith("bed.gz")) {
+		if (fileName.endsWith("bed") || fileName.toString().endsWith("bed.gz")) {
 
-			return "";
+			return getByRegionBed(fileName, chr, start, end);
 		}
 
 		return "Format unknown";
 	}
 
-	private boolean processGff(/* String fileName */) {
+	private String getByRegionBed(String fileName, final String chr,
+			final int start, final int end) {
+		StringBuilder infoChrom = new StringBuilder(chr).append(":")
+				.append(start).append(":").append(end);
+
+		if (!new File(new StringBuilder(fileName.substring(0,
+				fileName.lastIndexOf("."))).append("sort.gz.tbi").toString())
+				.exists()) {
+			if (fileName.toString().endsWith("gz")) {
+				if (descGz(/* fileName */)) {
+					if (process("bed"/* fileName */))
+						moveTempToDir(/* fileName */);
+				}
+			} else {
+				if (process("bed"/* fileName */))
+					moveTempToDir(/* fileName */);
+			}
+		}
+
+		return "";// tabixFind(infoChrom.toString()/* , fileName */);
+	}
+
+	private boolean process(String typeFile/* String fileName */) {
 		System.out.println("ESTAMOS EN PROCESSGFF");
 		boolean processOK = true;
 
 		try {
 			// Sorted
 			System.out.println("ESTAMOS ORDENANDO");
-			StringBuilder commandToExecute = new StringBuilder(
-					"sort -k1,1 -k4,4n ").append(tmpDir).append(fileName)
+			String operation = null;
+			if (typeFile.equals("gff")) {
+				operation = "sort -k1,1 -k4,4n ";
+			} else {
+				operation = "sort -k1,1 -k2,2n ";
+			}
+			StringBuilder commandToExecute = new StringBuilder(operation).append(tmpDir).append(fileName)
 					.append(" > ").append(tmpDir).append(fileName)
 					.append(".sort");
 			String[] command = { "/bin/bash", "-c", commandToExecute.toString() };
+			System.out.println(commandToExecute.toString());
+
+			process = execute.exec(command);
+
+			process.waitFor();
+			System.out.println("HA SALIDO CON " + process.exitValue());
+			if (process.exitValue() != 0)
+				processOK = false;
+
+			// remove
+			System.out.println("ESTAMOS ORDENANDO");
+			commandToExecute = new StringBuilder("rm -f ").append(tmpDir)
+					.append(fileName);
+			command[2] = commandToExecute.toString();
 			System.out.println(commandToExecute.toString());
 
 			process = execute.exec(command);
@@ -70,8 +111,9 @@ public class FeatureManager {
 
 			// Index
 			System.out.println("ESTAMOS INDEXANDO");
-			commandToExecute = new StringBuilder("/opt/tabix/tabix -p gff ")
-					.append(tmpDir).append(fileName).append(".sort.gz");
+			commandToExecute = new StringBuilder("/opt/tabix/tabix -p ")
+					.append(typeFile).append(" ").append(tmpDir)
+					.append(fileName).append(".sort.gz");
 			command[2] = commandToExecute.toString();
 			System.out.println(commandToExecute.toString());
 			process = execute.exec(command);
@@ -117,8 +159,8 @@ public class FeatureManager {
 		try {
 			// descomprime
 			StringBuilder commandToExecute = new StringBuilder("gzip -cd ")
-					.append(tmpDir).append(fileName).append(".gz").append(" > ")
-					.append(tmpDir).append(fileName);
+					.append(tmpDir).append(fileName).append(".gz")
+					.append(" > ").append(tmpDir).append(fileName);
 			String[] command = { "/bin/bash", "-c", commandToExecute.toString() };
 
 			System.out.println(commandToExecute.toString());
@@ -126,7 +168,7 @@ public class FeatureManager {
 			process = execute.exec(command);
 
 			process.waitFor();
-
+			System.out.println("HA SALIDO CON " + process.exitValue());
 			if (process.exitValue() != 0)
 				processOK = false;
 
@@ -147,7 +189,7 @@ public class FeatureManager {
 		try {
 			// StringBuilder tmpdir = directory.append("tmp");
 			File f = new File(tmpDir.toString());
-			// System.out.println(tmpDir.toString());
+			System.out.println(tmpDir.toString());
 			File[] ficheros = f.listFiles();
 			for (int i = 0; i < ficheros.length; i++) {
 				System.out.println("VIENDO SI EXISTE -->"
@@ -193,7 +235,8 @@ public class FeatureManager {
 	private String tabixFind(String infoChrom/* , String fileName */) {
 		System.out.println("ESTAMOS EN TABIXFIND");
 		StringBuilder strbuild = new StringBuilder();
-		StringBuilder tabixFile = new StringBuilder(directory.toString()+ fileName.toString() + ".sort.gz");
+		StringBuilder tabixFile = new StringBuilder(directory.toString()
+				+ fileName.toString() + ".sort.gz");
 		try {
 			TabixReader tb = new TabixReader(tabixFile.toString());
 
@@ -209,32 +252,26 @@ public class FeatureManager {
 		return strbuild.toString();
 	}
 
-	private String getByRegionGff(String fileName,final String chr,
+	private String getByRegionGff(String fileName, final String chr,
 			final int start, final int end) {
-		System.out.println("ESTAMOS EN GETBYREGIONGFF");
 		StringBuilder infoChrom = new StringBuilder(chr).append(":")
 				.append(start).append(":").append(end);
-
-		// fileName.substring(0, fileName.lastIndexOf("."))
 
 		if (!new File(new StringBuilder(fileName.substring(0,
 				fileName.lastIndexOf("."))).append("sort.gz.tbi").toString())
 				.exists()) {
 			if (fileName.toString().endsWith("gz")) {
 				if (descGz(/* fileName */)) {
-					// fileName = fileName.substring(0,
-					// fileName.lastIndexOf("."));
-					if (processGff(/* fileName */))
+					if (process("gff"/* fileName */))
 						moveTempToDir(/* fileName */);
-
 				}
 			} else {
-				if (processGff(/* fileName */))
+				if (process("gff"/* fileName */))
 					moveTempToDir(/* fileName */);
 			}
 		}
 
-		return tabixFind(infoChrom.toString()/* , fileName */);
+		return "";// tabixFind(infoChrom.toString()/* , fileName */);
 	}
 
 }
