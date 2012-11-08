@@ -21,11 +21,17 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-            <groupId>org.bioinfo</groupId>
-            <artifactId>gcsa-lib</artifactId>
-            <version>0.1.0</version>
-            <scope>compile</scope>
-        </dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-servlet</artifactId>
+			<version>1.15</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.bioinfo</groupId>
+			<artifactId>gcsa-lib</artifactId>
+			<version>0.1.0</version>
+			<scope>compile</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.bioinfo</groupId>
 			<artifactId>bioinfo-formats</artifactId>
