@@ -1,4 +1,4 @@
-package org.bioinfo.gcs.ws;
+package org.bioinfo.gcsa.ws;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,7 +19,7 @@ import org.bioinfo.commons.log.Logger;
 
 @Path("/")
 @Produces("text/plain")
-public class GcsWSServer {
+public class GenericWSServer {
 
 	
 	protected UriInfo uriInfo;
@@ -27,7 +27,7 @@ public class GcsWSServer {
 	protected ResourceBundle properties;
 	MultivaluedMap<String, String> params;
 	
-	public GcsWSServer(@Context UriInfo uriInfo) throws IOException {
+	public GenericWSServer(@Context UriInfo uriInfo) throws IOException {
 		this.uriInfo = uriInfo;
 		this.params = this.uriInfo.getQueryParameters();
 		
