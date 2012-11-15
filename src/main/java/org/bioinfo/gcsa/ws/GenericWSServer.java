@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ResourceBundle;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -14,6 +15,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.bioinfo.commons.Config;
 import org.bioinfo.commons.log.Logger;
 
 
@@ -25,16 +27,24 @@ public class GenericWSServer {
 	protected UriInfo uriInfo;
 	protected Logger logger;
 	protected ResourceBundle properties;
+	protected Config config;
+	
+	protected String sessionId;
+	protected String sessionIp;
+	
 	MultivaluedMap<String, String> params;
 	
-	public GenericWSServer(@Context UriInfo uriInfo) throws IOException {
+	public GenericWSServer(@Context UriInfo uriInfo,@Context HttpServletRequest httpServletRequest) throws IOException {
 		this.uriInfo = uriInfo;
 		this.params = this.uriInfo.getQueryParameters();
+		this.sessionId = (this.params.get("sessionid") != null) ? this.params.get("sessionid").get(0) : "";
+		this.sessionIp = httpServletRequest.getRemoteAddr();
 		
 		logger = new Logger();
 		logger.setLevel(Logger.INFO_LEVEL);
 		
 		properties = ResourceBundle.getBundle("org.bioinfo.gcs.ws.application");
+		config = new Config(properties);
 		
 		File dqsDir = new File(properties.getString("DQS.PATH"));
 		if(dqsDir.exists()){
