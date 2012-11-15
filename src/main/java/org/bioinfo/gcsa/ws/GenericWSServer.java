@@ -38,6 +38,7 @@ public class GenericWSServer {
 		this.uriInfo = uriInfo;
 		this.params = this.uriInfo.getQueryParameters();
 		this.sessionId = (this.params.get("sessionid") != null) ? this.params.get("sessionid").get(0) : "";
+		this.sessionIp = httpServletRequest.getRemoteAddr();
 		
 		logger = new Logger();
 		logger.setLevel(Logger.INFO_LEVEL);
