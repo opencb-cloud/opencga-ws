@@ -60,7 +60,6 @@ public class BamWSServer extends GenericWSServer {
 		return createOkResponse(result);
 	}
 	
-	
 	@GET
 	@Path("/list")
 	public Response getFileList() throws IOException{

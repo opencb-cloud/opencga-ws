@@ -32,7 +32,7 @@ public class GenericWSServer {
 	public GenericWSServer(@Context UriInfo uriInfo) throws IOException {
 		this.uriInfo = uriInfo;
 		this.params = this.uriInfo.getQueryParameters();
-		
+
 		logger = new Logger();
 		logger.setLevel(Logger.INFO_LEVEL);
 		
