@@ -52,8 +52,10 @@ public class BamWSServer extends GenericWSServer {
 		start = parsedRegion.getStart();
 		end =parsedRegion.getEnd();
 		
-		BamManager bu = new BamManager(properties);
-		String result = bu.getByRegion(filename, chr, start, end);
+		BamManager bu = new BamManager();
+		
+		String filePath = config.getProperty("FILES.PATH");
+		String result = bu.getByRegion(filePath, filename, chr, start, end);
 		
 		return createOkResponse(result);
 	}
@@ -62,7 +64,7 @@ public class BamWSServer extends GenericWSServer {
 	@GET
 	@Path("/list")
 	public Response getFileList() throws IOException{
-		return createOkResponse(new BamManager(properties).getFileList());
+		return createOkResponse(new BamManager().getFileList(config.getProperty("FILES.PATH")));
 	}
 	
 	

@@ -14,6 +14,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.bioinfo.commons.Config;
 import org.bioinfo.commons.log.Logger;
 
 
@@ -25,6 +26,7 @@ public class GenericWSServer {
 	protected UriInfo uriInfo;
 	protected Logger logger;
 	protected ResourceBundle properties;
+	protected Config config;
 	MultivaluedMap<String, String> params;
 	
 	public GenericWSServer(@Context UriInfo uriInfo) throws IOException {
@@ -35,6 +37,7 @@ public class GenericWSServer {
 		logger.setLevel(Logger.INFO_LEVEL);
 		
 		properties = ResourceBundle.getBundle("org.bioinfo.gcs.ws.application");
+		config = new Config(properties);
 		
 		File dqsDir = new File(properties.getString("DQS.PATH"));
 		if(dqsDir.exists()){
