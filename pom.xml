@@ -21,6 +21,12 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
+			<groupId>user.agent.util</groupId>
+			<artifactId>user-agent-util</artifactId>
+			<version>1.6</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<version>2.5</version>

@@ -51,10 +51,13 @@ public class AccountWSServer extends GenericWSServer  {
 	@GET
 	@Path("/login/{accountId}/{password}")
 	public Response login(@PathParam("accountId") String accountId,@PathParam("password") String password){
-		
-		//Session session = new Session(sessionIp);
-		System.out.println("ESTAMOS AQUI A VER SI ENTRA");
 		return createOkResponse(userManager.login(accountId, password));
+	}
+	
+	@GET
+	@Path("/pipetest/{accountId}/{password}") //Pruebas 
+	public Response pipeTest(@PathParam("accountId") String accountId,@PathParam("password") String password){
+		return createOkResponse(userManager.testPipe(accountId, password));
 	}
 
 	
