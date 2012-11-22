@@ -27,7 +27,7 @@ public class AnalysisWSServer extends GenericWSServer {
 	
 	public AnalysisWSServer(@Context UriInfo uriInfo,
 			@Context HttpServletRequest httpServletRequest) throws IOException {
-		super(uriInfo,httpServletRequest);
+		super(uriInfo, httpServletRequest);
 		baseUrl = uriInfo.getBaseUri().toString();
 	}
 	
