@@ -30,6 +30,15 @@ public class BamWSServer extends GenericWSServer {
 			@DefaultValue("") @PathParam("region") String region
 								) throws IOException {
 		
+		Boolean viewAsPairs = false;
+		if(params.get("view_as_pairs") != null){
+			viewAsPairs = true;
+		}
+		Boolean showSoftclipping = false;
+		if(params.get("show_softclipping") != null){
+			showSoftclipping = true;
+		}
+		
 		String chr = null;
 		int start = 0;
 		int end = 0;
@@ -52,10 +61,10 @@ public class BamWSServer extends GenericWSServer {
 		start = parsedRegion.getStart();
 		end =parsedRegion.getEnd();
 		
-		BamManager bu = new BamManager();
+		BamManager bamManager = new BamManager();
 		
 		String filePath = config.getProperty("FILES.PATH");
-		String result = bu.getByRegion(filePath, filename, chr, start, end);
+		String result = bamManager.getByRegion(filePath, filename, viewAsPairs, showSoftclipping, chr, start, end);
 		
 		return createOkResponse(result);
 	}
