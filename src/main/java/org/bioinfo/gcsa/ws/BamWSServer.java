@@ -73,7 +73,8 @@ public class BamWSServer extends GenericWSServer {
 	@GET
 	@Path("/list")
 	public Response getFileList() throws IOException{
-		return createOkResponse(new BamManager().getFileList(config.getProperty("FILES.PATH")));
+		String filePath = config.getProperty("FILES.PATH");
+		return createOkResponse(new BamManager().getFileList(filePath));
 	}
 	
 	
