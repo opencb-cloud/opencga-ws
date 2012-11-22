@@ -2,7 +2,6 @@ package org.bioinfo.gcsa.ws;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 import javax.servlet.http.HttpServletRequest;
@@ -17,7 +16,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import nl.bitwalker.useragentutils.Browser;
-import nl.bitwalker.useragentutils.Manufacturer;
 import nl.bitwalker.useragentutils.OperatingSystem;
 import nl.bitwalker.useragentutils.UserAgent;
 

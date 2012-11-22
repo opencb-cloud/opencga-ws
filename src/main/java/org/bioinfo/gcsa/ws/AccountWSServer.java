@@ -14,6 +14,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.bioinfo.gcsa.lib.GcsaUtils;
 import org.bioinfo.gcsa.lib.users.CloudSessionManager;
 import org.bioinfo.gcsa.lib.users.beans.Session;
 import org.bioinfo.gcsa.lib.users.persistence.UserManagementException;
@@ -24,13 +25,13 @@ import org.bioinfo.gcsa.lib.users.persistence.UserManager;
 @Path("/account")
 public class AccountWSServer extends GenericWSServer  {
 	private UserManager userManager;
-	private CloudSessionManager cloudSessionManager = null;
+//	private CloudSessionManager cloudSessionManager = null;
 	public AccountWSServer(@Context UriInfo uriInfo,@Context HttpServletRequest httpServletRequest) throws IOException, UserManagementException {
 		super(uriInfo,httpServletRequest); 
 		
 		System.out.println("HOST: "+uriInfo.getRequestUri().getHost());
 		System.err.println("----------------------------------->");
-		cloudSessionManager = new CloudSessionManager("GCSA_HOME");
+		CloudSessionManager cloudSessionManager = new CloudSessionManager(System.getenv("GCSA_HOME"));
 		userManager = CloudSessionManager.userManager;
 	}
 	
@@ -51,7 +52,8 @@ public class AccountWSServer extends GenericWSServer  {
 	@GET
 	@Path("/login/{accountId}/{password}")
 	public Response login(@PathParam("accountId") String accountId,@PathParam("password") String password){
-		return createOkResponse(userManager.login(accountId, password));
+		Session session = new Session(sessionIp);
+		return createOkResponse(userManager.login(accountId, password, session));
 	}
 	
 	@GET
