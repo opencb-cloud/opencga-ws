@@ -2,6 +2,7 @@ package org.bioinfo.gcsa.ws;
 
 import java.io.IOException;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -18,8 +19,8 @@ import org.bioinfo.infrared.lib.common.Region;
 public class BamWSServer extends GenericWSServer {
 
 	
-	public BamWSServer(@Context UriInfo uriInfo) throws IOException {
-		super(uriInfo);
+	public BamWSServer(@Context UriInfo uriInfo, @Context HttpServletRequest httpServletRequest) throws IOException {
+		super(uriInfo,httpServletRequest); 
 	}
 	
 	@GET
@@ -29,6 +30,15 @@ public class BamWSServer extends GenericWSServer {
 			@DefaultValue("") @PathParam("filename") String filename, 
 			@DefaultValue("") @PathParam("region") String region
 								) throws IOException {
+		
+		Boolean viewAsPairs = false;
+		if(params.get("view_as_pairs") != null){
+			viewAsPairs = true;
+		}
+		Boolean showSoftclipping = false;
+		if(params.get("show_softclipping") != null){
+			showSoftclipping = true;
+		}
 		
 		String chr = null;
 		int start = 0;
@@ -52,18 +62,19 @@ public class BamWSServer extends GenericWSServer {
 		start = parsedRegion.getStart();
 		end =parsedRegion.getEnd();
 		
-		BamManager bu = new BamManager();
-//		String result = bu.getByRegion(filename, chr, start, end);
-		String result = "";
+		BamManager bamManager = new BamManager();
+		
+		String filePath = config.getProperty("FILES.PATH");
+		String result = bamManager.getByRegion(filePath, filename, viewAsPairs, showSoftclipping, chr, start, end);
 		
 		return createOkResponse(result);
 	}
 	
-	
 	@GET
 	@Path("/list")
 	public Response getFileList() throws IOException{
-		return createOkResponse(new BamManager().getFileList(""));
+		String filePath = config.getProperty("FILES.PATH");
+		return createOkResponse(new BamManager().getFileList(filePath));
 	}
 	
 	
