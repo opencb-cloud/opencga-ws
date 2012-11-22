@@ -2,6 +2,7 @@ package org.bioinfo.gcsa.ws;
 
 import java.io.IOException;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -18,8 +19,8 @@ import org.bioinfo.infrared.lib.common.Region;
 public class BamWSServer extends GenericWSServer {
 
 	
-	public BamWSServer(@Context UriInfo uriInfo) throws IOException {
-		super(uriInfo);
+	public BamWSServer(@Context UriInfo uriInfo, @Context HttpServletRequest httpServletRequest) throws IOException {
+		super(uriInfo,httpServletRequest); 
 	}
 	
 	@GET
@@ -68,7 +69,6 @@ public class BamWSServer extends GenericWSServer {
 		
 		return createOkResponse(result);
 	}
-	
 	
 	@GET
 	@Path("/list")
