@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -24,8 +25,9 @@ public class AnalysisWSServer extends GenericWSServer {
 	AnalysisJobExecuter aje;
 	String baseUrl;
 	
-	public AnalysisWSServer(@Context UriInfo uriInfo) throws IOException {
-		super(uriInfo);
+	public AnalysisWSServer(@Context UriInfo uriInfo,
+			@Context HttpServletRequest httpServletRequest) throws IOException {
+		super(uriInfo,httpServletRequest);
 		baseUrl = uriInfo.getBaseUri().toString();
 	}
 	
