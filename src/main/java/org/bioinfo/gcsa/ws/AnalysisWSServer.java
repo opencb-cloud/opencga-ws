@@ -18,6 +18,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.bioinfo.gcsa.lib.analysis.AnalysisJobExecuter;
+import org.bioinfo.gcsa.lib.users.persistence.UserManagementException;
 
 
 @Path("/analysis")
@@ -38,6 +39,8 @@ public class AnalysisWSServer extends GenericWSServer {
 			aje = new AnalysisJobExecuter(analysis);
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (UserManagementException e) {
+			e.printStackTrace();
 		}
 		return createOkResponse(aje.help(baseUrl));
 	}
@@ -48,6 +51,8 @@ public class AnalysisWSServer extends GenericWSServer {
 		try {
 			aje = new AnalysisJobExecuter(analysis);
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (UserManagementException e) {
 			e.printStackTrace();
 		}
 		return createOkResponse(aje.params());
@@ -60,6 +65,8 @@ public class AnalysisWSServer extends GenericWSServer {
 			aje = new AnalysisJobExecuter(analysis);
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (UserManagementException e) {
+			e.printStackTrace();
 		}
 		return createOkResponse(aje.test());
 	}
@@ -70,6 +77,8 @@ public class AnalysisWSServer extends GenericWSServer {
 		try {
 			aje = new AnalysisJobExecuter();
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (UserManagementException e) {
 			e.printStackTrace();
 		}
 		
@@ -82,6 +91,8 @@ public class AnalysisWSServer extends GenericWSServer {
 		try {
 			aje = new AnalysisJobExecuter(analysis);
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (UserManagementException e) {
 			e.printStackTrace();
 		}
 		MultivaluedMap<String, String> params = this.uriInfo.getQueryParameters();
@@ -99,6 +110,8 @@ public class AnalysisWSServer extends GenericWSServer {
 		try {
 			aje = new AnalysisJobExecuter(analysis);
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (UserManagementException e) {
 			e.printStackTrace();
 		}
 		System.out.println("**POST executed***");
