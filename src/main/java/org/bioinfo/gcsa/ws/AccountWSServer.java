@@ -61,7 +61,7 @@ public class AccountWSServer extends GenericWSServer  {
 	@GET
 	@Path("/{accountId}/logout") 
 	public Response logout(@PathParam("accountId") String accountId,@QueryParam("sessionId") String sessionId){
-		return createOkResponse(createOkResponse(userManager.logout(accountId, sessionId)));
+		return createOkResponse(userManager.logout(accountId, sessionId));
 	}
 	
 	
