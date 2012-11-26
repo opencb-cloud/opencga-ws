@@ -64,6 +64,12 @@ public class AccountWSServer extends GenericWSServer  {
 		return createOkResponse(createOkResponse(userManager.logout(accountId, sessionId)));
 	}
 	
+	@GET
+	@Path("/info") 
+	public Response getUser(){
+		return createOkResponse(userManager.getUserBySessionId(sessionId));
+	}
+	
 	
 //	@GET
 //	@Path("/createproject/{accountId}/{password}/{accountName}/{email}")
