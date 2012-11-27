@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.bioinfo.gcsa.lib.users.CloudSessionManager;
+import org.bioinfo.gcsa.lib.users.beans.Project;
 import org.bioinfo.gcsa.lib.users.beans.Session;
 import org.bioinfo.gcsa.lib.users.persistence.UserManagementException;
 import org.bioinfo.gcsa.lib.users.persistence.UserManager;
@@ -27,13 +28,14 @@ public class AccountWSServer extends GenericWSServer  {
 		
 		System.out.println("HOST: "+uriInfo.getRequestUri().getHost());
 		System.err.println("----------------------------------->");
+		@SuppressWarnings("unused")
 		CloudSessionManager cloudSessionManager = new CloudSessionManager(System.getenv("GCSA_HOME"));
 		userManager = CloudSessionManager.userManager;
 	}
 	
 	@GET
-	@Path("/{accountId}/create")
-	public Response register(@PathParam("accountId") String accountId,@QueryParam("password") String password,@QueryParam("accountName") String accountName, @QueryParam("email") String email){
+	@Path("/{accountid}/create")
+	public Response register(@PathParam("accountid") String accountId,@QueryParam("password") String password,@QueryParam("accountname") String accountName, @QueryParam("email") String email){
 
 		Session session = new Session(sessionIp);
 		
@@ -46,24 +48,47 @@ public class AccountWSServer extends GenericWSServer  {
 	}
 
 	@GET
-	@Path("/{accountId}/login")
-	public Response login(@PathParam("accountId") String accountId,@QueryParam("password") String password){
+	@Path("/{accountid}/login")
+	public Response login(@PathParam("accountid") String accountId,@QueryParam("password") String password){
 		Session session = new Session(sessionIp);
 		return createOkResponse(userManager.login(accountId, password, session));
 	}
 	
-	@GET
-	@Path("/pipetest/{accountId}/{password}") //Pruebas 
-	public Response pipeTest(@PathParam("accountId") String accountId,@PathParam("password") String password){
-		return createOkResponse(userManager.testPipe(accountId, password));
-	}
+//	@GET
+//	@Path("/pipetest/{accountId}/{password}") //Pruebas 
+//	public Response pipeTest(@PathParam("accountId") String accountId,@PathParam("password") String password){
+//		return createOkResponse(userManager.testPipe(accountId, password));
+//	}
 
 	@GET
-	@Path("/{accountId}/logout") 
-	public Response logout(@PathParam("accountId") String accountId,@QueryParam("sessionId") String sessionId){
+	@Path("/{accountid}/logout") 
+	public Response logout(@PathParam("accountid") String accountId,@QueryParam("sessionid") String sessionId){
 		return createOkResponse(userManager.logout(accountId, sessionId));
 	}
 	
+	@GET
+	@Path("/getuserbyaccountid") 
+	public Response getUserByAccountId(@QueryParam("accountid") String accountId,@QueryParam("sessionid") String sessionId){
+		return createOkResponse(userManager.getUserByAccountId(accountId, sessionId));
+	}
+	
+	@GET
+	@Path("/getuserbyemail") 
+	public Response getUserByEmail(@QueryParam("email") String email,@QueryParam("sessionid") String sessionId){
+		return createOkResponse(userManager.getUserByEmail(email, sessionId));
+	}
+	
+	@GET
+	@Path("/getallprojectsbysessionid") 
+	public Response getAllprojectsBySessionId(@QueryParam("accountid") String accountId,@QueryParam("sessionid") String sessionId){
+		return createOkResponse(userManager.getAllProjectsBySessionId(accountId, sessionId));
+	}
+	
+//	@GET
+//	@Path("/{accountId}/createproject") 
+//	public Response createProject(@PathParam("accountId") String accountId, @QueryParam("project") Project project, @QueryParam("sessionId") String sessionId){
+//		return createOkResponse(userManager.createProject(project, accountId, sessionId));
+//	}
 	
 //	@GET
 //	@Path("/createproject/{accountId}/{password}/{accountName}/{email}")
