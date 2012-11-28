@@ -28,7 +28,7 @@ public class AccountWSServer extends GenericWSServer  {
 		System.out.println("HOST: "+uriInfo.getRequestUri().getHost());
 		System.err.println("----------------------------------->");
 		CloudSessionManager cloudSessionManager = new CloudSessionManager(System.getenv("GCSA_HOME"));
-		userManager = CloudSessionManager.userManager;
+		userManager = cloudSessionManager.getUserManager();
 	}
 	
 	@GET
@@ -52,11 +52,11 @@ public class AccountWSServer extends GenericWSServer  {
 		return createOkResponse(userManager.login(accountId, password, session));
 	}
 	
-	@GET
-	@Path("/pipetest/{accountId}/{password}") //Pruebas 
-	public Response pipeTest(@PathParam("accountId") String accountId,@PathParam("password") String password){
-		return createOkResponse(userManager.testPipe(accountId, password));
-	}
+//	@GET
+//	@Path("/pipetest/{accountId}/{password}") //Pruebas 
+//	public Response pipeTest(@PathParam("accountId") String accountId,@PathParam("password") String password){
+//		return createOkResponse(userManager.testPipe(accountId, password));
+//	}
 
 	@GET
 	@Path("/{accountId}/logout") 
