@@ -12,7 +12,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.bioinfo.gcsa.lib.users.CloudSessionManager;
-import org.bioinfo.gcsa.lib.users.beans.Project;
 import org.bioinfo.gcsa.lib.users.beans.Session;
 import org.bioinfo.gcsa.lib.users.persistence.UserManagementException;
 import org.bioinfo.gcsa.lib.users.persistence.UserManager;
@@ -28,9 +27,8 @@ public class AccountWSServer extends GenericWSServer  {
 		
 		System.out.println("HOST: "+uriInfo.getRequestUri().getHost());
 		System.err.println("----------------------------------->");
-		@SuppressWarnings("unused")
 		CloudSessionManager cloudSessionManager = new CloudSessionManager(System.getenv("GCSA_HOME"));
-		userManager = CloudSessionManager.userManager;
+		userManager = cloudSessionManager.getUserManager();
 	}
 	
 	@GET
