@@ -28,7 +28,7 @@ public class AccountWSServer extends GenericWSServer  {
 		System.out.println("HOST: "+uriInfo.getRequestUri().getHost());
 		System.err.println("----------------------------------->");
 		CloudSessionManager cloudSessionManager = new CloudSessionManager(System.getenv("GCSA_HOME"));
-		userManager = CloudSessionManager.userManager;
+		userManager = cloudSessionManager.getUserManager();
 	}
 	
 	@GET
