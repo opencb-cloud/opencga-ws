@@ -49,25 +49,30 @@ public class AccountWSServer extends GenericWSServer  {
 	@Path("/{accountId}/login")
 	public Response login(@PathParam("accountId") String accountId,@QueryParam("password") String password){
 		Session session = new Session(sessionIp);
-		return createOkResponse(userManager.login(accountId, password, session));
+		String res = userManager.login(accountId, password, session);
+		if(res!=null && res!=""){
+			return createOkResponse(res);
+		}else{
+			return createErrorResponse(res);
+		}
 	}
 	
-	@GET
-	@Path("/pipetest/{accountId}/{password}") //Pruebas 
-	public Response pipeTest(@PathParam("accountId") String accountId,@PathParam("password") String password){
-		return createOkResponse(userManager.testPipe(accountId, password));
-	}
+//	@GET
+//	@Path("/pipetest/{accountId}/{password}") //Pruebas 
+//	public Response pipeTest(@PathParam("accountId") String accountId,@PathParam("password") String password){
+//		return createOkResponse(userManager.testPipe(accountId, password));
+//	}
 
 	@GET
 	@Path("/{accountId}/logout") 
-	public Response logout(@PathParam("accountId") String accountId,@QueryParam("sessionId") String sessionId){
-		return createOkResponse(createOkResponse(userManager.logout(accountId, sessionId)));
+	public Response logout(@PathParam("accountId") String accountId){
+		return createOkResponse(userManager.logout(accountId, sessionId));
 	}
 	
 	@GET
-	@Path("/info") 
-	public Response getUser(){
-		return createOkResponse(userManager.getUserBySessionId(sessionId));
+	@Path("/{accountId}/info")
+	public Response getAccount(){
+		return createOkResponse(userManager.getAccountBySessionId(sessionId));
 	}
 	
 	
