@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.bioinfo.gcsa.lib.users.CloudSessionManager;
+import org.bioinfo.gcsa.lib.users.beans.Project;
 import org.bioinfo.gcsa.lib.users.beans.Session;
 import org.bioinfo.gcsa.lib.users.persistence.UserManagementException;
 import org.bioinfo.gcsa.lib.users.persistence.UserManager;
@@ -73,6 +74,14 @@ public class AccountWSServer extends GenericWSServer  {
 	@Path("/{accountId}/info")
 	public Response getAccount(){
 		return createOkResponse(userManager.getAccountBySessionId(sessionId));
+	}
+	@GET
+	@Path("/{accountId}/createproject")
+	public Response createProject(@PathParam("accountId") String accountId, @QueryParam("projectname") String projectname, @QueryParam("description") String description){
+		Project project = new Project();
+		project.setName(projectname);
+		project.setDescripcion(description);
+		return createOkResponse(userManager.createProject(project,accountId,sessionId));
 	}
 	
 	
