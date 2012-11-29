@@ -82,6 +82,19 @@ public class AccountWSServer extends GenericWSServer  {
 		return createOkResponse(userManager.getAllProjectsBySessionId(accountId, sessionId));
 	}
 	
+	@GET
+	@Path("/{accountid}/changepassword") 
+	public Response changePassword(@PathParam("accountid") String accountId, @QueryParam("password") String password,@QueryParam("npassword") String nPassword){
+		return createOkResponse(userManager.changePassword(accountId, password, nPassword));
+	}
+	
+	@GET
+	@Path("/{accountid}/changeemail") 
+	public Response changeEmail(@PathParam("accountid") String accountId, @QueryParam("sessionid") String sessionId,@QueryParam("nemail") String nEmail){
+		return createOkResponse(userManager.changeEmail(accountId, sessionId, nEmail));
+	}
+	
+	
 //	@GET
 //	@Path("/{accountId}/createproject") 
 //	public Response createProject(@PathParam("accountId") String accountId, @QueryParam("project") Project project, @QueryParam("sessionId") String sessionId){
