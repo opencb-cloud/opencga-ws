@@ -11,6 +11,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -33,8 +34,21 @@ public class AnalysisWSServer extends GenericWSServer {
 	}
 	
 	@GET
+	@Path("/{analysis}")
+	public Response help1(@DefaultValue("") @PathParam("analysis") String analysis) {
+		try {
+			aje = new AnalysisJobExecuter(analysis);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (UserManagementException e) {
+			e.printStackTrace();
+		}
+		return createOkResponse(aje.help(baseUrl));
+	}
+	
+	@GET
 	@Path("/{analysis}/help")
-	public Response help(@DefaultValue("") @PathParam("analysis") String analysis) {
+	public Response help2(@DefaultValue("") @PathParam("analysis") String analysis) {
 		try {
 			aje = new AnalysisJobExecuter(analysis);
 		} catch (IOException e) {
@@ -72,8 +86,8 @@ public class AnalysisWSServer extends GenericWSServer {
 	}
 	
 	@GET
-	@Path("/{jobId}/status")
-	public Response status(@DefaultValue("") @PathParam("jobId") String jobId) {
+	@Path("/{analysis}/status")
+	public Response status(@DefaultValue("") @PathParam("analysis") String analysis, @QueryParam("jobid") String jobId) {
 		try {
 			aje = new AnalysisJobExecuter();
 		} catch (IOException e) {
