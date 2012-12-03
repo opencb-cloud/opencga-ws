@@ -84,8 +84,8 @@ public class AccountWSServer extends GenericWSServer  {
 	
 	@GET
 	@Path("/{accountid}/changepassword") 
-	public Response changePassword(@PathParam("accountid") String accountId, @QueryParam("password") String password,@QueryParam("npassword") String nPassword){
-		return createOkResponse(userManager.changePassword(accountId, password, nPassword));
+	public Response changePassword(@PathParam("accountid") String accountId, @QueryParam("password") String password,@QueryParam("npassword1") String nPassword1,@QueryParam("npassword2") String nPassword2){
+		return createOkResponse(userManager.changePassword(accountId, password, nPassword1,nPassword2));
 	}
 	
 	@GET
