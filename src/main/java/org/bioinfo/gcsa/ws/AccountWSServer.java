@@ -1,7 +1,6 @@
 package org.bioinfo.gcsa.ws;
 
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -12,7 +11,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.gcsa.lib.users.CloudSessionManager;
 import org.bioinfo.gcsa.lib.users.beans.Project;
 import org.bioinfo.gcsa.lib.users.beans.Session;
@@ -107,13 +105,19 @@ public class AccountWSServer extends GenericWSServer  {
 	@GET
 	@Path("/{accountid}/changepassword") 
 	public Response changePassword(@PathParam("accountid") String accountId, @QueryParam("password") String password,@QueryParam("npassword1") String nPassword1,@QueryParam("npassword2") String nPassword2){
-		return createOkResponse(userManager.changePassword(accountId, password, nPassword1,nPassword2));
+		return createOkResponse(userManager.changePassword(accountId, sessionId, password, nPassword1,nPassword2));
 	}
 	
 	@GET
 	@Path("/{accountid}/changeemail") 
 	public Response changeEmail(@PathParam("accountid") String accountId, @QueryParam("sessionid") String sessionId,@QueryParam("nemail") String nEmail){
 		return createOkResponse(userManager.changeEmail(accountId, sessionId, nEmail));
+	}
+	
+	@GET
+	@Path("/{accountid}/resetpassword")
+	public Response resetPassword(@PathParam("accountid") String accountId, @QueryParam("email") String email){
+		return createOkResponse(userManager.resetPassword(accountId, email));
 	}
 	
 	
@@ -142,5 +146,4 @@ public class AccountWSServer extends GenericWSServer  {
 //		return createOkResponse("OK");
 //	}
 
-	
 }
