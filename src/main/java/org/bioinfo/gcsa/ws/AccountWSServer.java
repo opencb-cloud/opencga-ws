@@ -1,6 +1,7 @@
 package org.bioinfo.gcsa.ws;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -11,6 +12,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.gcsa.lib.users.CloudSessionManager;
 import org.bioinfo.gcsa.lib.users.beans.Project;
 import org.bioinfo.gcsa.lib.users.beans.Session;
@@ -72,8 +74,8 @@ public class AccountWSServer extends GenericWSServer  {
 	
 	@GET
 	@Path("/{accountId}/info")
-	public Response getAccount(){
-		return createOkResponse(userManager.getAccountBySessionId(sessionId));
+	public Response getAccount(@PathParam("accountId") String accountId, @QueryParam("lastactivity") String lastActivity){
+		return createOkResponse(userManager.getAccountBySessionId(sessionId, lastActivity));
 	}
 	@GET
 	@Path("/{accountId}/createproject")
