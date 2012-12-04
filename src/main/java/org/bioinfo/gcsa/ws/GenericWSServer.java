@@ -36,29 +36,26 @@ public class GenericWSServer {
 
 	MultivaluedMap<String, String> params;
 
-	public GenericWSServer(@Context UriInfo uriInfo,
-			@Context HttpServletRequest httpServletRequest) throws IOException {
+	public GenericWSServer(@Context UriInfo uriInfo, @Context HttpServletRequest httpServletRequest) throws IOException {
 		this.uriInfo = uriInfo;
 		this.params = this.uriInfo.getQueryParameters();
-		this.sessionId = (this.params.get("sessionid") != null) ? this.params
-				.get("sessionid").get(0) : "";
+		this.sessionId = (this.params.get("sessionid") != null) ? this.params.get("sessionid").get(0) : "";
 		this.sessionIp = httpServletRequest.getRemoteAddr();
+		logger = new Logger();
+		logger.setLevel(Logger.INFO_LEVEL);
 
-		UserAgent userAgent = UserAgent.parseUserAgentString(httpServletRequest
-				.getHeader("User-Agent"));
+		UserAgent userAgent = UserAgent.parseUserAgentString(httpServletRequest.getHeader("User-Agent"));
 
 		Browser br = userAgent.getBrowser();
 
 		OperatingSystem op = userAgent.getOperatingSystem();
 
-		System.out.println("------------------->" + br.getName());
-		System.out.println("------------------->" + br.getBrowserType().getName());
-		System.out.println("------------------->" + op.getName());
-		System.out.println("------------------->" + op.getId());
-		System.out.println("------------------->" + op.getDeviceType().getName());
+		logger.info("------------------->" + br.getName());
+		logger.info("------------------->" + br.getBrowserType().getName());
+		logger.info("------------------->" + op.getName());
+		logger.info("------------------->" + op.getId());
+		logger.info("------------------->" + op.getDeviceType().getName());
 
-		logger = new Logger();
-		logger.setLevel(Logger.INFO_LEVEL);
 
 		properties = ResourceBundle.getBundle("org.bioinfo.gcs.ws.application");
 		config = new Config(properties);
@@ -81,29 +78,22 @@ public class GenericWSServer {
 	protected Response createErrorResponse(Object o) {
 		String objMsg = o.toString();
 		if (objMsg.startsWith("ERROR:")) {
-			return Response.ok("" + o)
-					.header("Access-Control-Allow-Origin", "*").build();
+			return Response.ok("" + o).header("Access-Control-Allow-Origin", "*").build();
 		} else {
-			return Response.ok("ERROR: " + o)
-					.header("Access-Control-Allow-Origin", "*").build();
+			return Response.ok("ERROR: " + o).header("Access-Control-Allow-Origin", "*").build();
 		}
 	}
 
 	protected Response createOkResponse(Object o) {
-		return Response.ok(o).header("Access-Control-Allow-Origin", "*")
-				.build();
+		return Response.ok(o).header("Access-Control-Allow-Origin", "*").build();
 	}
 
 	protected Response createOkResponse(Object o1, MediaType o2) {
-		return Response.ok(o1, o2).header("Access-Control-Allow-Origin", "*")
-				.build();
+		return Response.ok(o1, o2).header("Access-Control-Allow-Origin", "*").build();
 	}
 
 	protected Response createOkResponse(Object o1, MediaType o2, String fileName) {
-		return Response
-				.ok(o1, o2)
-				.header("content-disposition",
-						"attachment; filename =" + fileName)
+		return Response.ok(o1, o2).header("content-disposition", "attachment; filename =" + fileName)
 				.header("Access-Control-Allow-Origin", "*").build();
 	}
 }
