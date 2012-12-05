@@ -1,4 +1,4 @@
-package org.bioinfo.gcs.lib.feature;
+package org.bioinfo.gcsa.lib.feature;
 
 import java.io.IOException;
 

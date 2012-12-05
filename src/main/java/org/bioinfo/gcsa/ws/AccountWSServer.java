@@ -1,5 +1,6 @@
 package org.bioinfo.gcsa.ws;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -16,20 +17,42 @@ import org.bioinfo.gcsa.lib.users.beans.Project;
 import org.bioinfo.gcsa.lib.users.beans.Session;
 import org.bioinfo.gcsa.lib.users.persistence.UserManagementException;
 import org.bioinfo.gcsa.lib.users.persistence.UserManager;
+import org.bioinfo.infrared.lib.impl.DBAdaptorFactory;
+import org.bioinfo.infrared.lib.impl.hibernate.HibernateDBAdaptorFactory;
 
 @Path("/account")
 public class AccountWSServer extends GenericWSServer {
-	private UserManager userManager;
-
-	// private CloudSessionManager cloudSessionManager = null;
+	private static UserManager userManager;
+	
+	/**
+	 * DBAdaptorFactory creation, this object can be initialize
+	 * with an HibernateDBAdaptorFactory or an HBaseDBAdaptorFactory.
+	 * This object is a factory for creating adaptors like GeneDBAdaptor
+	 */
+	protected static CloudSessionManager cloudSessionManager;
+	static{
+		try {
+			cloudSessionManager = new CloudSessionManager();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UserManagementException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("AccountWSServer: static cloudSessionManager");
+		userManager = cloudSessionManager.getUserManager();//TODO remove
+	}
+	
 	public AccountWSServer(@Context UriInfo uriInfo, @Context HttpServletRequest httpServletRequest)
 			throws IOException, UserManagementException {
 		super(uriInfo, httpServletRequest);
 
-		System.out.println("HOST: " + uriInfo.getRequestUri().getHost());
-		System.err.println("----------------------------------->");
-		CloudSessionManager cloudSessionManager = new CloudSessionManager(System.getenv("GCSA_HOME"));
-		userManager = cloudSessionManager.getUserManager();
+		logger.info("HOST: " + uriInfo.getRequestUri().getHost());
+		logger.info("----------------------------------->");
 	}
 
 	@GET
@@ -37,14 +60,12 @@ public class AccountWSServer extends GenericWSServer {
 	public Response register(@PathParam("accountid") String accountId, @QueryParam("password") String password,
 			@QueryParam("accountname") String accountName, @QueryParam("email") String email) {
 
-		Session session = new Session(sessionIp);
-
 		try {
-			userManager.createUser(accountId, password, accountName, email, session);
+			cloudSessionManager.createUser(accountId, password, accountName, email, sessionIp);
+			return createOkResponse("OK");
 		} catch (UserManagementException e) {
 			return createErrorResponse(e.toString());
 		}
-		return createOkResponse("OK");
 	}
 
 	@GET
