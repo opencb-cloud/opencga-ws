@@ -60,25 +60,25 @@ public class AccountWSServer extends GenericWSServer  {
 
 	@GET
 	@Path("/{accountid}/logout") 
-	public Response logout(@PathParam("accountid") String accountId,@QueryParam("sessionid") String sessionId){
+	public Response logout(@PathParam("accountid") String accountId){
 		return createOkResponse(userManager.logout(accountId, sessionId));
 	}
 	
 	@GET
 	@Path("/getuserbyaccountid") 
-	public Response getUserByAccountId(@QueryParam("accountid") String accountId,@QueryParam("sessionid") String sessionId){
+	public Response getUserByAccountId(@QueryParam("accountid") String accountId){
 		return createOkResponse(userManager.getUserByAccountId(accountId, sessionId));
 	}
 	
 	@GET
 	@Path("/getuserbyemail") 
-	public Response getUserByEmail(@QueryParam("email") String email,@QueryParam("sessionid") String sessionId){
+	public Response getUserByEmail(@QueryParam("email") String email){
 		return createOkResponse(userManager.getUserByEmail(email, sessionId));
 	}
 	
 	@GET
 	@Path("/getallprojectsbysessionid") 
-	public Response getAllprojectsBySessionId(@QueryParam("accountid") String accountId,@QueryParam("sessionid") String sessionId){
+	public Response getAllprojectsBySessionId(@QueryParam("accountid") String accountId){
 		return createOkResponse(userManager.getAllProjectsBySessionId(accountId, sessionId));
 	}
 	
@@ -90,7 +90,7 @@ public class AccountWSServer extends GenericWSServer  {
 	
 	@GET
 	@Path("/{accountid}/changeemail") 
-	public Response changeEmail(@PathParam("accountid") String accountId, @QueryParam("sessionid") String sessionId,@QueryParam("nemail") String nEmail){
+	public Response changeEmail(@PathParam("accountid") String accountId,@QueryParam("nemail") String nEmail){
 		return createOkResponse(userManager.changeEmail(accountId, sessionId, nEmail));
 	}
 	
