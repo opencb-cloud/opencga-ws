@@ -22,31 +22,6 @@ import org.bioinfo.infrared.lib.impl.hibernate.HibernateDBAdaptorFactory;
 
 @Path("/account")
 public class AccountWSServer extends GenericWSServer {
-	private static UserManager userManager;
-	
-	/**
-	 * DBAdaptorFactory creation, this object can be initialize
-	 * with an HibernateDBAdaptorFactory or an HBaseDBAdaptorFactory.
-	 * This object is a factory for creating adaptors like GeneDBAdaptor
-	 */
-	protected static CloudSessionManager cloudSessionManager;
-	static{
-		try {
-			cloudSessionManager = new CloudSessionManager();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UserManagementException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		System.out.println("AccountWSServer: static cloudSessionManager");
-		userManager = cloudSessionManager.getUserManager();//TODO remove
-	}
-	
 	public AccountWSServer(@Context UriInfo uriInfo, @Context HttpServletRequest httpServletRequest)
 			throws IOException, UserManagementException {
 		super(uriInfo, httpServletRequest);

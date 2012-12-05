@@ -1,6 +1,7 @@
 package org.bioinfo.gcsa.ws;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ResourceBundle;
 
@@ -21,11 +22,16 @@ import nl.bitwalker.useragentutils.UserAgent;
 
 import org.bioinfo.commons.Config;
 import org.bioinfo.commons.log.Logger;
+import org.bioinfo.gcsa.lib.users.CloudSessionManager;
+import org.bioinfo.gcsa.lib.users.persistence.UserManagementException;
+import org.bioinfo.gcsa.lib.users.persistence.UserManager;
 
 @Path("/")
 @Produces("text/plain")
 public class GenericWSServer {
 
+	protected static UserManager userManager;//TODO remove
+	
 	protected UriInfo uriInfo;
 	protected Logger logger;
 	protected ResourceBundle properties;
@@ -35,6 +41,27 @@ public class GenericWSServer {
 	protected String sessionIp;
 
 	MultivaluedMap<String, String> params;
+	
+	/**
+	 * Only one CloudSessionManager
+	 */
+	protected static CloudSessionManager cloudSessionManager;
+	static{
+		try {
+			cloudSessionManager = new CloudSessionManager();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UserManagementException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("AccountWSServer: static cloudSessionManager");
+		userManager = cloudSessionManager.getUserManager();//TODO remove
+	}
 
 	public GenericWSServer(@Context UriInfo uriInfo, @Context HttpServletRequest httpServletRequest) throws IOException {
 		this.uriInfo = uriInfo;
