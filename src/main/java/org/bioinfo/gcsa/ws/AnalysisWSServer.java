@@ -19,18 +19,17 @@ import javax.ws.rs.core.UriInfo;
 import org.bioinfo.gcsa.lib.analysis.AnalysisJobExecuter;
 import org.bioinfo.gcsa.lib.users.persistence.UserManagementException;
 
-
 @Path("/analysis")
 public class AnalysisWSServer extends GenericWSServer {
 	AnalysisJobExecuter aje;
 	String baseUrl;
-	
-	public AnalysisWSServer(@Context UriInfo uriInfo,
-			@Context HttpServletRequest httpServletRequest) throws IOException {
+
+	public AnalysisWSServer(@Context UriInfo uriInfo, @Context HttpServletRequest httpServletRequest)
+			throws IOException {
 		super(uriInfo, httpServletRequest);
 		baseUrl = uriInfo.getBaseUri().toString();
 	}
-	
+
 	@GET
 	@Path("/{analysis}")
 	public Response help1(@DefaultValue("") @PathParam("analysis") String analysis) {
@@ -43,7 +42,7 @@ public class AnalysisWSServer extends GenericWSServer {
 		}
 		return createOkResponse(aje.help(baseUrl));
 	}
-	
+
 	@GET
 	@Path("/{analysis}/help")
 	public Response help2(@DefaultValue("") @PathParam("analysis") String analysis) {
@@ -56,7 +55,7 @@ public class AnalysisWSServer extends GenericWSServer {
 		}
 		return createOkResponse(aje.help(baseUrl));
 	}
-	
+
 	@GET
 	@Path("/{analysis}/params")
 	public Response showParams(@DefaultValue("") @PathParam("analysis") String analysis) {
@@ -69,7 +68,7 @@ public class AnalysisWSServer extends GenericWSServer {
 		}
 		return createOkResponse(aje.params());
 	}
-	
+
 	@GET
 	@Path("/{analysis}/test")
 	public Response test(@DefaultValue("") @PathParam("analysis") String analysis) {
@@ -82,7 +81,7 @@ public class AnalysisWSServer extends GenericWSServer {
 		}
 		return createOkResponse(aje.test());
 	}
-	
+
 	@GET
 	@Path("/{analysis}/status")
 	public Response status(@DefaultValue("") @PathParam("analysis") String analysis, @QueryParam("jobid") String jobId) {
@@ -93,10 +92,10 @@ public class AnalysisWSServer extends GenericWSServer {
 		} catch (UserManagementException e) {
 			e.printStackTrace();
 		}
-		
+
 		return createOkResponse(aje.status(jobId));
 	}
-	
+
 	@GET
 	@Path("/{analysis}/run")
 	public Response analysisGet(@DefaultValue("") @PathParam("analysis") String analysis) {
@@ -107,18 +106,20 @@ public class AnalysisWSServer extends GenericWSServer {
 		} catch (UserManagementException e) {
 			e.printStackTrace();
 		}
-//		MultivaluedMap<String, String> params = this.uriInfo.getQueryParameters();
+		// MultivaluedMap<String, String> params =
+		// this.uriInfo.getQueryParameters();
 		System.out.println("**GET executed***");
-		System.out.println("get params: "+params);
-//		params.add("analysis", analysis);
-		
+		System.out.println("get params: " + params);
+		// params.add("analysis", analysis);
+
 		return this.analysis(params);
 	}
-	
+
 	@POST
 	@Path("/{analysis}/run")
-	@Consumes({MediaType.MULTIPART_FORM_DATA, MediaType.APPLICATION_FORM_URLENCODED})
-	public Response analysisPost(@DefaultValue("") @PathParam("analysis") String analysis, MultivaluedMap<String, String> postParams) {
+	@Consumes({ MediaType.MULTIPART_FORM_DATA, MediaType.APPLICATION_FORM_URLENCODED })
+	public Response analysisPost(@DefaultValue("") @PathParam("analysis") String analysis,
+			MultivaluedMap<String, String> postParams) {
 		try {
 			aje = new AnalysisJobExecuter(analysis);
 		} catch (IOException e) {
@@ -127,20 +128,20 @@ public class AnalysisWSServer extends GenericWSServer {
 			e.printStackTrace();
 		}
 		System.out.println("**POST executed***");
-		System.out.println("post params: "+postParams);
-//		params.add("analysis", analysis);
-		
+		System.out.println("post params: " + postParams);
+		// params.add("analysis", analysis);
+
 		return this.analysis(postParams);
 	}
-	
+
 	private Response analysis(MultivaluedMap<String, String> params) {
-//		System.out.println("params: "+params.toString());
-//		Map<String, List<String>> paramsMap = params;
+		// System.out.println("params: "+params.toString());
+		// Map<String, List<String>> paramsMap = params;
 
 		String jobId = "";
-//		String jobId = execute("SW","HPG.SW", dataIds, params, "-d");
+		// String jobId = execute("SW","HPG.SW", dataIds, params, "-d");
 		jobId = aje.execute(params);
-		
+
 		return createOkResponse(jobId);
 	}
 }
