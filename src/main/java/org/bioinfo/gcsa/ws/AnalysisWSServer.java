@@ -24,7 +24,7 @@ import org.bioinfo.gcsa.lib.analysis.beans.Analysis;
 import org.bioinfo.gcsa.lib.analysis.beans.Execution;
 import org.bioinfo.gcsa.lib.analysis.beans.InputParam;
 import org.bioinfo.gcsa.lib.users.beans.Plugin;
-import org.bioinfo.gcsa.lib.users.persistence.UserManagementException;
+import org.bioinfo.gcsa.lib.users.persistence.AccountManagementException;
 
 @Path("/analysis")
 public class AnalysisWSServer extends GenericWSServer {
@@ -162,7 +162,7 @@ public class AnalysisWSServer extends GenericWSServer {
 					break;
 				}
 			}
-		} catch (UserManagementException e1) {
+		} catch (AccountManagementException e1) {
 			e1.printStackTrace();
 			return createErrorResponse("ERROR: invalid session id.");
 		}
