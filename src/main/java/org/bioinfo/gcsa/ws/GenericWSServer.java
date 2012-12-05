@@ -30,8 +30,8 @@ import org.bioinfo.gcsa.lib.users.persistence.UserManager;
 @Produces("text/plain")
 public class GenericWSServer {
 
-	protected static UserManager userManager;//TODO remove
-	
+	protected static UserManager userManager;// TODO remove
+
 	protected UriInfo uriInfo;
 	protected Logger logger;
 	protected ResourceBundle properties;
@@ -41,12 +41,12 @@ public class GenericWSServer {
 	protected String sessionIp;
 
 	MultivaluedMap<String, String> params;
-	
+
 	/**
 	 * Only one CloudSessionManager
 	 */
 	protected static CloudSessionManager cloudSessionManager;
-	static{
+	static {
 		try {
 			cloudSessionManager = new CloudSessionManager();
 		} catch (FileNotFoundException e) {
@@ -60,7 +60,7 @@ public class GenericWSServer {
 			e.printStackTrace();
 		}
 		System.out.println("AccountWSServer: static cloudSessionManager");
-		userManager = cloudSessionManager.getUserManager();//TODO remove
+		userManager = cloudSessionManager.getUserManager();// TODO remove
 	}
 
 	public GenericWSServer(@Context UriInfo uriInfo, @Context HttpServletRequest httpServletRequest) throws IOException {
@@ -82,7 +82,6 @@ public class GenericWSServer {
 		logger.info("------------------->" + op.getName());
 		logger.info("------------------->" + op.getId());
 		logger.info("------------------->" + op.getDeviceType().getName());
-
 
 		properties = ResourceBundle.getBundle("org.bioinfo.gcs.ws.application");
 		config = new Config(properties);

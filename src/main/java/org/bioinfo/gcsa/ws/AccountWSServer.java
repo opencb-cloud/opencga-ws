@@ -1,6 +1,5 @@
 package org.bioinfo.gcsa.ws;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,13 +11,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.bioinfo.gcsa.lib.users.CloudSessionManager;
 import org.bioinfo.gcsa.lib.users.beans.Project;
 import org.bioinfo.gcsa.lib.users.beans.Session;
 import org.bioinfo.gcsa.lib.users.persistence.UserManagementException;
-import org.bioinfo.gcsa.lib.users.persistence.UserManager;
-import org.bioinfo.infrared.lib.impl.DBAdaptorFactory;
-import org.bioinfo.infrared.lib.impl.hibernate.HibernateDBAdaptorFactory;
 
 @Path("/account")
 public class AccountWSServer extends GenericWSServer {
