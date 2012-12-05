@@ -30,7 +30,7 @@ import org.bioinfo.gcsa.lib.users.persistence.UserManager;
 @Produces("text/plain")
 public class GenericWSServer {
 
-	protected static UserManager userManager;// TODO remove
+//	protected static UserManager userManager;// TODO remove
 
 	protected UriInfo uriInfo;
 	protected Logger logger;
@@ -60,7 +60,7 @@ public class GenericWSServer {
 			e.printStackTrace();
 		}
 		System.out.println("AccountWSServer: static cloudSessionManager");
-		userManager = cloudSessionManager.getUserManager();// TODO remove
+//		userManager = cloudSessionManager.getUserManager();// TODO remove
 	}
 
 	public GenericWSServer(@Context UriInfo uriInfo, @Context HttpServletRequest httpServletRequest) throws IOException {
