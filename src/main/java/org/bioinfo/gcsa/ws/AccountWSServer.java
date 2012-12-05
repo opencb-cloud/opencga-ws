@@ -55,7 +55,12 @@ public class AccountWSServer extends GenericWSServer {
 	@Path("/{accountId}/info")
 	public Response getInfoAccount(@DefaultValue("") @PathParam("accountId") String accountId,
 			@DefaultValue("") @QueryParam("lastactivity") String lastActivity) {
-		return createOkResponse(cloudSessionManager.getAccountInfo(accountId, sessionId, lastActivity));
+		try {
+			return createOkResponse(cloudSessionManager.getAccountInfo(accountId, sessionId, lastActivity));
+		} catch (UserManagementException e) {
+			logger.error(e.toString());
+			return createErrorResponse("could get account information");
+		}
 	}
 
 	@GET

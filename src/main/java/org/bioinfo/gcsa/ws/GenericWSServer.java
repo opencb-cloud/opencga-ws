@@ -24,14 +24,11 @@ import org.bioinfo.commons.Config;
 import org.bioinfo.commons.log.Logger;
 import org.bioinfo.gcsa.lib.users.CloudSessionManager;
 import org.bioinfo.gcsa.lib.users.persistence.UserManagementException;
-import org.bioinfo.gcsa.lib.users.persistence.UserManager;
 
 @Path("/")
 @Produces("text/plain")
 public class GenericWSServer {
-
-//	protected static UserManager userManager;// TODO remove
-
+	
 	protected UriInfo uriInfo;
 	protected Logger logger;
 	protected ResourceBundle properties;
@@ -60,7 +57,6 @@ public class GenericWSServer {
 			e.printStackTrace();
 		}
 		System.out.println("AccountWSServer: static cloudSessionManager");
-//		userManager = cloudSessionManager.getUserManager();// TODO remove
 	}
 
 	public GenericWSServer(@Context UriInfo uriInfo, @Context HttpServletRequest httpServletRequest) throws IOException {
