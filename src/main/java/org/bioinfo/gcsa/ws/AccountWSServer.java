@@ -13,12 +13,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.bioinfo.gcsa.lib.users.beans.Project;
-import org.bioinfo.gcsa.lib.users.persistence.UserManagementException;
+import org.bioinfo.gcsa.lib.users.persistence.AccountManagementException;
 
 @Path("/account")
 public class AccountWSServer extends GenericWSServer {
 	public AccountWSServer(@Context UriInfo uriInfo, @Context HttpServletRequest httpServletRequest)
-			throws IOException, UserManagementException {
+			throws IOException, AccountManagementException {
 		super(uriInfo, httpServletRequest);
 
 		logger.info("HOST: " + uriInfo.getRequestUri().getHost());
@@ -34,7 +34,7 @@ public class AccountWSServer extends GenericWSServer {
 		try {
 			cloudSessionManager.createUser(accountId, password, accountName, email, sessionIp);
 			return createOkResponse("OK");
-		} catch (UserManagementException e) {
+		} catch (AccountManagementException e) {
 			return createErrorResponse(e.toString());
 		}
 	}
@@ -45,7 +45,7 @@ public class AccountWSServer extends GenericWSServer {
 			@DefaultValue("") @QueryParam("password") String password) {
 		try {
 			return createOkResponse(cloudSessionManager.login(accountId, password, sessionIp));
-		} catch (UserManagementException e) {
+		} catch (AccountManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("could not login");
 		}
@@ -57,7 +57,7 @@ public class AccountWSServer extends GenericWSServer {
 			@DefaultValue("") @QueryParam("lastactivity") String lastActivity) {
 		try {
 			return createOkResponse(cloudSessionManager.getAccountInfo(accountId, sessionId, lastActivity));
-		} catch (UserManagementException e) {
+		} catch (AccountManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("could get account information");
 		}
@@ -74,7 +74,7 @@ public class AccountWSServer extends GenericWSServer {
 		try {
 			cloudSessionManager.createProject(project, accountId, sessionId);
 			return createOkResponse("OK");
-		} catch (UserManagementException e) {
+		} catch (AccountManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("could not create project");
 		}
@@ -86,7 +86,7 @@ public class AccountWSServer extends GenericWSServer {
 		try {
 			cloudSessionManager.logout(accountId, sessionId);
 			return createOkResponse("OK");
-		} catch (UserManagementException e) {
+		} catch (AccountManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("could not logout");
 		}
@@ -97,7 +97,7 @@ public class AccountWSServer extends GenericWSServer {
 	public Response projects(@DefaultValue("") @QueryParam("accountid") String accountId) {
 		try {
 			return createOkResponse(cloudSessionManager.getAccountProjects(accountId, sessionId));
-		} catch (UserManagementException e) {
+		} catch (AccountManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("could not get projects");
 		}
@@ -112,7 +112,7 @@ public class AccountWSServer extends GenericWSServer {
 		try {
 			cloudSessionManager.changePassword(accountId, sessionId, password, nPassword1, nPassword2);
 			return createOkResponse("OK");
-		} catch (UserManagementException e) {
+		} catch (AccountManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("could not change password");
 		}
@@ -125,7 +125,7 @@ public class AccountWSServer extends GenericWSServer {
 		try {
 			cloudSessionManager.changeEmail(accountId, sessionId, nEmail);
 			return createOkResponse("OK");
-		} catch (UserManagementException e) {
+		} catch (AccountManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("could not change email");
 		}
@@ -138,7 +138,7 @@ public class AccountWSServer extends GenericWSServer {
 		try {
 			cloudSessionManager.resetPassword(accountId, email);
 			return createOkResponse("OK");
-		} catch (UserManagementException e) {
+		} catch (AccountManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("could not reset password");
 		}
@@ -194,7 +194,7 @@ public class AccountWSServer extends GenericWSServer {
 	//
 	// try {
 	// userManager.createUser(accountId,password,accountName,email,session);
-	// } catch (UserManagementException e) {
+	// } catch (AccountManagementException e) {
 	// return createErrorResponse(e.toString());
 	// }
 	// return createOkResponse("OK");

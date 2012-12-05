@@ -23,7 +23,7 @@ import nl.bitwalker.useragentutils.UserAgent;
 import org.bioinfo.commons.Config;
 import org.bioinfo.commons.log.Logger;
 import org.bioinfo.gcsa.lib.users.CloudSessionManager;
-import org.bioinfo.gcsa.lib.users.persistence.UserManagementException;
+import org.bioinfo.gcsa.lib.users.persistence.AccountManagementException;
 
 @Path("/")
 @Produces("text/plain")
@@ -52,7 +52,7 @@ public class GenericWSServer {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (UserManagementException e) {
+		} catch (AccountManagementException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
