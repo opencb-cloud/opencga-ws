@@ -1,8 +1,6 @@
 package org.bioinfo.gcsa.ws;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -109,7 +107,7 @@ public class AnalysisWSServer extends GenericWSServer {
 		} catch (UserManagementException e) {
 			e.printStackTrace();
 		}
-		MultivaluedMap<String, String> params = this.uriInfo.getQueryParameters();
+//		MultivaluedMap<String, String> params = this.uriInfo.getQueryParameters();
 		System.out.println("**GET executed***");
 		System.out.println("get params: "+params);
 //		params.add("analysis", analysis);
@@ -120,7 +118,7 @@ public class AnalysisWSServer extends GenericWSServer {
 	@POST
 	@Path("/{analysis}/run")
 	@Consumes({MediaType.MULTIPART_FORM_DATA, MediaType.APPLICATION_FORM_URLENCODED})
-	public Response analysisPost(@DefaultValue("") @PathParam("analysis") String analysis, MultivaluedMap<String, String> params) {
+	public Response analysisPost(@DefaultValue("") @PathParam("analysis") String analysis, MultivaluedMap<String, String> postParams) {
 		try {
 			aje = new AnalysisJobExecuter(analysis);
 		} catch (IOException e) {
@@ -129,19 +127,19 @@ public class AnalysisWSServer extends GenericWSServer {
 			e.printStackTrace();
 		}
 		System.out.println("**POST executed***");
-		System.out.println("post params: "+params);
+		System.out.println("post params: "+postParams);
 //		params.add("analysis", analysis);
 		
-		return this.analysis(params);
+		return this.analysis(postParams);
 	}
 	
 	private Response analysis(MultivaluedMap<String, String> params) {
-		System.out.println("params: "+params.toString());
-		Map<String, List<String>> paramsMap = params;
+//		System.out.println("params: "+params.toString());
+//		Map<String, List<String>> paramsMap = params;
 
 		String jobId = "";
 //		String jobId = execute("SW","HPG.SW", dataIds, params, "-d");
-		jobId = aje.execute(paramsMap);
+		jobId = aje.execute(params);
 		
 		return createOkResponse(jobId);
 	}
