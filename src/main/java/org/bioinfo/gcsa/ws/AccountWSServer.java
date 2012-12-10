@@ -1,19 +1,29 @@
 package org.bioinfo.gcsa.ws;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.bioinfo.gcsa.lib.GcsaUtils;
+import org.bioinfo.gcsa.lib.users.beans.Data;
 import org.bioinfo.gcsa.lib.users.beans.Project;
 import org.bioinfo.gcsa.lib.users.persistence.AccountManagementException;
+
+import com.sun.jersey.core.header.FormDataContentDisposition;
+import com.sun.jersey.multipart.FormDataParam;
 
 @Path("/account")
 public class AccountWSServer extends GenericWSServer {
@@ -65,21 +75,22 @@ public class AccountWSServer extends GenericWSServer {
 	}
 
 	@GET
-	@Path("/{accountId}/project/{projectname}/create")
-	public Response createProject(@DefaultValue("") @PathParam("accountId") String accountId,
+	@Path("/{accountid}/{projectname}/create")
+	public Response createProject(@DefaultValue("") @PathParam("accountid") String accountid,
 			@DefaultValue("") @PathParam("projectname") String projectname,
 			@DefaultValue("") @QueryParam("description") String description) {
 		Project project = new Project();
 		project.setName(projectname);
 		project.setDescripcion(description);
 		try {
-			cloudSessionManager.createProject(project, accountId, sessionId);
+			cloudSessionManager.createProject(project, accountid, sessionId);
 			return createOkResponse("OK");
 		} catch (AccountManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("could not create project");
 		}
 	}
+
 
 	@GET
 	@Path("/{accountid}/logout")
