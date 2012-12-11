@@ -34,18 +34,15 @@ public class GenericWSServer {
 	protected String sessionId;
 	protected String sessionIp;
 
-	MultivaluedMap<String, String> params;
+	protected MultivaluedMap<String, String> params;
 
-	public GenericWSServer(@Context UriInfo uriInfo,
-			@Context HttpServletRequest httpServletRequest) throws IOException {
+	public GenericWSServer(@Context UriInfo uriInfo, @Context HttpServletRequest httpServletRequest) throws IOException {
 		this.uriInfo = uriInfo;
 		this.params = this.uriInfo.getQueryParameters();
-		this.sessionId = (this.params.get("sessionid") != null) ? this.params
-				.get("sessionid").get(0) : "";
+		this.sessionId = (this.params.get("sessionid") != null) ? this.params.get("sessionid").get(0) : "";
 		this.sessionIp = httpServletRequest.getRemoteAddr();
 
-		UserAgent userAgent = UserAgent.parseUserAgentString(httpServletRequest
-				.getHeader("User-Agent"));
+		UserAgent userAgent = UserAgent.parseUserAgentString(httpServletRequest.getHeader("User-Agent"));
 
 		Browser br = userAgent.getBrowser();
 
@@ -81,29 +78,22 @@ public class GenericWSServer {
 	protected Response createErrorResponse(Object o) {
 		String objMsg = o.toString();
 		if (objMsg.startsWith("ERROR:")) {
-			return Response.ok("" + o)
-					.header("Access-Control-Allow-Origin", "*").build();
+			return Response.ok("" + o).header("Access-Control-Allow-Origin", "*").build();
 		} else {
-			return Response.ok("ERROR: " + o)
-					.header("Access-Control-Allow-Origin", "*").build();
+			return Response.ok("ERROR: " + o).header("Access-Control-Allow-Origin", "*").build();
 		}
 	}
 
 	protected Response createOkResponse(Object o) {
-		return Response.ok(o).header("Access-Control-Allow-Origin", "*")
-				.build();
+		return Response.ok(o).header("Access-Control-Allow-Origin", "*").build();
 	}
 
 	protected Response createOkResponse(Object o1, MediaType o2) {
-		return Response.ok(o1, o2).header("Access-Control-Allow-Origin", "*")
-				.build();
+		return Response.ok(o1, o2).header("Access-Control-Allow-Origin", "*").build();
 	}
 
 	protected Response createOkResponse(Object o1, MediaType o2, String fileName) {
-		return Response
-				.ok(o1, o2)
-				.header("content-disposition",
-						"attachment; filename =" + fileName)
+		return Response.ok(o1, o2).header("content-disposition", "attachment; filename =" + fileName)
 				.header("Access-Control-Allow-Origin", "*").build();
 	}
 }
