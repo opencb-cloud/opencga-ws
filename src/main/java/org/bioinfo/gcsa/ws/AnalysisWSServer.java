@@ -124,7 +124,7 @@ public class AnalysisWSServer extends GenericWSServer {
 	private Response analysis(String analysisStr, MultivaluedMap<String, String> params) {
 		// TODO Comprobar mas cosas antes de crear el analysis job executer
 		// (permisos, etc..)
-		
+
 		if (params.containsKey("sessionid")) {
 			sessionId = params.get("sessionid").get(0);
 			params.remove("sessionid");
@@ -144,17 +144,17 @@ public class AnalysisWSServer extends GenericWSServer {
 		if (params.containsKey("_")) {
 			params.remove("_");
 		}
-		
+
 		String analysisName = analysisStr;
 		if (analysisStr.contains(".")) {
 			analysisName = analysisStr.split("\\.")[0];
 		}
-		
+
 		String analysisOwner = "system";
 		try {
 			List<Plugin> userAnalysis = cloudSessionManager.getUserAnalysis(sessionId);
-			for(Plugin a: userAnalysis) {
-				if(a.getName().equals(analysisName)) {
+			for (Plugin a : userAnalysis) {
+				if (a.getName().equals(analysisName)) {
 					analysisOwner = a.getOwnerId();
 					break;
 				}

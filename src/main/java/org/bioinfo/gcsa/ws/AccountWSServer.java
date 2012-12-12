@@ -27,15 +27,16 @@ public class AccountWSServer extends GenericWSServer {
 
 	@GET
 	@Path("/{accountid}/create")
-	public Response register(@DefaultValue("") @PathParam("accountid") String accountId,
+	public Response create(@DefaultValue("") @PathParam("accountid") String accountId,
 			@DefaultValue("") @QueryParam("password") String password,
 			@DefaultValue("") @QueryParam("accountname") String accountName,
 			@DefaultValue("") @QueryParam("email") String email) {
 		try {
-			cloudSessionManager.createUser(accountId, password, accountName, email, sessionIp);
+			cloudSessionManager.createAccount(accountId, password, accountName, email, sessionIp);
 			return createOkResponse("OK");
 		} catch (AccountManagementException e) {
-			return createErrorResponse(e.toString());
+			logger.error(e.toString());
+			return createErrorResponse("could not create the account");
 		}
 	}
 
@@ -64,21 +65,22 @@ public class AccountWSServer extends GenericWSServer {
 	}
 
 	@GET
-	@Path("/{accountId}/project/{projectname}/create")
-	public Response createProject(@DefaultValue("") @PathParam("accountId") String accountId,
+	@Path("/{accountid}/{projectname}/create")
+	public Response createProject(@DefaultValue("") @PathParam("accountid") String accountid,
 			@DefaultValue("") @PathParam("projectname") String projectname,
 			@DefaultValue("") @QueryParam("description") String description) {
 		Project project = new Project();
 		project.setName(projectname);
 		project.setDescripcion(description);
 		try {
-			cloudSessionManager.createProject(project, accountId, sessionId);
+			cloudSessionManager.createProject(project, accountid, sessionId);
 			return createOkResponse("OK");
 		} catch (AccountManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("could not create project");
 		}
 	}
+
 
 	@GET
 	@Path("/{accountid}/logout")
