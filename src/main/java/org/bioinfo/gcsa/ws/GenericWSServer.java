@@ -14,6 +14,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -27,9 +28,10 @@ import nl.bitwalker.useragentutils.UserAgent;
 import org.bioinfo.commons.Config;
 import org.bioinfo.commons.log.Logger;
 import org.bioinfo.gcsa.lib.GcsaUtils;
-import org.bioinfo.gcsa.lib.users.CloudSessionManager;
-import org.bioinfo.gcsa.lib.users.beans.Data;
-import org.bioinfo.gcsa.lib.users.persistence.AccountManagementException;
+import org.bioinfo.gcsa.lib.account.CloudSessionManager;
+import org.bioinfo.gcsa.lib.account.beans.Data;
+import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
+import org.bioinfo.gcsa.lib.account.io.IOManagementException;
 
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
@@ -119,7 +121,8 @@ public class GenericWSServer {
 			@FormDataParam("organization") @DefaultValue("-") String organization,
 			@FormDataParam("date") @DefaultValue("-") String date,
 			@FormDataParam("description") @DefaultValue("-") String description,
-			@FormDataParam("jobid") @DefaultValue("-1") String jobid) {
+			@FormDataParam("jobid") @DefaultValue("-1") String jobid,
+			@QueryParam("parents") @DefaultValue("false") boolean parents) {
 
 		// "id" : "",
 		// "type" : "",
@@ -137,18 +140,17 @@ public class GenericWSServer {
 		
 		Data data = new Data();
 		data.setType(fileInfo.getType());
-		data.setDiskUsage(Long.toString(fileInfo.getSize()));
 		data.setResponsible(responsible);
 		data.setOrganization(organization);
 		data.setDate(GcsaUtils.getTime());
 		data.setDescription(description);
 
 		try {
-			cloudSessionManager.createDataToProject(projectname, accountid, sessionId, data, file, objectname);
+			cloudSessionManager.createDataToProject(projectname, accountid, sessionId, data, file, objectname, parents);
 			return createOkResponse("OK");
-		} catch (AccountManagementException e) {
+		} catch (Exception e) {
 			logger.error(e.toString());
-			return createErrorResponse("could not create data");
+			return createErrorResponse(e.getMessage());
 		}
 	}
 
