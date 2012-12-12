@@ -7,7 +7,6 @@ import java.net.URL;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.parsers.DocumentBuilder;
@@ -18,10 +17,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 @Path("/geolocation")
-@Produces("text/plain")
 public class GeocodingAddressService extends GenericWSServer {
 
-	public GeocodingAddressService(@Context UriInfo uriInfo,@Context  HttpServletRequest httpServletRequest) throws IOException {
+	public GeocodingAddressService(@Context UriInfo uriInfo, @Context HttpServletRequest httpServletRequest)
+			throws IOException {
 		super(uriInfo, httpServletRequest);
 	}
 

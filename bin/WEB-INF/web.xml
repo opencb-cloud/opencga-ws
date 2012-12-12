@@ -6,7 +6,7 @@
 	<display-name>Genomic Cloud Storage Analysis</display-name>
 
 	<servlet>
-		<servlet-name>GcsWSServer</servlet-name>
+		<servlet-name>gcsa</servlet-name>
 		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
 		<init-param>
 			<param-name>com.sun.jersey.config.property.packages</param-name>
