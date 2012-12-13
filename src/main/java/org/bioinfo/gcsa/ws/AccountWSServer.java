@@ -15,7 +15,6 @@ import javax.ws.rs.core.UriInfo;
 import org.bioinfo.gcsa.lib.account.beans.Project;
 import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
 
-
 @Path("/account")
 public class AccountWSServer extends GenericWSServer {
 	public AccountWSServer(@Context UriInfo uriInfo, @Context HttpServletRequest httpServletRequest)
@@ -93,7 +92,6 @@ public class AccountWSServer extends GenericWSServer {
 			return createErrorResponse("could not create project");
 		}
 	}
-
 
 	@GET
 	@Path("/{accountid}/logout")

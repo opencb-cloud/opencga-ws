@@ -23,8 +23,8 @@ import org.bioinfo.gcsa.lib.analysis.AnalysisJobExecuter;
 import org.bioinfo.gcsa.lib.analysis.beans.Analysis;
 import org.bioinfo.gcsa.lib.analysis.beans.Execution;
 import org.bioinfo.gcsa.lib.analysis.beans.InputParam;
-import org.bioinfo.gcsa.lib.users.beans.Plugin;
-import org.bioinfo.gcsa.lib.users.persistence.AccountManagementException;
+import org.bioinfo.gcsa.lib.account.beans.Plugin;
+import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
 
 @Path("/analysis")
 public class AnalysisWSServer extends GenericWSServer {
@@ -122,9 +122,6 @@ public class AnalysisWSServer extends GenericWSServer {
 	}
 
 	private Response analysis(String analysisStr, MultivaluedMap<String, String> params) {
-		// System.out.println("params: "+params.toString());
-		// Map<String, List<String>> paramsMap = params;
-
 		// TODO Comprobar mas cosas antes de crear el analysis job executer
 		// (permisos, etc..)
 
@@ -200,8 +197,7 @@ public class AnalysisWSServer extends GenericWSServer {
 				List<String> dataIds = Arrays.asList(params.get(inputParam.getName()).get(0).split(","));
 				List<String> dataPaths = new ArrayList<String>();
 				for (String dataId : dataIds) {
-					String dataPath = null;
-					dataPath = cloudSessionManager.getDataPath(dataId, sessionId);
+					String dataPath = cloudSessionManager.getDataPath(project, dataId, sessionId);
 					if (dataPath.contains("ERROR")) {
 						return createErrorResponse(dataPath);
 					} else {
