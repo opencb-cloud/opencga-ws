@@ -27,12 +27,16 @@ import nl.bitwalker.useragentutils.UserAgent;
 import org.bioinfo.commons.Config;
 import org.bioinfo.commons.log.Logger;
 import org.bioinfo.gcsa.lib.GcsaUtils;
-import org.bioinfo.gcsa.lib.users.CloudSessionManager;
-import org.bioinfo.gcsa.lib.users.beans.Data;
-import org.bioinfo.gcsa.lib.users.persistence.AccountManagementException;
+import org.bioinfo.gcsa.lib.account.CloudSessionManager;
+import org.bioinfo.gcsa.lib.account.beans.Data;
+import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
+import org.bioinfo.gcsa.lib.account.io.IOManagementException;
 
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
+//import org.bioinfo.gcsa.lib.users.CloudSessionManager;
+//import org.bioinfo.gcsa.lib.users.beans.Data;
+//import org.bioinfo.gcsa.lib.users.persistence.AccountManagementException;
 
 @Path("/")
 @Produces("text/plain")
@@ -144,7 +148,12 @@ public class GenericWSServer {
 		data.setDescription(description);
 
 		try {
-			cloudSessionManager.createDataToProject(projectname, accountid, sessionId, data, file, objectname);
+			try {
+				cloudSessionManager.createDataToProject(projectname, accountid, sessionId, data, file, objectname, false);
+			} catch (IOManagementException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return createOkResponse("OK");
 		} catch (AccountManagementException e) {
 			logger.error(e.toString());

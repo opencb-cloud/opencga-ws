@@ -12,8 +12,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.bioinfo.gcsa.lib.users.beans.Project;
-import org.bioinfo.gcsa.lib.users.persistence.AccountManagementException;
+import org.bioinfo.gcsa.lib.account.beans.Project;
+import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
+
 
 @Path("/account")
 public class AccountWSServer extends GenericWSServer {
@@ -33,6 +34,18 @@ public class AccountWSServer extends GenericWSServer {
 			@DefaultValue("") @QueryParam("email") String email) {
 		try {
 			cloudSessionManager.createAccount(accountId, password, accountName, email, sessionIp);
+			return createOkResponse("OK");
+		} catch (AccountManagementException e) {
+			logger.error(e.toString());
+			return createErrorResponse("could not create the account");
+		}
+	}
+	
+	@GET
+	@Path("/anonymous/create")
+	public Response create() {
+		try {
+			cloudSessionManager.createAnonymousAccount(sessionIp);
 			return createOkResponse("OK");
 		} catch (AccountManagementException e) {
 			logger.error(e.toString());
