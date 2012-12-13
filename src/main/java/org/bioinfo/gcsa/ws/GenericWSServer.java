@@ -110,10 +110,9 @@ public class GenericWSServer {
 	@POST
 	@Path("/{accountid}/{projectname}/{objectname}/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadFile(@DefaultValue("") @PathParam("accountid") String accountid,
-			@DefaultValue("") @PathParam("projectname") String projectname, 
-			@DefaultValue("") @PathParam("objectname") String objectname, 
-			@FormDataParam("file") InputStream file,
+	public Response uploadData(@DefaultValue("") @PathParam("accountid") String accountid,
+			@DefaultValue("") @PathParam("projectname") String projectname,
+			@DefaultValue("") @PathParam("objectname") String objectname, @FormDataParam("file") InputStream file,
 			@FormDataParam("file") FormDataContentDisposition fileInfo,
 			@FormDataParam("name") @DefaultValue("undefined") String name, @FormDataParam("tags") String tags,
 			@FormDataParam("responsible") @DefaultValue("-") String responsible,
@@ -136,7 +135,7 @@ public class GenericWSServer {
 		// "status" : "",
 		// "statusMessage" : "",
 		// "members" : [ ]
-		
+
 		Data data = new Data();
 		data.setType(fileInfo.getType());
 		data.setResponsible(responsible);
@@ -145,7 +144,21 @@ public class GenericWSServer {
 		data.setDescription(description);
 
 		try {
-			cloudSessionManager.createDataToProject(projectname, accountid, sessionId, data, file, objectname, parents);
+			String res = cloudSessionManager.createDataToProject(projectname, accountid, sessionId, data, file, objectname, parents);
+			return createOkResponse(res);
+		} catch (Exception e) {
+			logger.error(e.toString());
+			return createErrorResponse(e.getMessage());
+		}
+	}
+
+	@GET
+	@Path("/{accountid}/{projectname}/{objectname}/delete")
+	public Response deleteData(@DefaultValue("") @PathParam("accountid") String accountid,
+			@DefaultValue("") @PathParam("projectname") String projectname,
+			@DefaultValue("") @PathParam("objectname") String objectname) {
+		try {
+			cloudSessionManager.deleteDataFromProject(projectname, accountid, sessionId, objectname);
 			return createOkResponse("OK");
 		} catch (Exception e) {
 			logger.error(e.toString());
