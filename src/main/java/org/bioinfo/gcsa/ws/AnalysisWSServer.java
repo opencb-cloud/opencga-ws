@@ -132,12 +132,12 @@ public class AnalysisWSServer extends GenericWSServer {
 			return createErrorResponse("ERROR: Session is not initialized yet.");
 		}
 
-		String project = null;
-		if (params.containsKey("project")) {
-			project = params.get("project").get(0);
-			params.remove("project");
+		String bucket = null;
+		if (params.containsKey("jobDestinationBucket")) {
+			bucket = params.get("jobDestinationBucket").get(0);
+			params.remove("jobDestinationBucket");
 		} else {
-			return createErrorResponse("ERROR: unspecified project id.");
+			return createErrorResponse("ERROR: unspecified destination bucket.");
 		}
 
 		// Jquery put this parameter and it is sent to the tool
@@ -197,7 +197,7 @@ public class AnalysisWSServer extends GenericWSServer {
 				List<String> dataIds = Arrays.asList(params.get(inputParam.getName()).get(0).split(","));
 				List<String> dataPaths = new ArrayList<String>();
 				for (String dataId : dataIds) {
-					String dataPath = cloudSessionManager.getDataPath(project, dataId, sessionId);
+					String dataPath = cloudSessionManager.getDataPath(bucket, dataId, sessionId);
 					if (dataPath.contains("ERROR")) {
 						return createErrorResponse(dataPath);
 					} else {
@@ -211,11 +211,11 @@ public class AnalysisWSServer extends GenericWSServer {
 		// Create commmand line
 		String commandLine = aje.createCommandLine(execution.getExecutable(), params);
 
-		String jobId = cloudSessionManager.createJob(jobName, jobFolder, project, toolName, new ArrayList<String>(),
+		String jobId = cloudSessionManager.createJob(jobName, jobFolder, bucket, toolName, new ArrayList<String>(),
 				commandLine, sessionId);
 
 		if (jobFolder == null) {
-			jobFolder = cloudSessionManager.getJobFolder(project, jobId, sessionId);
+			jobFolder = cloudSessionManager.getJobFolder(bucket, jobId, sessionId);
 		}
 
 		// String jobId = execute("SW","HPG.SW", dataIds, params, "-d");
