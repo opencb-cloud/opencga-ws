@@ -31,43 +31,44 @@ public class BamWSServer extends GenericWSServer {
 			@DefaultValue("") @PathParam("region") String region
 								) throws IOException {
 		
-		Boolean viewAsPairs = false;
-		if(params.get("view_as_pairs") != null){
-			viewAsPairs = true;
-		}
-		Boolean showSoftclipping = false;
-		if(params.get("show_softclipping") != null){
-			showSoftclipping = true;
-		}
-		
-		String chr = null;
-		int start = 0;
-		int end = 0;
-		
-		if(filename == ""){
-			return 	createErrorResponse("ERROR: filename path param is empty.");
-		}
-		
-		//comprobar si existe el fichero 
-		
-		if(region == "") {
-			return createErrorResponse("ERROR: region path param is empty.");
-		}
-		Region parsedRegion = Region.parseRegion(region);
-		if(parsedRegion == null){
-			return createErrorResponse("ERROR: region format not valid.");
-		}
-		
-		chr = parsedRegion.getChromosome();
-		start = parsedRegion.getStart();
-		end =parsedRegion.getEnd();
-		
-		BamManager bamManager = new BamManager();
-		
-		String filePath = config.getProperty("FILES.PATH");
-		String result = bamManager.getByRegion(filePath, filename, viewAsPairs, showSoftclipping, chr, start, end);
-		
-		return createOkResponse(result);
+//		Boolean viewAsPairs = false;
+//		if(params.get("view_as_pairs") != null){
+//			viewAsPairs = true;
+//		}
+//		Boolean showSoftclipping = false;
+//		if(params.get("show_softclipping") != null){
+//			showSoftclipping = true;
+//		}
+//		
+//		String chr = null;
+//		int start = 0;
+//		int end = 0;
+//		
+//		if(filename == ""){
+//			return 	createErrorResponse("ERROR: filename path param is empty.");
+//		}
+//		
+//		//comprobar si existe el fichero 
+//		
+//		if(region == "") {
+//			return createErrorResponse("ERROR: region path param is empty.");
+//		}
+//		Region parsedRegion = Region.parseRegion(region);
+//		if(parsedRegion == null){
+//			return createErrorResponse("ERROR: region format not valid.");
+//		}
+//		
+//		chr = parsedRegion.getChromosome();
+//		start = parsedRegion.getStart();
+//		end =parsedRegion.getEnd();
+//		
+//		BamManager bamManager = new BamManager();
+//		
+//		String filePath = config.getProperty("FILES.PATH");
+//		String result = bamManager.getByRegion(filePath, filename, viewAsPairs, showSoftclipping, chr, start, end);
+//		
+//		return createOkResponse(result);
+		return createOkResponse("");
 	}
 	
 	@GET
