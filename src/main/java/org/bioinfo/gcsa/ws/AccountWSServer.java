@@ -12,7 +12,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.bioinfo.gcsa.lib.account.beans.Project;
+import org.bioinfo.gcsa.lib.account.beans.Bucket;
 import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
 
 @Path("/account")
@@ -65,15 +65,15 @@ public class AccountWSServer extends GenericWSServer {
 	}
 
 	@GET
-	@Path("/{accountid}/{projectname}/create")
+	@Path("/{accountid}/{bucketname}/create")
 	public Response createProject(@DefaultValue("") @PathParam("accountid") String accountid,
-			@DefaultValue("") @PathParam("projectname") String projectname,
+			@DefaultValue("") @PathParam("bucketname") String bucketname,
 			@DefaultValue("") @QueryParam("description") String description) {
-		Project project = new Project();
-		project.setName(projectname);
-		project.setDescripcion(description);
+		Bucket bucket = new Bucket();
+		bucket.setName(bucketname);
+		bucket.setDescripcion(description);
 		try {
-			cloudSessionManager.createProject(project, accountid, sessionId);
+			cloudSessionManager.createBucket(bucket, accountid, sessionId);
 			return createOkResponse("OK");
 		} catch (AccountManagementException e) {
 			logger.error(e.toString());
@@ -97,7 +97,7 @@ public class AccountWSServer extends GenericWSServer {
 	@Path("/{accountid}/projects")
 	public Response projects(@DefaultValue("") @QueryParam("accountid") String accountId) {
 		try {
-			return createOkResponse(cloudSessionManager.getAccountProjects(accountId, sessionId));
+			return createOkResponse(cloudSessionManager.getAccountBuckets(accountId, sessionId));
 		} catch (AccountManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("could not get projects");
