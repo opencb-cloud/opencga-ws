@@ -31,6 +31,9 @@ import org.bioinfo.gcsa.lib.GcsaUtils;
 import org.bioinfo.gcsa.lib.account.CloudSessionManager;
 import org.bioinfo.gcsa.lib.account.beans.Data;
 import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
+import org.bioinfo.gcsa.lib.account.io.IOManagementException;
+import org.bioinfo.gcsa.lib.storage.alignment.BamManager;
+import org.bioinfo.infrared.lib.common.Region;
 
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
@@ -46,6 +49,7 @@ public class GenericWSServer {
 
 	protected String sessionId;
 	protected String sessionIp;
+	protected String of;
 
 	protected MultivaluedMap<String, String> params;
 
@@ -73,6 +77,7 @@ public class GenericWSServer {
 		this.uriInfo = uriInfo;
 		this.params = this.uriInfo.getQueryParameters();
 		this.sessionId = (this.params.get("sessionid") != null) ? this.params.get("sessionid").get(0) : "";
+		this.of = (this.params.get("of") != null) ? this.params.get("of").get(0) : "";
 		this.sessionIp = httpServletRequest.getRemoteAddr();
 		logger = new Logger();
 		logger.setLevel(Logger.INFO_LEVEL);
@@ -108,10 +113,10 @@ public class GenericWSServer {
 	}
 
 	@POST
-	@Path("/{accountid}/{projectname}/{objectname}/upload")
+	@Path("/{accountid}/{bucketname}/{objectname}/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response uploadData(@DefaultValue("") @PathParam("accountid") String accountid,
-			@DefaultValue("") @PathParam("projectname") String projectname,
+			@DefaultValue("") @PathParam("bucketname") String bucketname,
 			@DefaultValue("") @PathParam("objectname") String objectname, @FormDataParam("file") InputStream file,
 			@FormDataParam("file") FormDataContentDisposition fileInfo,
 			@FormDataParam("name") @DefaultValue("undefined") String name, @FormDataParam("tags") String tags,
@@ -137,15 +142,15 @@ public class GenericWSServer {
 		// "members" : [ ]
 
 		Data data = new Data();
-		data.setType(fileInfo.getType());
+		data.setType(tags);
 		data.setResponsible(responsible);
 		data.setOrganization(organization);
 		data.setDate(GcsaUtils.getTime());
 		data.setDescription(description);
 
 		try {
-			String res = cloudSessionManager.createDataToProject(projectname, accountid, sessionId, data, file, objectname, parents);
-			return createOkResponse(res);
+			String res = cloudSessionManager.createDataToBucket(bucketname, accountid, sessionId, data, file, objectname, parents);
+			return createOkResponse("OK");
 		} catch (Exception e) {
 			logger.error(e.toString());
 			return createErrorResponse(e.getMessage());
@@ -153,18 +158,54 @@ public class GenericWSServer {
 	}
 
 	@GET
-	@Path("/{accountid}/{projectname}/{objectname}/delete")
+	@Path("/{accountid}/{bucketname}/{objectname}/delete")
 	public Response deleteData(@DefaultValue("") @PathParam("accountid") String accountid,
-			@DefaultValue("") @PathParam("projectname") String projectname,
+			@DefaultValue("") @PathParam("bucketname") String bucketname,
 			@DefaultValue("") @PathParam("objectname") String objectname) {
 		try {
-			cloudSessionManager.deleteDataFromProject(projectname, accountid, sessionId, objectname);
+			cloudSessionManager.deleteDataFromBucket(bucketname, accountid, sessionId, objectname);
 			return createOkResponse("OK");
 		} catch (Exception e) {
 			logger.error(e.toString());
 			return createErrorResponse(e.getMessage());
 		}
 	}
+	
+	@GET
+	@Path("/{accountid}/{bucketname}/{objectname}/{region}/region/")
+	public Response region(@DefaultValue("") @PathParam("accountid") String accountid,
+			@DefaultValue("") @PathParam("bucketname") String bucketname,
+			@DefaultValue("") @PathParam("objectname") String objectname,
+			@DefaultValue("") @PathParam("region") String region) {
+		try {
+			cloudSessionManager.region(bucketname, accountid, sessionId, objectname, region, params);
+			return createOkResponse("OK");
+		} catch (Exception e) {
+			logger.error(e.toString());
+			return createErrorResponse(e.getMessage());
+		}
+		
+		/**/
+//		Boolean viewAsPairs = false;
+//		if(params.get("view_as_pairs") != null){
+//			viewAsPairs = true;
+//		}
+//		Boolean showSoftclipping = false;
+//		if(params.get("show_softclipping") != null){
+//			showSoftclipping = true;
+//		}
+//		
+//		String chr = null;
+//		int start = 0;
+//		int end = 0;
+//		
+//		//comprobar si existe el fichero 
+		
+		
+//		return createOkResponse("");
+		
+	}
+
 
 	/*****************************/
 
