@@ -19,6 +19,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.bioinfo.gcsa.lib.analysis.AnalysisExecutionException;
 import org.bioinfo.gcsa.lib.analysis.AnalysisJobExecuter;
 import org.bioinfo.gcsa.lib.analysis.beans.Analysis;
 import org.bioinfo.gcsa.lib.analysis.beans.Execution;
@@ -42,8 +43,9 @@ public class AnalysisWSServer extends GenericWSServer {
 	public Response help1(@DefaultValue("") @PathParam("analysis") String analysis) {
 		try {
 			aje = new AnalysisJobExecuter(analysis);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
+			return createErrorResponse("ERROR: Analysis not found.");
 		}
 		return createOkResponse(aje.help(baseUrl));
 	}
@@ -53,8 +55,9 @@ public class AnalysisWSServer extends GenericWSServer {
 	public Response help2(@DefaultValue("") @PathParam("analysis") String analysis) {
 		try {
 			aje = new AnalysisJobExecuter(analysis);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
+			return createErrorResponse("ERROR: Analysis not found.");
 		}
 		return createOkResponse(aje.help(baseUrl));
 	}
@@ -64,8 +67,9 @@ public class AnalysisWSServer extends GenericWSServer {
 	public Response showParams(@DefaultValue("") @PathParam("analysis") String analysis) {
 		try {
 			aje = new AnalysisJobExecuter(analysis);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
+			return createErrorResponse("ERROR: Analysis not found.");
 		}
 		return createOkResponse(aje.params());
 	}
@@ -75,8 +79,9 @@ public class AnalysisWSServer extends GenericWSServer {
 	public Response test(@DefaultValue("") @PathParam("analysis") String analysis) {
 		try {
 			aje = new AnalysisJobExecuter(analysis);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
+			return createErrorResponse("ERROR: Analysis not found.");
 		}
 
 		// Create job
@@ -92,8 +97,9 @@ public class AnalysisWSServer extends GenericWSServer {
 			@DefaultValue("") @QueryParam("jobid") String jobId) {
 		try {
 			aje = new AnalysisJobExecuter(analysis);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
+			return createErrorResponse("ERROR: Analysis not found.");
 		}
 
 		return createOkResponse(aje.status(jobId));
@@ -168,12 +174,16 @@ public class AnalysisWSServer extends GenericWSServer {
 		try {
 			aje = new AnalysisJobExecuter(analysisStr, analysisOwner);
 			analysis = aje.getAnalysis();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
+			return createErrorResponse("ERROR: Analysis not found.");
 		}
 
-		Execution execution = aje.getExecution();
-		if (execution == null) {
+		Execution execution = null;
+		try {
+			execution = aje.getExecution();
+		} catch (AnalysisExecutionException e) {
+			e.printStackTrace();
 			return createErrorResponse("ERROR: Executable not found.");
 		}
 
@@ -219,7 +229,13 @@ public class AnalysisWSServer extends GenericWSServer {
 		}
 
 		// String jobId = execute("SW","HPG.SW", dataIds, params, "-d");
-		String resp = aje.execute(jobId, jobFolder, params);
+		String resp;
+		try {
+			resp = aje.execute(jobId, jobFolder, params);
+		} catch (AccountManagementException e) {
+			e.printStackTrace();
+			return createErrorResponse("ERROR: Execution failed.");
+		}
 
 		return createOkResponse(resp);
 	}
