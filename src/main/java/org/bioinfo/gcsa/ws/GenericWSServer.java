@@ -178,8 +178,7 @@ public class GenericWSServer {
 			@DefaultValue("") @PathParam("objectname") String objectname,
 			@DefaultValue("") @PathParam("region") String region) {
 		try {
-			cloudSessionManager.region(bucketname, accountid, sessionId, objectname, region, params);
-			return createOkResponse("OK");
+			return createOkResponse(cloudSessionManager.region(bucketname, accountid, sessionId, objectname, region, params));
 		} catch (Exception e) {
 			logger.error(e.toString());
 			return createErrorResponse(e.getMessage());
