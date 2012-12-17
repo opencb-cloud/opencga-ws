@@ -104,7 +104,20 @@ public class AccountWSServer extends GenericWSServer {
 			return createErrorResponse("could not logout");
 		}
 	}
-
+	
+	@GET
+	@Path("/anonymous/logout")
+	public Response logoutAnonymous() {
+		try {
+			System.out.println("-----> sessionId: " + sessionId);
+			cloudSessionManager.logoutAnonymous(sessionId);
+			return createOkResponse("OK");
+		} catch (AccountManagementException e) {
+			logger.error(e.toString());
+			return createErrorResponse("could not logout");
+		}
+	}
+	
 	@GET
 	@Path("/{accountid}/projects")
 	public Response projects(@DefaultValue("") @QueryParam("accountid") String accountId) {
