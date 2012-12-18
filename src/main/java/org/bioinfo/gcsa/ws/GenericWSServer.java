@@ -1,6 +1,8 @@
 package org.bioinfo.gcsa.ws;
 
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,9 +33,6 @@ import org.bioinfo.gcsa.lib.GcsaUtils;
 import org.bioinfo.gcsa.lib.account.CloudSessionManager;
 import org.bioinfo.gcsa.lib.account.beans.Data;
 import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
-import org.bioinfo.gcsa.lib.account.io.IOManagementException;
-import org.bioinfo.gcsa.lib.storage.alignment.BamManager;
-import org.bioinfo.infrared.lib.common.Region;
 
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
@@ -88,11 +87,11 @@ public class GenericWSServer {
 
 		OperatingSystem op = userAgent.getOperatingSystem();
 
-		logger.info("------------------->" + br.getName());
-		logger.info("------------------->" + br.getBrowserType().getName());
-		logger.info("------------------->" + op.getName());
-		logger.info("------------------->" + op.getId());
-		logger.info("------------------->" + op.getDeviceType().getName());
+		// logger.info("------------------->" + br.getName());
+		// logger.info("------------------->" + br.getBrowserType().getName());
+		// logger.info("------------------->" + op.getName());
+		// logger.info("------------------->" + op.getId());
+		// logger.info("------------------->" + op.getDeviceType().getName());
 
 		properties = ResourceBundle.getBundle("org.bioinfo.gcs.ws.application");
 		config = new Config(properties);
@@ -127,20 +126,6 @@ public class GenericWSServer {
 			@FormDataParam("jobid") @DefaultValue("-1") String jobid,
 			@QueryParam("parents") @DefaultValue("false") boolean parents) {
 
-		// "id" : "",
-		// "type" : "",
-		// "fileName" : "HG00096.chrom20.ILLUMINA.bwa.GBR.exome.20111114.bam",
-		// "multiple" : "",
-		// "diskUsage" : "1234321",
-		// "creationTime" : "20121205173147",
-		// "responsible" : "",
-		// "organization" : "",
-		// "date" : "",
-		// "description" : "",
-		// "status" : "",
-		// "statusMessage" : "",
-		// "members" : [ ]
-
 		Data data = new Data();
 		data.setType(tags);
 		data.setResponsible(responsible);
@@ -149,7 +134,8 @@ public class GenericWSServer {
 		data.setDescription(description);
 
 		try {
-			String res = cloudSessionManager.createDataToBucket(bucketname, accountid, sessionId, data, file, objectname, parents);
+			String res = cloudSessionManager.createDataToBucket(bucketname, accountid, sessionId, data, file,
+					objectname, parents);
 			return createOkResponse("OK");
 		} catch (Exception e) {
 			logger.error(e.toString());
@@ -170,7 +156,72 @@ public class GenericWSServer {
 			return createErrorResponse(e.getMessage());
 		}
 	}
-	
+
+	@GET
+	@Path("/{accountid}/{bucketname}/job/{jobid}/result.{format}")
+	public Response getResultFile(@DefaultValue("") @PathParam("accountid") String accountid,
+			@DefaultValue("") @PathParam("bucketname") String bucketname,
+			@DefaultValue("") @PathParam("jobid") String jobId, @PathParam("format") String format) {
+		try {
+			return createOkResponse(cloudSessionManager.getJobResultFromBucket(bucketname, accountid, sessionId, jobId));
+		} catch (Exception e) {
+			logger.error(e.toString());
+			return createErrorResponse(e.getMessage());
+		}
+	}
+
+	@GET
+	@Path("/{accountid}/{bucketname}/job/{jobid}/table")
+	public Response table(@DefaultValue("") @PathParam("accountid") String accountid,
+			@DefaultValue("") @PathParam("bucketname") String bucketname,
+			@DefaultValue("") @PathParam("jobid") String jobId,
+			@DefaultValue("") @QueryParam("filename") String filename,
+			@DefaultValue("") @QueryParam("start") String start, @DefaultValue("") @QueryParam("limit") String limit,
+			@DefaultValue("") @QueryParam("colNames") String colNames,
+			@DefaultValue("") @QueryParam("colVisibility") String colVisibility,
+			@DefaultValue("") @QueryParam("callback") String callback,
+			@QueryParam("sort") @DefaultValue("false") String sort) {
+
+		try {
+			return createOkResponse(cloudSessionManager.getFileTableFromJob(bucketname, accountid, sessionId, jobId,
+					filename, start, limit, colNames, colVisibility, callback, sort));
+		} catch (Exception e) {
+			logger.error(e.toString());
+			return createErrorResponse(e.getMessage());
+		}
+	}
+
+	// @GET
+	// @Path("{jobId}/poll")
+	// public Response pollJobFile(@PathParam("jobId") String jobId,
+	// @QueryParam("filename") String filename, @DefaultValue("true")
+	// @QueryParam("zip") String zip) {
+	// logger.debug("POLLING "+ filename + "...");
+	//
+	@GET
+	@Path("/{accountid}/{bucketname}/job/{jobid}/poll")
+	public Response pollJobFile(@DefaultValue("") @PathParam("accountid") String accountid,
+			@DefaultValue("") @PathParam("bucketname") String bucketname,
+			@DefaultValue("") @PathParam("jobid") String jobId,
+			@DefaultValue("") @QueryParam("filename") String filename,
+			@DefaultValue("true") @QueryParam("zip") String zip) {
+
+		try {
+			DataInputStream is = cloudSessionManager.getFileFromJob(bucketname, accountid, sessionId, jobId, filename,
+					zip);
+			String name = null;
+			if (zip.compareTo("true") != 0) {// PAKO zip != true
+				name = filename;
+			} else {
+				name = filename + ".zip";
+			}
+			return createOkResponse(is, MediaType.APPLICATION_OCTET_STREAM_TYPE, name);
+		} catch (Exception e) {
+			logger.error(e.toString());
+			return createErrorResponse(e.getMessage());
+		}
+	}
+
 	@GET
 	@Path("/{accountid}/{bucketname}/{objectname}/{region}/region/")
 	public Response region(@DefaultValue("") @PathParam("accountid") String accountid,
@@ -178,33 +229,13 @@ public class GenericWSServer {
 			@DefaultValue("") @PathParam("objectname") String objectname,
 			@DefaultValue("") @PathParam("region") String region) {
 		try {
-			return createOkResponse(cloudSessionManager.region(bucketname, accountid, sessionId, objectname, region, params));
+			return createOkResponse(cloudSessionManager.region(bucketname, accountid, sessionId, objectname, region,
+					params));
 		} catch (Exception e) {
 			logger.error(e.toString());
 			return createErrorResponse(e.getMessage());
 		}
-		
-		/**/
-//		Boolean viewAsPairs = false;
-//		if(params.get("view_as_pairs") != null){
-//			viewAsPairs = true;
-//		}
-//		Boolean showSoftclipping = false;
-//		if(params.get("show_softclipping") != null){
-//			showSoftclipping = true;
-//		}
-//		
-//		String chr = null;
-//		int start = 0;
-//		int end = 0;
-//		
-//		//comprobar si existe el fichero 
-		
-		
-//		return createOkResponse("");
-		
 	}
-
 
 	/*****************************/
 
