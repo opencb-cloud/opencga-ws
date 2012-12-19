@@ -2,7 +2,6 @@ package org.bioinfo.gcsa.ws;
 
 import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +30,7 @@ import org.bioinfo.commons.Config;
 import org.bioinfo.commons.log.Logger;
 import org.bioinfo.gcsa.lib.GcsaUtils;
 import org.bioinfo.gcsa.lib.account.CloudSessionManager;
-import org.bioinfo.gcsa.lib.account.beans.Data;
+import org.bioinfo.gcsa.lib.account.beans.ObjectItem;
 import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
 
 import com.sun.jersey.core.header.FormDataContentDisposition;
@@ -126,12 +125,34 @@ public class GenericWSServer {
 			@FormDataParam("jobid") @DefaultValue("-1") String jobid,
 			@QueryParam("parents") @DefaultValue("false") boolean parents) {
 
-		Data data = new Data();
-		data.setType(tags);
+		ObjectItem data = new ObjectItem();
+		data.setFileFormat(tags);
 		data.setResponsible(responsible);
 		data.setOrganization(organization);
 		data.setDate(GcsaUtils.getTime());
 		data.setDescription(description);
+
+		try {
+			String res = cloudSessionManager.createDataToBucket(bucketname, accountid, sessionId, data, file,
+					objectname, parents);
+			return createOkResponse("OK");
+		} catch (Exception e) {
+			logger.error(e.toString());
+			return createErrorResponse(e.getMessage());
+		}
+	}
+
+	@GET
+	@Path("/{accountid}/{bucketname}/{objectname}/createdirectory")
+	public Response createDirectory(@DefaultValue("") @PathParam("accountid") String accountid,
+			@DefaultValue("") @PathParam("bucketname") String bucketname,
+			@DefaultValue("") @PathParam("objectname") String objectname,
+			@DefaultValue("dir") @FormDataParam("filetype") String filetype,
+			@QueryParam("parents") @DefaultValue("false") boolean parents) {
+
+		ObjectItem data = new ObjectItem();
+		data.setFileType(filetype);
+		data.setDate(GcsaUtils.getTime());
 
 		try {
 			String res = cloudSessionManager.createDataToBucket(bucketname, accountid, sessionId, data, file,

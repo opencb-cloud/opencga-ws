@@ -14,6 +14,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.bioinfo.gcsa.lib.account.beans.Bucket;
 import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
+import org.bioinfo.gcsa.lib.account.io.IOManagementException;
 
 @Path("/account")
 public class AccountWSServer extends GenericWSServer {
@@ -75,7 +76,7 @@ public class AccountWSServer extends GenericWSServer {
 		try {
 			cloudSessionManager.createBucket(bucket, accountid, sessionId);
 			return createOkResponse("OK");
-		} catch (AccountManagementException e) {
+		} catch (AccountManagementException | IOManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("could not create project");
 		}
