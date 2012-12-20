@@ -207,7 +207,7 @@ public class AnalysisWSServer extends GenericWSServer {
 				List<String> dataIds = Arrays.asList(params.get(inputParam.getName()).get(0).split(","));
 				List<String> dataPaths = new ArrayList<String>();
 				for (String dataId : dataIds) {
-					String dataPath = cloudSessionManager.getDataPath(bucket, dataId, sessionId);
+					String dataPath = cloudSessionManager.getDataPath(null, dataId, sessionId);
 					if (dataPath.contains("ERROR")) {
 						return createErrorResponse(dataPath);
 					} else {
