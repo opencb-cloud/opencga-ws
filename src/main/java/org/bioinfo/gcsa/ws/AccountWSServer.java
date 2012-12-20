@@ -71,6 +71,7 @@ public class AccountWSServer extends GenericWSServer {
 			@DefaultValue("") @PathParam("bucketname") String bucketname,
 			@DefaultValue("") @QueryParam("description") String description) {
 		Bucket bucket = new Bucket();
+		bucket.setId(bucketname.toLowerCase());
 		bucket.setName(bucketname);
 		bucket.setDescripcion(description);
 		try {
