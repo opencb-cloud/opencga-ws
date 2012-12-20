@@ -219,7 +219,13 @@ public class AnalysisWSServer extends GenericWSServer {
 		}
 
 		// Create commmand line
-		String commandLine = aje.createCommandLine(execution.getExecutable(), params);
+		String commandLine = null;
+		try {
+			commandLine = aje.createCommandLine(execution.getExecutable(), params);
+		} catch (AccountManagementException e) {
+			e.printStackTrace();
+			return createErrorResponse(e.getMessage());
+		}
 
 		String jobId = cloudSessionManager.createJob(jobName, jobFolder, bucket, toolName, new ArrayList<String>(),
 				commandLine, sessionId);
