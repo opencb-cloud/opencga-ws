@@ -118,24 +118,26 @@ public class GenericWSServer {
 			@DefaultValue("") @PathParam("objectname") String objectname, @FormDataParam("file") InputStream file,
 			@FormDataParam("file") FormDataContentDisposition fileInfo,
 			@FormDataParam("name") @DefaultValue("undefined") String name, @FormDataParam("tags") String tags,
+			@DefaultValue("r") @QueryParam("filetype") String filetype,
 			@FormDataParam("responsible") @DefaultValue("-") String responsible,
 			@FormDataParam("organization") @DefaultValue("-") String organization,
 			@FormDataParam("date") @DefaultValue("-") String date,
 			@FormDataParam("description") @DefaultValue("-") String description,
 			@FormDataParam("jobid") @DefaultValue("-1") String jobid,
-			@QueryParam("parents") @DefaultValue("false") boolean parents) {
+			@DefaultValue("false") @QueryParam("parents") boolean parents) {
 
-		ObjectItem data = new ObjectItem();
-		data.setFileFormat(tags);
-		data.setResponsible(responsible);
-		data.setOrganization(organization);
-		data.setDate(GcsaUtils.getTime());
-		data.setDescription(description);
+		ObjectItem object = new ObjectItem();
+		object.setFileFormat(tags);
+		object.setFileType(filetype);
+		object.setResponsible(responsible);
+		object.setOrganization(organization);
+		object.setDate(GcsaUtils.getTime());
+		object.setDescription(description);
 
 		try {
-			String res = cloudSessionManager.createDataToBucket(bucketname, accountid, sessionId, data, file,
+			String res = cloudSessionManager.createObjectToBucket(bucketname, accountid, sessionId, object, file,
 					objectname, parents);
-			return createOkResponse("OK");
+			return createOkResponse(res);
 		} catch (Exception e) {
 			logger.error(e.toString());
 			return createErrorResponse(e.getMessage());
@@ -147,17 +149,16 @@ public class GenericWSServer {
 	public Response createDirectory(@DefaultValue("") @PathParam("accountid") String accountid,
 			@DefaultValue("") @PathParam("bucketname") String bucketname,
 			@DefaultValue("") @PathParam("objectname") String objectname,
-			@DefaultValue("dir") @FormDataParam("filetype") String filetype,
-			@QueryParam("parents") @DefaultValue("false") boolean parents) {
+			@DefaultValue("dir") @QueryParam("filetype") String filetype,
+			@DefaultValue("false") @QueryParam("parents") boolean parents) {
 
-		ObjectItem data = new ObjectItem();
-		data.setFileType(filetype);
-		data.setDate(GcsaUtils.getTime());
-
+		ObjectItem object = new ObjectItem();
+		object.setFileType(filetype);
+		object.setDate(GcsaUtils.getTime());
 		try {
-			String res = cloudSessionManager.createDataToBucket(bucketname, accountid, sessionId, data, file,
-					objectname, parents);
-			return createOkResponse("OK");
+			String res = cloudSessionManager.createFolderToBucket(bucketname, accountid, sessionId, object, objectname,
+					parents);
+			return createOkResponse(res);
 		} catch (Exception e) {
 			logger.error(e.toString());
 			return createErrorResponse(e.getMessage());
