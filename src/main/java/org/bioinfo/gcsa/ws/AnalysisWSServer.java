@@ -1,6 +1,9 @@
 package org.bioinfo.gcsa.ws;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,11 +22,14 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.bioinfo.commons.utils.StringUtils;
+import org.bioinfo.gcsa.lib.GcsaUtils;
 import org.bioinfo.gcsa.lib.analysis.AnalysisExecutionException;
 import org.bioinfo.gcsa.lib.analysis.AnalysisJobExecuter;
 import org.bioinfo.gcsa.lib.analysis.beans.Analysis;
 import org.bioinfo.gcsa.lib.analysis.beans.Execution;
 import org.bioinfo.gcsa.lib.analysis.beans.InputParam;
+import org.bioinfo.gcsa.lib.account.beans.ObjectItem;
 import org.bioinfo.gcsa.lib.account.beans.Plugin;
 import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
 
@@ -137,11 +143,19 @@ public class AnalysisWSServer extends GenericWSServer {
 		} else {
 			return createErrorResponse("ERROR: Session is not initialized yet.");
 		}
+		
+		String accountId = null;
+		if (params.containsKey("accountid")) {
+			accountId = params.get("accountid").get(0);
+			params.remove("accountid");
+		} else {
+			return createErrorResponse("ERROR: Session is not initialized yet.");
+		}
 
 		String bucket = null;
-		if (params.containsKey("jobDestinationBucket")) {
-			bucket = params.get("jobDestinationBucket").get(0);
-			params.remove("jobDestinationBucket");
+		if (params.containsKey("jobdestinationbucket")) {
+			bucket = params.get("jobdestinationbucket").get(0);
+			params.remove("jobdestinationbucket");
 		} else {
 			return createErrorResponse("ERROR: unspecified destination bucket.");
 		}
@@ -198,16 +212,54 @@ public class AnalysisWSServer extends GenericWSServer {
 			jobFolder = params.get("outdir").get(0);
 			params.remove("outdir");
 		}
+		
+		boolean example = false;
+		if (params.containsKey("example")) {
+			example = Boolean.parseBoolean(params.get("example").get(0));
+			params.remove("example");
+		}
+		
 
 		String toolName = analysis.getId();
-
+		
 		// Set input param
 		for (InputParam inputParam : execution.getInputParams()) {
 			if (params.containsKey(inputParam.getName())) {
 				List<String> dataIds = Arrays.asList(params.get(inputParam.getName()).get(0).split(","));
 				List<String> dataPaths = new ArrayList<String>();
 				for (String dataId : dataIds) {
-					String dataPath = cloudSessionManager.getDataPath(null, dataId, sessionId);
+					String dataPath = null;
+					if(example) {
+						dataPath = aje.getExamplePath(dataId);
+					}
+					else {
+						
+						//TODO
+						/*TEMPORAL, PENSAR OTRA FORMA DE CREAR LOS FICHEROS CON LA LISTA DE NODOS*/
+						/*DE MOMENTO SE CREAN EN TMP*/
+						if(dataId.contains("\n")) {
+							FileWriter fileWriter = null;
+					        try {
+					            String content = dataId;
+					            dataPath = "/tmp/" + StringUtils.randomString(8) + "/";
+					            fileWriter = new FileWriter(new File(dataPath));
+					            fileWriter.write(content);
+					            fileWriter.close();
+					        } catch (IOException ex) {
+					        	ex.printStackTrace();
+					        } finally {
+					            try {
+					                fileWriter.close();
+					            } catch (IOException ex) {
+					                ex.printStackTrace();
+					            }
+					        }
+						}
+						/**/
+						else { // is a dataId
+							dataPath = cloudSessionManager.getDataPath(accountId, null, dataId);
+						}
+					}
 					if (dataPath.contains("ERROR")) {
 						return createErrorResponse(dataPath);
 					} else {
