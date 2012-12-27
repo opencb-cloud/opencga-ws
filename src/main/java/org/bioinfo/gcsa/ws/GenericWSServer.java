@@ -251,7 +251,7 @@ public class GenericWSServer {
 			@DefaultValue("") @PathParam("bucketname") String bucketname,
 			@DefaultValue("") @PathParam("jobid") String jobId) {
 		try {
-			return createOkResponse(cloudSessionManager.checkJobStatus(accountid, jobId, sessionId,));
+			return createOkResponse(cloudSessionManager.checkJobStatus(accountid, jobId, sessionId));
 		} catch (Exception e) {
 			logger.error(e.toString());
 			return createErrorResponse(e.getMessage());
