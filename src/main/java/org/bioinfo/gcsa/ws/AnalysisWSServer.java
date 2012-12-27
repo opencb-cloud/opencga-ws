@@ -241,7 +241,7 @@ public class AnalysisWSServer extends GenericWSServer {
 							FileWriter fileWriter = null;
 					        try {
 					            String content = dataId;
-					            dataPath = "/tmp/" + StringUtils.randomString(8) + "/";
+					            dataPath = "/tmp/" + StringUtils.randomString(8);
 					            fileWriter = new FileWriter(new File(dataPath));
 					            fileWriter.write(content);
 					            fileWriter.close();
