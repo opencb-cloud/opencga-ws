@@ -192,6 +192,7 @@ public class GenericWSServer {
 		}
 	}
 
+
 	@GET
 	@Path("/{accountid}/{bucketname}/job/{jobid}/table")
 	public Response table(@DefaultValue("") @PathParam("accountid") String accountid,
@@ -244,6 +245,20 @@ public class GenericWSServer {
 		}
 	}
 
+	@GET
+	@Path("/{accountid}/{bucketname}/job/{jobid}/status")
+	public Response getJobStatus(@DefaultValue("") @PathParam("accountid") String accountid,
+			@DefaultValue("") @PathParam("bucketname") String bucketname,
+			@DefaultValue("") @PathParam("jobid") String jobId) {
+		try {
+			return createOkResponse(cloudSessionManager.checkJobStatus(accountid, jobId, sessionId,));
+		} catch (Exception e) {
+			logger.error(e.toString());
+			return createErrorResponse(e.getMessage());
+		}
+	}
+	
+	
 	@GET
 	@Path("/{accountid}/{bucketname}/{objectname}/{region}/region/")
 	public Response region(@DefaultValue("") @PathParam("accountid") String accountid,

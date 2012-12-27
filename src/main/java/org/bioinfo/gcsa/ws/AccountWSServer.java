@@ -46,7 +46,14 @@ public class AccountWSServer extends GenericWSServer {
 	public Response login(@DefaultValue("") @PathParam("accountid") String accountId,
 			@DefaultValue("") @QueryParam("password") String password) {
 		try {
-			return createOkResponse(cloudSessionManager.login(accountId, password, sessionIp));
+			
+			String res;
+			if(accountId.toLowerCase().equals("anonymous")){
+				res =  cloudSessionManager.createAnonymousAccount(sessionIp);
+			}else{
+				res = cloudSessionManager.login(accountId, password, sessionIp);
+			}
+			return createOkResponse(res);
 		} catch (AccountManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("could not login");
