@@ -3,7 +3,9 @@ package org.bioinfo.gcsa.ws;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,13 +25,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.bioinfo.commons.utils.StringUtils;
-import org.bioinfo.gcsa.lib.GcsaUtils;
 import org.bioinfo.gcsa.lib.analysis.AnalysisExecutionException;
 import org.bioinfo.gcsa.lib.analysis.AnalysisJobExecuter;
 import org.bioinfo.gcsa.lib.analysis.beans.Analysis;
 import org.bioinfo.gcsa.lib.analysis.beans.Execution;
 import org.bioinfo.gcsa.lib.analysis.beans.InputParam;
-import org.bioinfo.gcsa.lib.account.beans.ObjectItem;
 import org.bioinfo.gcsa.lib.account.beans.Plugin;
 import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
 
@@ -134,8 +134,7 @@ public class AnalysisWSServer extends GenericWSServer {
 	}
 
 	private Response analysis(String analysisStr, MultivaluedMap<String, String> params) {
-		// TODO Comprobar mas cosas antes de crear el analysis job executer
-		// (permisos, etc..)
+		// TODO Comprobar mas cosas antes de crear el analysis job executer (permisos, etc..)
 
 		if (params.containsKey("sessionid")) {
 			sessionId = params.get("sessionid").get(0);
@@ -149,7 +148,7 @@ public class AnalysisWSServer extends GenericWSServer {
 			accountId = params.get("accountid").get(0);
 			params.remove("accountid");
 		} else {
-			return createErrorResponse("ERROR: Session is not initialized yet.");
+			return createErrorResponse("ERROR: unknown account.");
 		}
 
 		String bucket = null;
@@ -219,7 +218,6 @@ public class AnalysisWSServer extends GenericWSServer {
 			params.remove("example");
 		}
 		
-
 		String toolName = analysis.getId();
 		
 		// Set input param
@@ -237,7 +235,8 @@ public class AnalysisWSServer extends GenericWSServer {
 						//TODO
 						/*TEMPORAL, PENSAR OTRA FORMA DE CREAR LOS FICHEROS CON LA LISTA DE NODOS*/
 						/*DE MOMENTO SE CREAN EN TMP*/
-						if(dataId.contains("\n")) {
+						if(dataId.startsWith("***fromText***")) {
+							dataId = dataId.replaceFirst("***fromText***", "");
 							FileWriter fileWriter = null;
 					        try {
 					            String content = dataId;
@@ -254,6 +253,15 @@ public class AnalysisWSServer extends GenericWSServer {
 					                ex.printStackTrace();
 					            }
 					        }
+					        
+					        //Java 7
+//					        try {
+//					        	String content = dataId;
+//					            dataPath = "/tmp/" + StringUtils.randomString(8);
+//								Files.write(Paths.get(dataPath), content.getBytes());
+//							} catch (IOException e) {
+//								e.printStackTrace();
+//							}
 						}
 						/**/
 						else { // is a dataId
@@ -286,7 +294,6 @@ public class AnalysisWSServer extends GenericWSServer {
 			jobFolder = cloudSessionManager.getJobFolder(bucket, jobId, sessionId);
 		}
 
-		// String jobId = execute("SW","HPG.SW", dataIds, params, "-d");
 		String resp;
 		try {
 			resp = aje.execute(jobId, jobFolder, params);
