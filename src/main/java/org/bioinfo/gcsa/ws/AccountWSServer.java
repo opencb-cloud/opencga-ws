@@ -35,7 +35,7 @@ public class AccountWSServer extends GenericWSServer {
 		try {
 			cloudSessionManager.createAccount(accountId, password, accountName, email, sessionIp);
 			return createOkResponse("OK");
-		} catch (AccountManagementException e) {
+		} catch (AccountManagementException | IOManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("could not create the account");
 		}
@@ -47,7 +47,7 @@ public class AccountWSServer extends GenericWSServer {
 		try {
 			cloudSessionManager.createAnonymousAccount(sessionIp);
 			return createOkResponse("OK");
-		} catch (AccountManagementException e) {
+		} catch (AccountManagementException | IOManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("could not create the account");
 		}
@@ -66,7 +66,7 @@ public class AccountWSServer extends GenericWSServer {
 				res = cloudSessionManager.login(accountId, password, sessionIp);
 			}
 			return createOkResponse(res);
-		} catch (AccountManagementException e) {
+		} catch (AccountManagementException | IOManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("could not login");
 		}
@@ -89,7 +89,7 @@ public class AccountWSServer extends GenericWSServer {
 	public Response createProject(@DefaultValue("") @PathParam("accountid") String accountid,
 			@DefaultValue("") @PathParam("bucketname") String bucketname,
 			@DefaultValue("") @QueryParam("description") String description) {
-		Bucket bucket = new Bucket();
+		Bucket bucket = new Bucket(null);//TODO PAKO COMPROBAR CONSTRUCTOR
 		bucket.setId(bucketname.toLowerCase());
 		bucket.setName(bucketname);
 		bucket.setDescripcion(description);
@@ -121,7 +121,7 @@ public class AccountWSServer extends GenericWSServer {
 			System.out.println("-----> sessionId: " + sessionId);
 			cloudSessionManager.logoutAnonymous(sessionId);
 			return createOkResponse("OK");
-		} catch (AccountManagementException e) {
+		} catch (AccountManagementException | IOManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("could not logout");
 		}
