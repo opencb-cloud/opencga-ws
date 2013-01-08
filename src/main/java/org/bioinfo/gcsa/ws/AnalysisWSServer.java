@@ -3,9 +3,6 @@ package org.bioinfo.gcsa.ws;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,13 +22,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.bioinfo.commons.utils.StringUtils;
+import org.bioinfo.gcsa.lib.account.beans.AnalysisPlugin;
+import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
+import org.bioinfo.gcsa.lib.account.io.IOManagementException;
 import org.bioinfo.gcsa.lib.analysis.AnalysisExecutionException;
 import org.bioinfo.gcsa.lib.analysis.AnalysisJobExecuter;
 import org.bioinfo.gcsa.lib.analysis.beans.Analysis;
 import org.bioinfo.gcsa.lib.analysis.beans.Execution;
 import org.bioinfo.gcsa.lib.analysis.beans.InputParam;
-import org.bioinfo.gcsa.lib.account.beans.Plugin;
-import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
 
 @Path("/analysis")
 public class AnalysisWSServer extends GenericWSServer {
@@ -91,7 +89,13 @@ public class AnalysisWSServer extends GenericWSServer {
 		}
 
 		// Create job
-		String jobId = cloudSessionManager.createJob("", null, "", "", new ArrayList<String>(), "", sessionId);
+		String jobId;
+		try {
+			jobId = cloudSessionManager.createJob("", null, "", "", new ArrayList<String>(), "", sessionId);
+		} catch (AccountManagementException | IOManagementException e) {
+			e.printStackTrace();
+			return createErrorResponse("Could not create the job");
+		}
 		String jobFolder = "/tmp/";
 
 		return createOkResponse(aje.test(jobId, jobFolder));
@@ -134,7 +138,8 @@ public class AnalysisWSServer extends GenericWSServer {
 	}
 
 	private Response analysis(String analysisStr, MultivaluedMap<String, String> params) {
-		// TODO Comprobar mas cosas antes de crear el analysis job executer (permisos, etc..)
+		// TODO Comprobar mas cosas antes de crear el analysis job executer
+		// (permisos, etc..)
 
 		if (params.containsKey("sessionid")) {
 			sessionId = params.get("sessionid").get(0);
@@ -142,7 +147,7 @@ public class AnalysisWSServer extends GenericWSServer {
 		} else {
 			return createErrorResponse("ERROR: Session is not initialized yet.");
 		}
-		
+
 		String accountId = null;
 		if (params.containsKey("accountid")) {
 			accountId = params.get("accountid").get(0);
@@ -171,8 +176,8 @@ public class AnalysisWSServer extends GenericWSServer {
 
 		String analysisOwner = "system";
 		try {
-			List<Plugin> userAnalysis = cloudSessionManager.getUserAnalysis(sessionId);
-			for (Plugin a : userAnalysis) {
+			List<AnalysisPlugin> userAnalysis = cloudSessionManager.getUserAnalysis(sessionId);
+			for (AnalysisPlugin a : userAnalysis) {
 				if (a.getName().equals(analysisName)) {
 					analysisOwner = a.getOwnerId();
 					break;
@@ -211,15 +216,14 @@ public class AnalysisWSServer extends GenericWSServer {
 			jobFolder = params.get("outdir").get(0);
 			params.remove("outdir");
 		}
-		
+
 		boolean example = false;
 		if (params.containsKey("example")) {
 			example = Boolean.parseBoolean(params.get("example").get(0));
 			params.remove("example");
 		}
-		
 		String toolName = analysis.getId();
-		
+
 		// Set input param
 		for (InputParam inputParam : execution.getInputParams()) {
 			if (params.containsKey(inputParam.getName())) {
@@ -227,45 +231,48 @@ public class AnalysisWSServer extends GenericWSServer {
 				List<String> dataPaths = new ArrayList<String>();
 				for (String dataId : dataIds) {
 					String dataPath = null;
-					if(example) {
+					if (example) {
 						dataPath = aje.getExamplePath(dataId);
-					}
-					else {
-						
-						//TODO
-						/*TEMPORAL, PENSAR OTRA FORMA DE CREAR LOS FICHEROS CON LA LISTA DE NODOS*/
-						/*DE MOMENTO SE CREAN EN TMP*/
-						if(dataId.startsWith("***fromText***")) {
+					} else {
+
+						// TODO
+						/*
+						 * TEMPORAL, PENSAR OTRA FORMA DE CREAR LOS FICHEROS CON
+						 * LA LISTA DE NODOS
+						 */
+						/* DE MOMENTO SE CREAN EN TMP */
+						if (dataId.startsWith("***fromText***")) {
 							dataId = dataId.replaceFirst("***fromText***", "");
 							FileWriter fileWriter = null;
-					        try {
-					            String content = dataId;
-					            dataPath = "/tmp/" + StringUtils.randomString(8);
-					            fileWriter = new FileWriter(new File(dataPath));
-					            fileWriter.write(content);
-					            fileWriter.close();
-					        } catch (IOException ex) {
-					        	ex.printStackTrace();
-					        } finally {
-					            try {
-					                fileWriter.close();
-					            } catch (IOException ex) {
-					                ex.printStackTrace();
-					            }
-					        }
-					        
-					        //Java 7
-//					        try {
-//					        	String content = dataId;
-//					            dataPath = "/tmp/" + StringUtils.randomString(8);
-//								Files.write(Paths.get(dataPath), content.getBytes());
-//							} catch (IOException e) {
-//								e.printStackTrace();
-//							}
+							try {
+								String content = dataId;
+								dataPath = "/tmp/" + StringUtils.randomString(8);
+								fileWriter = new FileWriter(new File(dataPath));
+								fileWriter.write(content);
+								fileWriter.close();
+							} catch (IOException ex) {
+								ex.printStackTrace();
+							} finally {
+								try {
+									fileWriter.close();
+								} catch (IOException ex) {
+									ex.printStackTrace();
+								}
+							}
+
+							// Java 7
+							// try {
+							// String content = dataId;
+							// dataPath = "/tmp/" + StringUtils.randomString(8);
+							// Files.write(Paths.get(dataPath),
+							// content.getBytes());
+							// } catch (IOException e) {
+							// e.printStackTrace();
+							// }
 						}
 						/**/
 						else { // is a dataId
-							dataPath = cloudSessionManager.getDataPath(accountId, null, dataId);
+							dataPath = cloudSessionManager.getObjectPath(accountId, null, dataId);
 						}
 					}
 					if (dataPath.contains("ERROR")) {
@@ -287,8 +294,14 @@ public class AnalysisWSServer extends GenericWSServer {
 			return createErrorResponse(e.getMessage());
 		}
 
-		String jobId = cloudSessionManager.createJob(jobName, jobFolder, bucket, toolName, new ArrayList<String>(),
-				commandLine, sessionId);
+		String jobId;
+		try {
+			jobId = cloudSessionManager.createJob(jobName, jobFolder, bucket, toolName, new ArrayList<String>(),
+					commandLine, sessionId);
+		} catch (AccountManagementException | IOManagementException e1) {
+			e1.printStackTrace();
+			return createErrorResponse("Could not create the job");
+		}
 
 		if (jobFolder == null) {
 			jobFolder = cloudSessionManager.getJobFolder(bucket, jobId, sessionId);

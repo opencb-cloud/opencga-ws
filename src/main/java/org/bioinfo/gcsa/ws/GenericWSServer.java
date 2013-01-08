@@ -10,7 +10,9 @@ import java.util.ResourceBundle;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -20,6 +22,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import nl.bitwalker.useragentutils.Browser;
@@ -35,6 +38,9 @@ import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
 
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
+//import org.bioinfo.gcsa.lib.users.CloudSessionManager;
+//import org.bioinfo.gcsa.lib.users.beans.Data;
+//import org.bioinfo.gcsa.lib.users.persistence.AccountManagementException;
 
 @Path("/")
 @Produces("text/plain")
@@ -126,7 +132,9 @@ public class GenericWSServer {
 			@FormDataParam("jobid") @DefaultValue("-1") String jobid,
 			@DefaultValue("false") @QueryParam("parents") boolean parents) {
 
-		ObjectItem object = new ObjectItem();
+		ObjectItem object = new ObjectItem(null, null, null);// TODO PAKO
+																// COMPROBAR
+																// CONSTRUCTOR
 		object.setFileFormat(tags);
 		object.setFileType(filetype);
 		object.setResponsible(responsible);
@@ -152,7 +160,7 @@ public class GenericWSServer {
 			@DefaultValue("dir") @QueryParam("filetype") String filetype,
 			@DefaultValue("false") @QueryParam("parents") boolean parents) {
 
-		ObjectItem object = new ObjectItem();
+		ObjectItem object = new ObjectItem(null, null, null);
 		object.setFileType(filetype);
 		object.setDate(GcsaUtils.getTime());
 		try {
@@ -191,7 +199,6 @@ public class GenericWSServer {
 			return createErrorResponse(e.getMessage());
 		}
 	}
-
 
 	@GET
 	@Path("/{accountid}/{bucketname}/job/{jobid}/table")
@@ -257,8 +264,7 @@ public class GenericWSServer {
 			return createErrorResponse(e.getMessage());
 		}
 	}
-	
-	
+
 	@GET
 	@Path("/{accountid}/{bucketname}/{objectname}/{region}/region/")
 	public Response region(@DefaultValue("") @PathParam("accountid") String accountid,
@@ -279,22 +285,34 @@ public class GenericWSServer {
 	protected Response createErrorResponse(Object o) {
 		String objMsg = o.toString();
 		if (objMsg.startsWith("ERROR:")) {
-			return Response.ok("" + o).header("Access-Control-Allow-Origin", "*").build();
+			return buildResponse(Response.ok("" + o));
 		} else {
-			return Response.ok("ERROR: " + o).header("Access-Control-Allow-Origin", "*").build();
+			return buildResponse(Response.ok("ERROR: " + o));
 		}
 	}
 
 	protected Response createOkResponse(Object o) {
-		return Response.ok(o).header("Access-Control-Allow-Origin", "*").build();
+		return buildResponse(Response.ok(o));
 	}
 
 	protected Response createOkResponse(Object o1, MediaType o2) {
-		return Response.ok(o1, o2).header("Access-Control-Allow-Origin", "*").build();
+		return buildResponse(Response.ok(o1, o2));
 	}
 
 	protected Response createOkResponse(Object o1, MediaType o2, String fileName) {
-		return Response.ok(o1, o2).header("content-disposition", "attachment; filename =" + fileName)
-				.header("Access-Control-Allow-Origin", "*").build();
+		return buildResponse(Response.ok(o1, o2).header("content-disposition", "attachment; filename =" + fileName));
+	}
+
+	private Response buildResponse(ResponseBuilder responseBuilder) {
+		return responseBuilder.header("Access-Control-Allow-Origin", "*")
+				.header("Access-Control-Allow-Headers", "content-type").build();
+	}
+
+	/*******************/
+	@POST
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@Path("/subir")
+	public Response subir(@FormParam("a") String a) {
+		return createOkResponse(a.toUpperCase());
 	}
 }
