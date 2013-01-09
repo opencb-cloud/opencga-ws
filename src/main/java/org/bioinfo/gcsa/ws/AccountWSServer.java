@@ -40,7 +40,7 @@ public class AccountWSServer extends GenericWSServer {
 			return createErrorResponse("could not create the account");
 		}
 	}
-	
+
 	@GET
 	@Path("/anonymous/create")
 	public Response create() {
@@ -58,11 +58,11 @@ public class AccountWSServer extends GenericWSServer {
 	public Response login(@DefaultValue("") @PathParam("accountid") String accountId,
 			@DefaultValue("") @QueryParam("password") String password) {
 		try {
-			
+
 			String res;
-			if(accountId.toLowerCase().equals("anonymous")){
-				res =  cloudSessionManager.createAnonymousAccount(sessionIp);
-			}else{
+			if (accountId.toLowerCase().equals("anonymous")) {
+				res = cloudSessionManager.createAnonymousAccount(sessionIp);
+			} else {
 				res = cloudSessionManager.login(accountId, password, sessionIp);
 			}
 			return createOkResponse(res);
@@ -77,7 +77,8 @@ public class AccountWSServer extends GenericWSServer {
 	public Response getInfoAccount(@DefaultValue("") @PathParam("accountId") String accountId,
 			@DefaultValue("") @QueryParam("lastactivity") String lastActivity) {
 		try {
-			return createOkResponse(cloudSessionManager.getAccountInfo(accountId, sessionId, lastActivity));
+			String res = cloudSessionManager.getAccountInfo(accountId, sessionId, lastActivity);
+			return createOkResponse(res);
 		} catch (AccountManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("could get account information");
@@ -86,15 +87,14 @@ public class AccountWSServer extends GenericWSServer {
 
 	@GET
 	@Path("/{accountid}/{bucketname}/create")
-	public Response createProject(@DefaultValue("") @PathParam("accountid") String accountid,
-			@DefaultValue("") @PathParam("bucketname") String bucketname,
+	public Response createProject(@DefaultValue("") @PathParam("accountid") String accountId,
+			@DefaultValue("") @PathParam("bucketname") String bucketId,
 			@DefaultValue("") @QueryParam("description") String description) {
-		Bucket bucket = new Bucket(null);//TODO PAKO COMPROBAR CONSTRUCTOR
-		bucket.setId(bucketname.toLowerCase());
-		bucket.setName(bucketname);
+		Bucket bucket = new Bucket(bucketId);
+		bucket.setId(bucketId.toLowerCase());
 		bucket.setDescripcion(description);
 		try {
-			cloudSessionManager.createBucket(bucket, accountid, sessionId);
+			cloudSessionManager.createBucket(accountId, bucket, sessionId);
 			return createOkResponse("OK");
 		} catch (AccountManagementException | IOManagementException e) {
 			logger.error(e.toString());
@@ -113,7 +113,7 @@ public class AccountWSServer extends GenericWSServer {
 			return createErrorResponse("could not logout");
 		}
 	}
-	
+
 	@GET
 	@Path("/anonymous/logout")
 	public Response logoutAnonymous() {
@@ -126,12 +126,13 @@ public class AccountWSServer extends GenericWSServer {
 			return createErrorResponse("could not logout");
 		}
 	}
-	
+
 	@GET
 	@Path("/{accountid}/projects")
 	public Response projects(@DefaultValue("") @QueryParam("accountid") String accountId) {
 		try {
-			return createOkResponse(cloudSessionManager.getAccountBuckets(accountId, sessionId));
+			String res = cloudSessionManager.getAccountBuckets(accountId, sessionId);
+			return createOkResponse(res);
 		} catch (AccountManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("could not get projects");
@@ -177,7 +178,6 @@ public class AccountWSServer extends GenericWSServer {
 			logger.error(e.toString());
 			return createErrorResponse("could not reset password");
 		}
-		// return createOkResponse(userManager.resetPassword(accountId, email));
 	}
 
 	// @GET

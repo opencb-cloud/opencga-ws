@@ -5,6 +5,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import javax.servlet.http.HttpServletRequest;
@@ -42,6 +45,10 @@ import com.sun.jersey.multipart.FormDataParam;
 //import org.bioinfo.gcsa.lib.users.beans.Data;
 //import org.bioinfo.gcsa.lib.users.persistence.AccountManagementException;
 
+/**
+ * @author fsalavert
+ * 
+ */
 @Path("/")
 @Produces("text/plain")
 public class GenericWSServer {
@@ -119,10 +126,10 @@ public class GenericWSServer {
 	@POST
 	@Path("/{accountid}/{bucketname}/{objectname}/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadData(@DefaultValue("") @PathParam("accountid") String accountid,
-			@DefaultValue("") @PathParam("bucketname") String bucketname,
-			@DefaultValue("") @PathParam("objectname") String objectname, @FormDataParam("file") InputStream file,
-			@FormDataParam("file") FormDataContentDisposition fileInfo,
+	public Response uploadData(@DefaultValue("") @PathParam("accountid") String accountId,
+			@DefaultValue("") @PathParam("bucketname") String bucketId,
+			@DefaultValue("") @PathParam("objectname") String objectIdFromURL,
+			@FormDataParam("file") InputStream fileIs, @FormDataParam("file") FormDataContentDisposition fileInfo,
 			@FormDataParam("name") @DefaultValue("undefined") String name, @FormDataParam("tags") String tags,
 			@DefaultValue("r") @QueryParam("filetype") String filetype,
 			@FormDataParam("responsible") @DefaultValue("-") String responsible,
@@ -132,19 +139,21 @@ public class GenericWSServer {
 			@FormDataParam("jobid") @DefaultValue("-1") String jobid,
 			@DefaultValue("false") @QueryParam("parents") boolean parents) {
 
-		ObjectItem object = new ObjectItem(null, null, null);// TODO PAKO
-																// COMPROBAR
-																// CONSTRUCTOR
-		object.setFileFormat(tags);
-		object.setFileType(filetype);
-		object.setResponsible(responsible);
-		object.setOrganization(organization);
-		object.setDate(GcsaUtils.getTime());
-		object.setDescription(description);
+		java.nio.file.Path objectId = parseObjectId(objectIdFromURL);
+
+		ObjectItem objectItem = new ObjectItem(null, null, null);// TODO PAKO
+																	// COMPROBAR
+																	// CONSTRUCTOR
+		objectItem.setFileFormat(tags);
+		objectItem.setFileType(filetype);
+		objectItem.setResponsible(responsible);
+		objectItem.setOrganization(organization);
+		objectItem.setDate(GcsaUtils.getTime());
+		objectItem.setDescription(description);
 
 		try {
-			String res = cloudSessionManager.createObjectToBucket(bucketname, accountid, sessionId, object, file,
-					objectname, parents);
+			String res = cloudSessionManager.createObjectToBucket(accountId, bucketId, objectId, objectItem, fileIs,
+					parents, sessionId);
 			return createOkResponse(res);
 		} catch (Exception e) {
 			logger.error(e.toString());
@@ -154,18 +163,20 @@ public class GenericWSServer {
 
 	@GET
 	@Path("/{accountid}/{bucketname}/{objectname}/createdirectory")
-	public Response createDirectory(@DefaultValue("") @PathParam("accountid") String accountid,
-			@DefaultValue("") @PathParam("bucketname") String bucketname,
-			@DefaultValue("") @PathParam("objectname") String objectname,
+	public Response createDirectory(@DefaultValue("") @PathParam("accountid") String accountId,
+			@DefaultValue("") @PathParam("bucketname") String bucketId,
+			@DefaultValue("") @PathParam("objectname") String objectIdFromURL,
 			@DefaultValue("dir") @QueryParam("filetype") String filetype,
 			@DefaultValue("false") @QueryParam("parents") boolean parents) {
 
-		ObjectItem object = new ObjectItem(null, null, null);
-		object.setFileType(filetype);
-		object.setDate(GcsaUtils.getTime());
+		java.nio.file.Path objectId = parseObjectId(objectIdFromURL);
+
+		ObjectItem objectItem = new ObjectItem(null, null, null);
+		objectItem.setFileType(filetype);
+		objectItem.setDate(GcsaUtils.getTime());
 		try {
-			String res = cloudSessionManager.createFolderToBucket(bucketname, accountid, sessionId, object, objectname,
-					parents);
+			String res = cloudSessionManager.createFolderToBucket(accountId, bucketId, objectId, objectItem, parents,
+					sessionId);
 			return createOkResponse(res);
 		} catch (Exception e) {
 			logger.error(e.toString());
@@ -175,11 +186,13 @@ public class GenericWSServer {
 
 	@GET
 	@Path("/{accountid}/{bucketname}/{objectname}/delete")
-	public Response deleteData(@DefaultValue("") @PathParam("accountid") String accountid,
-			@DefaultValue("") @PathParam("bucketname") String bucketname,
-			@DefaultValue("") @PathParam("objectname") String objectname) {
+	public Response deleteData(@DefaultValue("") @PathParam("accountid") String accountId,
+			@DefaultValue("") @PathParam("bucketname") String bucketId,
+			@DefaultValue("") @PathParam("objectname") String objectIdFromURL) {
+
+		java.nio.file.Path objectId = parseObjectId(objectIdFromURL);
 		try {
-			cloudSessionManager.deleteDataFromBucket(bucketname, accountid, sessionId, objectname);
+			cloudSessionManager.deleteDataFromBucket(accountId, bucketId, objectId, sessionId);
 			return createOkResponse("OK");
 		} catch (Exception e) {
 			logger.error(e.toString());
@@ -189,11 +202,12 @@ public class GenericWSServer {
 
 	@GET
 	@Path("/{accountid}/{bucketname}/job/{jobid}/result.{format}")
-	public Response getResultFile(@DefaultValue("") @PathParam("accountid") String accountid,
-			@DefaultValue("") @PathParam("bucketname") String bucketname,
+	public Response getResultFile(@DefaultValue("") @PathParam("accountid") String accountId,
+			@DefaultValue("") @PathParam("bucketname") String bucketId,
 			@DefaultValue("") @PathParam("jobid") String jobId, @PathParam("format") String format) {
 		try {
-			return createOkResponse(cloudSessionManager.getJobResultFromBucket(bucketname, accountid, sessionId, jobId));
+			String res = cloudSessionManager.getJobResultFromBucket(accountId, bucketId, jobId, sessionId);
+			return createOkResponse(res);
 		} catch (Exception e) {
 			logger.error(e.toString());
 			return createErrorResponse(e.getMessage());
@@ -202,8 +216,8 @@ public class GenericWSServer {
 
 	@GET
 	@Path("/{accountid}/{bucketname}/job/{jobid}/table")
-	public Response table(@DefaultValue("") @PathParam("accountid") String accountid,
-			@DefaultValue("") @PathParam("bucketname") String bucketname,
+	public Response table(@DefaultValue("") @PathParam("accountid") String accountId,
+			@DefaultValue("") @PathParam("bucketname") String bucketId,
 			@DefaultValue("") @PathParam("jobid") String jobId,
 			@DefaultValue("") @QueryParam("filename") String filename,
 			@DefaultValue("") @QueryParam("start") String start, @DefaultValue("") @QueryParam("limit") String limit,
@@ -213,8 +227,9 @@ public class GenericWSServer {
 			@QueryParam("sort") @DefaultValue("false") String sort) {
 
 		try {
-			return createOkResponse(cloudSessionManager.getFileTableFromJob(bucketname, accountid, sessionId, jobId,
-					filename, start, limit, colNames, colVisibility, callback, sort));
+			String res = cloudSessionManager.getFileTableFromJob(accountId, bucketId, jobId, filename, start, limit,
+					colNames, colVisibility, callback, sort, sessionId);
+			return createOkResponse(res);
 		} catch (Exception e) {
 			logger.error(e.toString());
 			return createErrorResponse(e.getMessage());
@@ -230,15 +245,16 @@ public class GenericWSServer {
 	//
 	@GET
 	@Path("/{accountid}/{bucketname}/job/{jobid}/poll")
-	public Response pollJobFile(@DefaultValue("") @PathParam("accountid") String accountid,
-			@DefaultValue("") @PathParam("bucketname") String bucketname,
+	public Response pollJobFile(@DefaultValue("") @PathParam("accountid") String accountId,
+			@DefaultValue("") @PathParam("bucketname") String bucketId,
 			@DefaultValue("") @PathParam("jobid") String jobId,
 			@DefaultValue("") @QueryParam("filename") String filename,
 			@DefaultValue("true") @QueryParam("zip") String zip) {
 
 		try {
-			DataInputStream is = cloudSessionManager.getFileFromJob(bucketname, accountid, sessionId, jobId, filename,
-					zip);
+
+			DataInputStream is = cloudSessionManager.getFileFromJob(accountId, bucketId, jobId, filename, zip,
+					sessionId);
 			String name = null;
 			if (zip.compareTo("true") != 0) {// PAKO zip != true
 				name = filename;
@@ -254,11 +270,12 @@ public class GenericWSServer {
 
 	@GET
 	@Path("/{accountid}/{bucketname}/job/{jobid}/status")
-	public Response getJobStatus(@DefaultValue("") @PathParam("accountid") String accountid,
-			@DefaultValue("") @PathParam("bucketname") String bucketname,
+	public Response getJobStatus(@DefaultValue("") @PathParam("accountid") String accountId,
+			@DefaultValue("") @PathParam("bucketname") String bucketId,
 			@DefaultValue("") @PathParam("jobid") String jobId) {
 		try {
-			return createOkResponse(cloudSessionManager.checkJobStatus(accountid, jobId, sessionId));
+			String res = cloudSessionManager.checkJobStatus(accountId, jobId, sessionId);
+			return createOkResponse(res);
 		} catch (Exception e) {
 			logger.error(e.toString());
 			return createErrorResponse(e.getMessage());
@@ -267,17 +284,27 @@ public class GenericWSServer {
 
 	@GET
 	@Path("/{accountid}/{bucketname}/{objectname}/{region}/region/")
-	public Response region(@DefaultValue("") @PathParam("accountid") String accountid,
-			@DefaultValue("") @PathParam("bucketname") String bucketname,
-			@DefaultValue("") @PathParam("objectname") String objectname,
-			@DefaultValue("") @PathParam("region") String region) {
+	public Response region(@DefaultValue("") @PathParam("accountid") String accountId,
+			@DefaultValue("") @PathParam("bucketname") String bucketId,
+			@DefaultValue("") @PathParam("objectname") String objectIdFromURL,
+			@DefaultValue("") @PathParam("region") String regionStr) {
+		java.nio.file.Path objectId = parseObjectId(objectIdFromURL);
 		try {
-			return createOkResponse(cloudSessionManager.region(bucketname, accountid, sessionId, objectname, region,
-					params));
+			String res = cloudSessionManager.region(accountId, bucketId, objectId, regionStr, params, sessionId);
+			return createOkResponse(res);
 		} catch (Exception e) {
 			logger.error(e.toString());
 			return createErrorResponse(e.getMessage());
 		}
+	}
+
+	private java.nio.file.Path parseObjectId(String objectIdFromURL) {
+		String[] tokens = objectIdFromURL.split(":");
+		java.nio.file.Path objectPath = Paths.get("");
+		for (int i = 0; i < tokens.length; i++) {
+			objectPath = objectPath.resolve(Paths.get(tokens[i]));
+		}
+		return objectPath;
 	}
 
 	/*****************************/
@@ -304,8 +331,7 @@ public class GenericWSServer {
 	}
 
 	private Response buildResponse(ResponseBuilder responseBuilder) {
-		return responseBuilder.header("Access-Control-Allow-Origin", "*")
-				.header("Access-Control-Allow-Headers", "content-type").build();
+		return responseBuilder.header("Access-Control-Allow-Origin", "*").build();
 	}
 
 	/*******************/
