@@ -88,13 +88,12 @@ public class AnalysisWSServer extends GenericWSServer {
 		String jobId;
 		try {
 			jobId = cloudSessionManager.createJob("", null, "", "", new ArrayList<String>(), "", sessionId);
-		} catch (AccountManagementException | IOManagementException e) {
+			String jobFolder = "/tmp/";
+			return createOkResponse(aje.test(jobId, jobFolder));
+		} catch (AccountManagementException | IOManagementException | AnalysisExecutionException e) {
 			logger.error(e.toString());
 			return createErrorResponse("ERROR: could not create job.");
 		}
-		String jobFolder = "/tmp/";
-
-		return createOkResponse(aje.test(jobId, jobFolder));
 	}
 
 	@GET
@@ -103,12 +102,12 @@ public class AnalysisWSServer extends GenericWSServer {
 			@DefaultValue("") @QueryParam("jobid") String jobId) {
 		try {
 			aje = new AnalysisJobExecuter(analysis);
+			return createOkResponse(aje.status(jobId));
 		} catch (Exception e) {
 			logger.error(e.toString());
 			return createErrorResponse("ERROR: analysis not found.");
 		}
 
-		return createOkResponse(aje.status(jobId));
 	}
 
 	@GET
@@ -240,7 +239,7 @@ public class AnalysisWSServer extends GenericWSServer {
 					if (example) { // is a example
 						dataPath = aje.getExamplePath(dataId);
 					} else { // is a dataId
-						dataPath = cloudSessionManager.getObjectPath(accountId, null, dataId);
+						dataPath = cloudSessionManager.getObjectPath(accountId, null, parseObjectId(dataId));
 					}
 
 					if (dataPath.contains("ERROR")) {
@@ -274,14 +273,14 @@ public class AnalysisWSServer extends GenericWSServer {
 		try {
 			commandLine = aje.createCommandLine(execution.getExecutable(), params);
 			cloudSessionManager.setJobCommandLine(accountId, jobId, commandLine);
-		} catch (AccountManagementException e) {
+		} catch (AccountManagementException | AnalysisExecutionException e) {
 			logger.error(e.toString());
 			return createErrorResponse(e.getMessage());
 		}
 
 		try {
-			aje.execute(jobId, jobFolder, params);
-		} catch (AccountManagementException e) {
+			aje.execute(jobId, jobFolder, commandLine);
+		} catch (AnalysisExecutionException e) {
 			logger.error(e.toString());
 			return createErrorResponse("ERROR: execution failed.");
 		}

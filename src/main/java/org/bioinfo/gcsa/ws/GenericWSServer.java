@@ -298,7 +298,7 @@ public class GenericWSServer {
 		}
 	}
 
-	private java.nio.file.Path parseObjectId(String objectIdFromURL) {
+	protected java.nio.file.Path parseObjectId(String objectIdFromURL) {
 		String[] tokens = objectIdFromURL.split(":");
 		java.nio.file.Path objectPath = Paths.get("");
 		for (int i = 0; i < tokens.length; i++) {
