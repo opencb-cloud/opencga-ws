@@ -1,14 +1,11 @@
 package org.bioinfo.gcsa.ws;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -16,12 +13,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.bioinfo.commons.utils.StringUtils;
+import org.bioinfo.gcsa.lib.account.beans.Acl;
 import org.bioinfo.gcsa.lib.account.beans.AnalysisPlugin;
 import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
 import org.bioinfo.gcsa.lib.account.io.IOManagementException;
@@ -48,8 +44,8 @@ public class AnalysisWSServer extends GenericWSServer {
 		try {
 			aje = new AnalysisJobExecuter(analysis);
 		} catch (Exception e) {
-			e.printStackTrace();
-			return createErrorResponse("ERROR: Analysis not found.");
+			logger.error(e.toString());
+			return createErrorResponse("ERROR: analysis not found.");
 		}
 		return createOkResponse(aje.help(baseUrl));
 	}
@@ -60,8 +56,8 @@ public class AnalysisWSServer extends GenericWSServer {
 		try {
 			aje = new AnalysisJobExecuter(analysis);
 		} catch (Exception e) {
-			e.printStackTrace();
-			return createErrorResponse("ERROR: Analysis not found.");
+			logger.error(e.toString());
+			return createErrorResponse("ERROR: analysis not found.");
 		}
 		return createOkResponse(aje.help(baseUrl));
 	}
@@ -72,8 +68,8 @@ public class AnalysisWSServer extends GenericWSServer {
 		try {
 			aje = new AnalysisJobExecuter(analysis);
 		} catch (Exception e) {
-			e.printStackTrace();
-			return createErrorResponse("ERROR: Analysis not found.");
+			logger.error(e.toString());
+			return createErrorResponse("ERROR: analysis not found.");
 		}
 		return createOkResponse(aje.params());
 	}
@@ -84,8 +80,8 @@ public class AnalysisWSServer extends GenericWSServer {
 		try {
 			aje = new AnalysisJobExecuter(analysis);
 		} catch (Exception e) {
-			e.printStackTrace();
-			return createErrorResponse("ERROR: Analysis not found.");
+			logger.error(e.toString());
+			return createErrorResponse("ERROR: analysis not found.");
 		}
 
 		// Create job
@@ -93,8 +89,8 @@ public class AnalysisWSServer extends GenericWSServer {
 		try {
 			jobId = cloudSessionManager.createJob("", null, "", "", new ArrayList<String>(), "", sessionId);
 		} catch (AccountManagementException | IOManagementException e) {
-			e.printStackTrace();
-			return createErrorResponse("Could not create the job");
+			logger.error(e.toString());
+			return createErrorResponse("ERROR: could not create job.");
 		}
 		String jobFolder = "/tmp/";
 
@@ -108,8 +104,8 @@ public class AnalysisWSServer extends GenericWSServer {
 		try {
 			aje = new AnalysisJobExecuter(analysis);
 		} catch (Exception e) {
-			e.printStackTrace();
-			return createErrorResponse("ERROR: Analysis not found.");
+			logger.error(e.toString());
+			return createErrorResponse("ERROR: analysis not found.");
 		}
 
 		return createOkResponse(aje.status(jobId));
@@ -120,32 +116,27 @@ public class AnalysisWSServer extends GenericWSServer {
 	public Response analysisGet(@DefaultValue("") @PathParam("analysis") String analysis) {
 		// MultivaluedMap<String, String> params =
 		// this.uriInfo.getQueryParameters();
-		System.out.println("**GET executed***");
-		System.out.println("get params: " + params);
+		logger.debug("get params: " + params);
 
 		return this.analysis(analysis, params);
 	}
 
 	@POST
 	@Path("/{analysis}/run")
-	@Consumes({ MediaType.MULTIPART_FORM_DATA, MediaType.APPLICATION_FORM_URLENCODED })
+//	@Consumes({ MediaType.MULTIPART_FORM_DATA, MediaType.APPLICATION_FORM_URLENCODED })
 	public Response analysisPost(@DefaultValue("") @PathParam("analysis") String analysis,
 			MultivaluedMap<String, String> postParams) {
-		System.out.println("**POST executed***");
-		System.out.println("post params: " + postParams);
+		logger.debug("post params: " + postParams);
 
 		return this.analysis(analysis, postParams);
 	}
 
 	private Response analysis(String analysisStr, MultivaluedMap<String, String> params) {
-		// TODO Comprobar mas cosas antes de crear el analysis job executer
-		// (permisos, etc..)
-
 		if (params.containsKey("sessionid")) {
 			sessionId = params.get("sessionid").get(0);
 			params.remove("sessionid");
 		} else {
-			return createErrorResponse("ERROR: Session is not initialized yet.");
+			return createErrorResponse("ERROR: session is not initialized yet.");
 		}
 
 		String accountId = null;
@@ -174,17 +165,31 @@ public class AnalysisWSServer extends GenericWSServer {
 			analysisName = analysisStr.split("\\.")[0];
 		}
 
+		
 		String analysisOwner = "system";
+		boolean hasPermission = false;
 		try {
 			List<AnalysisPlugin> userAnalysis = cloudSessionManager.getUserAnalysis(sessionId);
 			for (AnalysisPlugin a : userAnalysis) {
 				if (a.getName().equals(analysisName)) {
 					analysisOwner = a.getOwnerId();
+					// get execution permissions
+					for(Acl acl : a.getAcl()) {
+						if(acl.getAccountId().equals(accountId) && acl.isExecute()) {
+							hasPermission = true;
+							break;
+						}
+					}
 					break;
 				}
 			}
-		} catch (AccountManagementException e1) {
-			e1.printStackTrace();
+		} catch (AccountManagementException e) {
+			logger.error(e.toString());
+			return createErrorResponse("ERROR: invalid session id.");
+		}
+		
+		// check execution permissions
+		if(!analysisOwner.equals("system") && !hasPermission) {
 			return createErrorResponse("ERROR: invalid session id.");
 		}
 
@@ -193,16 +198,16 @@ public class AnalysisWSServer extends GenericWSServer {
 			aje = new AnalysisJobExecuter(analysisStr, analysisOwner);
 			analysis = aje.getAnalysis();
 		} catch (Exception e) {
-			e.printStackTrace();
-			return createErrorResponse("ERROR: Analysis not found.");
+			logger.error(e.toString());
+			return createErrorResponse("ERROR: analysis not found.");
 		}
 
 		Execution execution = null;
 		try {
 			execution = aje.getExecution();
 		} catch (AnalysisExecutionException e) {
-			e.printStackTrace();
-			return createErrorResponse("ERROR: Executable not found.");
+			logger.error(e.toString());
+			return createErrorResponse("ERROR: executable not found.");
 		}
 
 		String jobName = "";
@@ -225,96 +230,62 @@ public class AnalysisWSServer extends GenericWSServer {
 		String toolName = analysis.getId();
 
 		// Set input param
+		List<String> dataList = new ArrayList<String>();
 		for (InputParam inputParam : execution.getInputParams()) {
 			if (params.containsKey(inputParam.getName())) {
 				List<String> dataIds = Arrays.asList(params.get(inputParam.getName()).get(0).split(","));
 				List<String> dataPaths = new ArrayList<String>();
 				for (String dataId : dataIds) {
 					String dataPath = null;
-					if (example) {
+					if (example) { // is a example
 						dataPath = aje.getExamplePath(dataId);
-					} else {
-
-						// TODO
-						/*
-						 * TEMPORAL, PENSAR OTRA FORMA DE CREAR LOS FICHEROS CON
-						 * LA LISTA DE NODOS
-						 */
-						/* DE MOMENTO SE CREAN EN TMP */
-						if (dataId.startsWith("***fromText***")) {
-							dataId = dataId.replaceFirst("***fromText***", "");
-							FileWriter fileWriter = null;
-							try {
-								String content = dataId;
-								dataPath = "/tmp/" + StringUtils.randomString(8);
-								fileWriter = new FileWriter(new File(dataPath));
-								fileWriter.write(content);
-								fileWriter.close();
-							} catch (IOException ex) {
-								ex.printStackTrace();
-							} finally {
-								try {
-									fileWriter.close();
-								} catch (IOException ex) {
-									ex.printStackTrace();
-								}
-							}
-
-							// Java 7
-							// try {
-							// String content = dataId;
-							// dataPath = "/tmp/" + StringUtils.randomString(8);
-							// Files.write(Paths.get(dataPath),
-							// content.getBytes());
-							// } catch (IOException e) {
-							// e.printStackTrace();
-							// }
-						}
-						/**/
-						else { // is a dataId
-							dataPath = cloudSessionManager.getObjectPath(accountId, null, dataId);
-						}
+					} else { // is a dataId
+						dataPath = cloudSessionManager.getObjectPath(accountId, null, dataId);
 					}
+
 					if (dataPath.contains("ERROR")) {
 						return createErrorResponse(dataPath);
 					} else {
 						dataPaths.add(dataPath);
+						dataList.add(dataPath);
 					}
 				}
 				params.put(inputParam.getName(), dataPaths);
 			}
 		}
 
-		// Create commmand line
-		String commandLine = null;
-		try {
-			commandLine = aje.createCommandLine(execution.getExecutable(), params);
-		} catch (AccountManagementException e) {
-			e.printStackTrace();
-			return createErrorResponse(e.getMessage());
-		}
-
 		String jobId;
 		try {
-			jobId = cloudSessionManager.createJob(jobName, jobFolder, bucket, toolName, new ArrayList<String>(),
-					commandLine, sessionId);
-		} catch (AccountManagementException | IOManagementException e1) {
-			e1.printStackTrace();
-			return createErrorResponse("Could not create the job");
+			jobId = cloudSessionManager.createJob(jobName, jobFolder, bucket, toolName, dataList, null, sessionId);
+		} catch (AccountManagementException | IOManagementException e) {
+			logger.error(e.toString());
+			return createErrorResponse("ERROR: could not create job.");
 		}
 
 		if (jobFolder == null) {
 			jobFolder = cloudSessionManager.getJobFolder(bucket, jobId, sessionId);
 		}
 
-		String resp;
+		// Set output param
+		params.put(execution.getOutputParam(), Arrays.asList(jobFolder));
+
+		// Create commmand line
+		String commandLine = null;
 		try {
-			resp = aje.execute(jobId, jobFolder, params);
+			commandLine = aje.createCommandLine(execution.getExecutable(), params);
+			cloudSessionManager.setJobCommandLine(accountId, jobId, commandLine);
 		} catch (AccountManagementException e) {
-			e.printStackTrace();
-			return createErrorResponse("ERROR: Execution failed.");
+			logger.error(e.toString());
+			return createErrorResponse(e.getMessage());
 		}
 
-		return createOkResponse(resp);
+		try {
+			aje.execute(jobId, jobFolder, params);
+		} catch (AccountManagementException e) {
+			logger.error(e.toString());
+			return createErrorResponse("ERROR: execution failed.");
+		}
+
+		return createOkResponse(jobId);
 	}
 }
