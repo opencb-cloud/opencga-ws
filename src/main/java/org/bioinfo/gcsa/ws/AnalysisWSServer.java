@@ -87,7 +87,7 @@ public class AnalysisWSServer extends GenericWSServer {
 		// Create job
 		String jobId;
 		try {
-			jobId = cloudSessionManager.createJob("", null, "", "", new ArrayList<String>(), "", sessionId);
+			jobId = cloudSessionManager.createJob("", null, "", new ArrayList<String>(), "", sessionId);
 			String jobFolder = "/tmp/";
 			return createOkResponse(aje.test(jobId, jobFolder));
 		} catch (AccountManagementException | IOManagementException | AnalysisExecutionException e) {
@@ -146,13 +146,13 @@ public class AnalysisWSServer extends GenericWSServer {
 			return createErrorResponse("ERROR: unknown account.");
 		}
 
-		String bucket = null;
-		if (params.containsKey("jobdestinationbucket")) {
-			bucket = params.get("jobdestinationbucket").get(0);
-			params.remove("jobdestinationbucket");
-		} else {
-			return createErrorResponse("ERROR: unspecified destination bucket.");
-		}
+//		String bucket = null;
+//		if (params.containsKey("jobdestinationbucket")) {
+//			bucket = params.get("jobdestinationbucket").get(0);
+//			params.remove("jobdestinationbucket");
+//		} else {
+//			return createErrorResponse("ERROR: unspecified destination bucket.");
+//		}
 
 		// Jquery put this parameter and it is sent to the tool
 		if (params.containsKey("_")) {
@@ -255,14 +255,14 @@ public class AnalysisWSServer extends GenericWSServer {
 
 		String jobId;
 		try {
-			jobId = cloudSessionManager.createJob(jobName, jobFolder, bucket, toolName, dataList, null, sessionId);
+			jobId = cloudSessionManager.createJob(jobName, jobFolder, toolName, dataList, null, sessionId);
 		} catch (AccountManagementException | IOManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("ERROR: could not create job.");
 		}
 
 		if (jobFolder == null) {
-			jobFolder = cloudSessionManager.getJobFolder(bucket, jobId, sessionId);
+			jobFolder = cloudSessionManager.getJobFolder(jobId, sessionId);
 		}
 
 		// Set output param
