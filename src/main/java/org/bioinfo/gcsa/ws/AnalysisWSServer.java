@@ -45,7 +45,7 @@ public class AnalysisWSServer extends GenericWSServer {
 			aje = new AnalysisJobExecuter(analysis);
 		} catch (Exception e) {
 			logger.error(e.toString());
-			return createErrorResponse("ERROR: analysis not found.");
+			return createErrorResponse("analysis not found.");
 		}
 		return createOkResponse(aje.help(baseUrl));
 	}
@@ -57,7 +57,7 @@ public class AnalysisWSServer extends GenericWSServer {
 			aje = new AnalysisJobExecuter(analysis);
 		} catch (Exception e) {
 			logger.error(e.toString());
-			return createErrorResponse("ERROR: analysis not found.");
+			return createErrorResponse("analysis not found.");
 		}
 		return createOkResponse(aje.help(baseUrl));
 	}
@@ -69,7 +69,7 @@ public class AnalysisWSServer extends GenericWSServer {
 			aje = new AnalysisJobExecuter(analysis);
 		} catch (Exception e) {
 			logger.error(e.toString());
-			return createErrorResponse("ERROR: analysis not found.");
+			return createErrorResponse("analysis not found.");
 		}
 		return createOkResponse(aje.params());
 	}
@@ -81,7 +81,7 @@ public class AnalysisWSServer extends GenericWSServer {
 			aje = new AnalysisJobExecuter(analysis);
 		} catch (Exception e) {
 			logger.error(e.toString());
-			return createErrorResponse("ERROR: analysis not found.");
+			return createErrorResponse("analysis not found.");
 		}
 
 		// Create job
@@ -92,7 +92,7 @@ public class AnalysisWSServer extends GenericWSServer {
 			return createOkResponse(aje.test(jobId, jobFolder));
 		} catch (AccountManagementException | IOManagementException | AnalysisExecutionException e) {
 			logger.error(e.toString());
-			return createErrorResponse("ERROR: could not create job.");
+			return createErrorResponse("could not create job.");
 		}
 	}
 
@@ -105,7 +105,7 @@ public class AnalysisWSServer extends GenericWSServer {
 			return createOkResponse(aje.status(jobId));
 		} catch (Exception e) {
 			logger.error(e.toString());
-			return createErrorResponse("ERROR: analysis not found.");
+			return createErrorResponse("analysis not found.");
 		}
 
 	}
@@ -122,7 +122,8 @@ public class AnalysisWSServer extends GenericWSServer {
 
 	@POST
 	@Path("/{analysis}/run")
-//	@Consumes({ MediaType.MULTIPART_FORM_DATA, MediaType.APPLICATION_FORM_URLENCODED })
+	// @Consumes({ MediaType.MULTIPART_FORM_DATA,
+	// MediaType.APPLICATION_FORM_URLENCODED })
 	public Response analysisPost(@DefaultValue("") @PathParam("analysis") String analysis,
 			MultivaluedMap<String, String> postParams) {
 		logger.debug("post params: " + postParams);
@@ -135,7 +136,7 @@ public class AnalysisWSServer extends GenericWSServer {
 			sessionId = params.get("sessionid").get(0);
 			params.remove("sessionid");
 		} else {
-			return createErrorResponse("ERROR: session is not initialized yet.");
+			return createErrorResponse("session is not initialized yet.");
 		}
 
 		String accountId = null;
@@ -143,16 +144,16 @@ public class AnalysisWSServer extends GenericWSServer {
 			accountId = params.get("accountid").get(0);
 			params.remove("accountid");
 		} else {
-			return createErrorResponse("ERROR: unknown account.");
+			return createErrorResponse("unknown account.");
 		}
 
-//		String bucket = null;
-//		if (params.containsKey("jobdestinationbucket")) {
-//			bucket = params.get("jobdestinationbucket").get(0);
-//			params.remove("jobdestinationbucket");
-//		} else {
-//			return createErrorResponse("ERROR: unspecified destination bucket.");
-//		}
+		// String bucket = null;
+		// if (params.containsKey("jobdestinationbucket")) {
+		// bucket = params.get("jobdestinationbucket").get(0);
+		// params.remove("jobdestinationbucket");
+		// } else {
+		// return createErrorResponse("unspecified destination bucket.");
+		// }
 
 		// Jquery put this parameter and it is sent to the tool
 		if (params.containsKey("_")) {
@@ -164,7 +165,6 @@ public class AnalysisWSServer extends GenericWSServer {
 			analysisName = analysisStr.split("\\.")[0];
 		}
 
-		
 		String analysisOwner = "system";
 		boolean hasPermission = false;
 		try {
@@ -173,8 +173,8 @@ public class AnalysisWSServer extends GenericWSServer {
 				if (a.getName().equals(analysisName)) {
 					analysisOwner = a.getOwnerId();
 					// get execution permissions
-					for(Acl acl : a.getAcl()) {
-						if(acl.getAccountId().equals(accountId) && acl.isExecute()) {
+					for (Acl acl : a.getAcl()) {
+						if (acl.getAccountId().equals(accountId) && acl.isExecute()) {
 							hasPermission = true;
 							break;
 						}
@@ -184,12 +184,12 @@ public class AnalysisWSServer extends GenericWSServer {
 			}
 		} catch (AccountManagementException e) {
 			logger.error(e.toString());
-			return createErrorResponse("ERROR: invalid session id.");
+			return createErrorResponse("invalid session id.");
 		}
-		
+
 		// check execution permissions
-		if(!analysisOwner.equals("system") && !hasPermission) {
-			return createErrorResponse("ERROR: invalid session id.");
+		if (!analysisOwner.equals("system") && !hasPermission) {
+			return createErrorResponse("invalid session id.");
 		}
 
 		Analysis analysis = null;
@@ -198,7 +198,7 @@ public class AnalysisWSServer extends GenericWSServer {
 			analysis = aje.getAnalysis();
 		} catch (Exception e) {
 			logger.error(e.toString());
-			return createErrorResponse("ERROR: analysis not found.");
+			return createErrorResponse("analysis not found.");
 		}
 
 		Execution execution = null;
@@ -206,7 +206,7 @@ public class AnalysisWSServer extends GenericWSServer {
 			execution = aje.getExecution();
 		} catch (AnalysisExecutionException e) {
 			logger.error(e.toString());
-			return createErrorResponse("ERROR: executable not found.");
+			return createErrorResponse("executable not found.");
 		}
 
 		String jobName = "";
@@ -217,7 +217,8 @@ public class AnalysisWSServer extends GenericWSServer {
 
 		String jobFolder = null;
 		if (params.containsKey("outdir")) {
-			jobFolder = params.get("outdir").get(0);
+			jobFolder = "buckets:" + params.get("outdir").get(0);
+			jobFolder = parseObjectId(jobFolder).toString();
 			params.remove("outdir");
 		}
 
@@ -255,14 +256,16 @@ public class AnalysisWSServer extends GenericWSServer {
 
 		String jobId;
 		try {
-			jobId = cloudSessionManager.createJob(jobName, jobFolder, toolName, dataList, null, sessionId);
+			jobId = cloudSessionManager.createJob(jobName, jobFolder, toolName, dataList, "", sessionId);
 		} catch (AccountManagementException | IOManagementException e) {
 			logger.error(e.toString());
-			return createErrorResponse("ERROR: could not create job.");
+			return createErrorResponse("could not create job.");
 		}
 
 		if (jobFolder == null) {
-			jobFolder = cloudSessionManager.getJobFolder(jobId, sessionId);
+			jobFolder = cloudSessionManager.getJobFolder(accountId, jobId);
+		} else {
+			jobFolder = cloudSessionManager.getAccountPath(accountId).resolve(jobFolder).toString();
 		}
 
 		// Set output param
@@ -282,7 +285,7 @@ public class AnalysisWSServer extends GenericWSServer {
 			aje.execute(jobId, jobFolder, commandLine);
 		} catch (AnalysisExecutionException e) {
 			logger.error(e.toString());
-			return createErrorResponse("ERROR: execution failed.");
+			return createErrorResponse("execution failed.");
 		}
 
 		return createOkResponse(jobId);

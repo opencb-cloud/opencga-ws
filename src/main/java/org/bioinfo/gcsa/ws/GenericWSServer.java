@@ -207,7 +207,7 @@ public class GenericWSServer {
 			@DefaultValue("") @PathParam("bucketname") String bucketId,
 			@DefaultValue("") @PathParam("jobid") String jobId, @PathParam("format") String format) {
 		try {
-			String res = cloudSessionManager.getJobResultFromBucket(accountId, bucketId, jobId, sessionId);
+			String res = cloudSessionManager.getJobResult(accountId, jobId);
 			return createOkResponse(res);
 		} catch (Exception e) {
 			logger.error(e.toString());
@@ -228,8 +228,8 @@ public class GenericWSServer {
 			@QueryParam("sort") @DefaultValue("false") String sort) {
 
 		try {
-			String res = cloudSessionManager.getFileTableFromJob(accountId, bucketId, jobId, filename, start, limit,
-					colNames, colVisibility, callback, sort, sessionId);
+			String res = cloudSessionManager.getFileTableFromJob(accountId, jobId, filename, start, limit, colNames,
+					colVisibility, callback, sort);
 			return createOkResponse(res);
 		} catch (Exception e) {
 			logger.error(e.toString());
@@ -253,9 +253,7 @@ public class GenericWSServer {
 			@DefaultValue("true") @QueryParam("zip") String zip) {
 
 		try {
-
-			DataInputStream is = cloudSessionManager.getFileFromJob(accountId, bucketId, jobId, filename, zip,
-					sessionId);
+			DataInputStream is = cloudSessionManager.getFileFromJob(accountId, jobId, filename, zip);
 			String name = null;
 			if (zip.compareTo("true") != 0) {// PAKO zip != true
 				name = filename;
