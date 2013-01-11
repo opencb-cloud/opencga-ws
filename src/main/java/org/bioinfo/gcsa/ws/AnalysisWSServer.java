@@ -217,9 +217,9 @@ public class AnalysisWSServer extends GenericWSServer {
 
 		String jobFolder = null;
 		if (params.containsKey("outdir")) {
-			jobFolder = params.get("outdir").get(0);
+			jobFolder = "buckets:" + params.get("outdir").get(0);
+			jobFolder = parseObjectId(jobFolder).toString();
 			params.remove("outdir");
-			logger.debug(jobFolder);
 		}
 
 		boolean example = false;
@@ -256,7 +256,7 @@ public class AnalysisWSServer extends GenericWSServer {
 
 		String jobId;
 		try {
-			jobId = cloudSessionManager.createJob(jobName, jobFolder, toolName, dataList, null, sessionId);
+			jobId = cloudSessionManager.createJob(jobName, jobFolder, toolName, dataList, "", sessionId);
 		} catch (AccountManagementException | IOManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("could not create job.");
@@ -264,6 +264,8 @@ public class AnalysisWSServer extends GenericWSServer {
 
 		if (jobFolder == null) {
 			jobFolder = cloudSessionManager.getJobFolder(accountId, jobId);
+		} else {
+			jobFolder = cloudSessionManager.getAccountPath(accountId).resolve(jobFolder).toString();
 		}
 
 		// Set output param
