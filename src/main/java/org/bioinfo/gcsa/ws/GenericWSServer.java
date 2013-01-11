@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
@@ -336,9 +337,18 @@ public class GenericWSServer {
 
 	/*******************/
 	@POST
-	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Path("/subir")
-	public Response subir(@FormParam("a") String a) {
-		return createOkResponse(a.toUpperCase());
+	public Response subir(@FormDataParam("chunkData") byte[] chunkData) {
+		System.out.println("---------->  subir!!!");
+		System.out.println();
+		try {
+			Files.write(Paths.get("tmp","imagen.png"+"_"+System.currentTimeMillis()), chunkData);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return createOkResponse("ok");
 	}
 }
