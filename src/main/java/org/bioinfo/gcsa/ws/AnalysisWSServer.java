@@ -56,15 +56,7 @@ public class AnalysisWSServer extends GenericWSServer {
 	}
 
 	@GET
-	@Path("/")
 	public Response help1() {
-//		try {
-//			aje = new AnalysisJobExecuter(analysis);
-//		} catch (Exception e) {
-//			logger.error(e.toString());
-//			return createErrorResponse("analysis not found.");
-//		}
-		
 		if(analysisError){
 			return createErrorResponse(analysisErrorMsg);
 		}
@@ -111,14 +103,6 @@ public class AnalysisWSServer extends GenericWSServer {
 	@GET
 	@Path("/status")
 	public Response status(@DefaultValue("") @QueryParam("jobid") String jobId) {
-//		try {
-//			aje = new AnalysisJobExecuter(analysis);
-//			return createOkResponse(aje.status(jobId));
-//		} catch (Exception e) {
-//			logger.error(e.toString());
-//			return createErrorResponse("analysis not found.");
-//		}
-		
 		if(analysisError){
 			return createErrorResponse(analysisErrorMsg);
 		}
