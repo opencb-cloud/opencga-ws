@@ -76,7 +76,7 @@ public class StorageWSServer extends GenericWSServer {
 		}
 	}
 
-	//TODO
+	// TODO
 	// @GET
 	// @Path("/{bucketname}/rename/{newName}")
 	// public Response renameBucket(@DefaultValue("") @PathParam("bucket_name")
@@ -92,7 +92,7 @@ public class StorageWSServer extends GenericWSServer {
 	// }
 	// }
 
-	//TODO
+	// TODO
 	// @GET
 	// @Path("/{bucketname}/delete")
 	// public Response deleteBucket(@DefaultValue("") @PathParam("bucketname")
@@ -106,7 +106,7 @@ public class StorageWSServer extends GenericWSServer {
 	// }
 	// }
 
-	//TODO
+	// TODO
 	// @GET
 	// @Path("/{bucketname}/share/{accountList}")
 	// public Response shareBucket(@DefaultValue("") @PathParam("bucketname")
@@ -123,9 +123,9 @@ public class StorageWSServer extends GenericWSServer {
 	// }
 
 	@POST
-	@Path("/{bucketname}/upload")
+	@Path("/{bucketId}/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadObject(@DefaultValue("") @PathParam("bucketname") String bucketId,
+	public Response uploadObject(@DefaultValue("") @PathParam("bucketId") String bucketId,
 			@DefaultValue("") @FormDataParam("objectid") String objectIdFromURL,
 			@FormDataParam("file") InputStream fileIs, @FormDataParam("file") FormDataContentDisposition fileInfo,
 			@FormDataParam("name") @DefaultValue("undefined") String name, @FormDataParam("tags") String tags,
@@ -139,7 +139,7 @@ public class StorageWSServer extends GenericWSServer {
 
 		java.nio.file.Path objectId = parseObjectId(objectIdFromURL);
 		System.out.println(objectId);
-		
+
 		ObjectItem objectItem = new ObjectItem(null, null, null);// TODO PAKO
 		// COMPROBAR
 		// CONSTRUCTOR
@@ -167,16 +167,15 @@ public class StorageWSServer extends GenericWSServer {
 	 ********************/
 
 	@GET
-	@Path("/{bucketname}/create_directory")
-	public Response createDirectory(@DefaultValue("") @PathParam("bucketname") String bucketId,
+	@Path("/{bucketId}/create_directory")
+	public Response createDirectory(@DefaultValue("") @PathParam("bucketId") String bucketId,
 			@DefaultValue("") @QueryParam("objectid") String objectIdFromURL,
-			@DefaultValue("dir") @QueryParam("filetype") String filetype,
 			@DefaultValue("false") @QueryParam("parents") boolean parents) {
 
 		java.nio.file.Path objectId = parseObjectId(objectIdFromURL);
 
 		ObjectItem objectItem = new ObjectItem(null, null, null);
-		objectItem.setFileType(filetype);
+		objectItem.setFileType("dir");
 		objectItem.setDate(GcsaUtils.getTime());
 		try {
 			String res = cloudSessionManager.createFolderToBucket(accountId, bucketId, objectId, objectItem, parents,
@@ -189,9 +188,9 @@ public class StorageWSServer extends GenericWSServer {
 	}
 
 	@GET
-	@Path("/{bucketname}/{objectid}/delete")
-	public Response deleteData(@DefaultValue("") @PathParam("bucketname") String bucketId,
-			@DefaultValue("") @PathParam("objectid") String objectIdFromURL) {
+	@Path("/{bucketId}/{objectId}/delete")
+	public Response deleteData(@DefaultValue("") @PathParam("bucketId") String bucketId,
+			@DefaultValue("") @PathParam("objectId") String objectIdFromURL) {
 
 		java.nio.file.Path objectId = parseObjectId(objectIdFromURL);
 		try {
@@ -202,12 +201,13 @@ public class StorageWSServer extends GenericWSServer {
 			return createErrorResponse(e.getMessage());
 		}
 	}
-	
+
+	// TODO for now, only region filter allowed
 	@GET
-	@Path("/{bucketname}/{objectid}/{region}/region/")
-	public Response region(@DefaultValue("") @PathParam("bucketname") String bucketId,
-			@DefaultValue("") @PathParam("objectid") String objectIdFromURL,
-			@DefaultValue("") @PathParam("region") String regionStr) {
+	@Path("/{bucketId}/{objectId}/fetch/")
+	public Response region(@DefaultValue("") @PathParam("bucketId") String bucketId,
+			@DefaultValue("") @PathParam("objectId") String objectIdFromURL,
+			@DefaultValue("") @QueryParam("region") String regionStr) {
 		java.nio.file.Path objectId = parseObjectId(objectIdFromURL);
 		try {
 			String res = cloudSessionManager.region(accountId, bucketId, objectId, regionStr, params, sessionId);
@@ -217,8 +217,7 @@ public class StorageWSServer extends GenericWSServer {
 			return createErrorResponse(e.getMessage());
 		}
 	}
-	
-	
+
 	/********************
 	 * 
 	 * JOB METHODS
@@ -226,9 +225,8 @@ public class StorageWSServer extends GenericWSServer {
 	 ********************/
 
 	@GET
-	@Path("/{bucketname}/job/{jobid}/result.{format}")
-	public Response getResultFile(@DefaultValue("") @PathParam("bucketname") String bucketId,
-			@DefaultValue("") @PathParam("jobid") String jobId, @PathParam("format") String format) {
+	@Path("/job/{jobid}/result.{format}")
+	public Response getResultFile(@DefaultValue("") @PathParam("jobid") String jobId, @PathParam("format") String format) {
 		try {
 			String res = cloudSessionManager.getJobResult(accountId, jobId);
 			return createOkResponse(res);
@@ -239,9 +237,8 @@ public class StorageWSServer extends GenericWSServer {
 	}
 
 	@GET
-	@Path("/{bucketname}/job/{jobid}/table")
-	public Response table(@DefaultValue("") @PathParam("bucketname") String bucketId,
-			@DefaultValue("") @PathParam("jobid") String jobId,
+	@Path("/job/{jobid}/table")
+	public Response table(@DefaultValue("") @PathParam("jobid") String jobId,
 			@DefaultValue("") @QueryParam("filename") String filename,
 			@DefaultValue("") @QueryParam("start") String start, @DefaultValue("") @QueryParam("limit") String limit,
 			@DefaultValue("") @QueryParam("colNames") String colNames,
@@ -267,9 +264,8 @@ public class StorageWSServer extends GenericWSServer {
 	// logger.debug("POLLING "+ filename + "...");
 	//
 	@GET
-	@Path("/{bucketname}/job/{jobid}/poll")
-	public Response pollJobFile(@DefaultValue("") @PathParam("bucketname") String bucketId,
-			@DefaultValue("") @PathParam("jobid") String jobId,
+	@Path("/job/{jobid}/poll")
+	public Response pollJobFile(@DefaultValue("") @PathParam("jobid") String jobId,
 			@DefaultValue("") @QueryParam("filename") String filename,
 			@DefaultValue("true") @QueryParam("zip") String zip) {
 
@@ -289,9 +285,8 @@ public class StorageWSServer extends GenericWSServer {
 	}
 
 	@GET
-	@Path("/{bucketname}/job/{jobid}/status")
-	public Response getJobStatus(@DefaultValue("") @PathParam("bucketname") String bucketId,
-			@DefaultValue("") @PathParam("jobid") String jobId) {
+	@Path("/job/{jobid}/status")
+	public Response getJobStatus(@DefaultValue("") @PathParam("jobid") String jobId) {
 		try {
 			String res = cloudSessionManager.checkJobStatus(accountId, jobId, sessionId);
 			return createOkResponse(res);
@@ -300,7 +295,6 @@ public class StorageWSServer extends GenericWSServer {
 			return createErrorResponse(e.getMessage());
 		}
 	}
-
 
 	/*******************/
 	@POST
