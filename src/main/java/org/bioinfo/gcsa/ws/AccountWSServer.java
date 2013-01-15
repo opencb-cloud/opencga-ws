@@ -16,24 +16,29 @@ import org.bioinfo.gcsa.lib.account.beans.Bucket;
 import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
 import org.bioinfo.gcsa.lib.account.io.IOManagementException;
 
-@Path("/account")
+@Path("/account/{accountId}")
 public class AccountWSServer extends GenericWSServer {
-	public AccountWSServer(@Context UriInfo uriInfo, @Context HttpServletRequest httpServletRequest)
-			throws IOException, AccountManagementException {
+	private String accountId;
+
+	public AccountWSServer(@Context UriInfo uriInfo, @Context HttpServletRequest httpServletRequest,
+			@DefaultValue("") @PathParam("accountId") String accountId) throws IOException, AccountManagementException {
 		super(uriInfo, httpServletRequest);
+		this.accountId = accountId;
 
 		logger.info("HOST: " + uriInfo.getRequestUri().getHost());
 		logger.info("----------------------------------->");
 	}
 
 	@GET
-	@Path("/{accountid}/create")
-	public Response create(@DefaultValue("") @PathParam("accountid") String accountId,
-			@DefaultValue("") @QueryParam("password") String password,
-			@DefaultValue("") @QueryParam("accountname") String accountName,
-			@DefaultValue("") @QueryParam("email") String email) {
+	@Path("/create")
+	public Response create(@DefaultValue("") @QueryParam("password") String password,
+			@DefaultValue("") @QueryParam("name") String name, @DefaultValue("") @QueryParam("email") String email) {
 		try {
-			cloudSessionManager.createAccount(accountId, password, accountName, email, sessionIp);
+			if (accountId.toLowerCase().equals("anonymous")) {
+				cloudSessionManager.createAnonymousAccount(sessionIp);
+			} else {
+				cloudSessionManager.createAccount(accountId, password, name, email, sessionIp);
+			}
 			return createOkResponse("OK");
 		} catch (AccountManagementException | IOManagementException e) {
 			logger.error(e.toString());
@@ -42,23 +47,9 @@ public class AccountWSServer extends GenericWSServer {
 	}
 
 	@GET
-	@Path("/anonymous/create")
-	public Response create() {
+	@Path("/login")
+	public Response login(@DefaultValue("") @QueryParam("password") String password) {
 		try {
-			cloudSessionManager.createAnonymousAccount(sessionIp);
-			return createOkResponse("OK");
-		} catch (AccountManagementException | IOManagementException e) {
-			logger.error(e.toString());
-			return createErrorResponse("could not create the account");
-		}
-	}
-
-	@GET
-	@Path("/{accountid}/login")
-	public Response login(@DefaultValue("") @PathParam("accountid") String accountId,
-			@DefaultValue("") @QueryParam("password") String password) {
-		try {
-
 			String res;
 			if (accountId.toLowerCase().equals("anonymous")) {
 				res = cloudSessionManager.createAnonymousAccount(sessionIp);
@@ -73,9 +64,24 @@ public class AccountWSServer extends GenericWSServer {
 	}
 
 	@GET
-	@Path("/{accountId}/info")
-	public Response getInfoAccount(@DefaultValue("") @PathParam("accountId") String accountId,
-			@DefaultValue("") @QueryParam("lastactivity") String lastActivity) {
+	@Path("/logout")
+	public Response logout() {
+		try {
+			if (accountId.toLowerCase().equals("anonymous")) {
+				cloudSessionManager.logoutAnonymous(sessionId);
+			} else {
+				cloudSessionManager.logout(accountId, sessionId);
+			}
+			return createOkResponse("OK");
+		} catch (AccountManagementException | IOManagementException e) {
+			logger.error(e.toString());
+			return createErrorResponse("could not logout");
+		}
+	}
+
+	@GET
+	@Path("/info")
+	public Response getInfoAccount(@DefaultValue("") @QueryParam("last_activity") String lastActivity) {
 		try {
 			String res = cloudSessionManager.getAccountInfo(accountId, sessionId, lastActivity);
 			return createOkResponse(res);
@@ -86,67 +92,12 @@ public class AccountWSServer extends GenericWSServer {
 	}
 
 	@GET
-	@Path("/{accountid}/{bucketname}/create")
-	public Response createProject(@DefaultValue("") @PathParam("accountid") String accountId,
-			@DefaultValue("") @PathParam("bucketname") String bucketId,
-			@DefaultValue("") @QueryParam("description") String description) {
-		Bucket bucket = new Bucket(bucketId);
-		bucket.setId(bucketId.toLowerCase());
-		bucket.setDescripcion(description);
+	@Path("/profile/change_password")
+	public Response changePassword(@DefaultValue("") @QueryParam("old_password") String old_password,
+			@DefaultValue("") @QueryParam("new_password1") String new_password1,
+			@DefaultValue("") @QueryParam("new_password2") String new_password2) {
 		try {
-			cloudSessionManager.createBucket(accountId, bucket, sessionId);
-			return createOkResponse("OK");
-		} catch (AccountManagementException | IOManagementException e) {
-			logger.error(e.toString());
-			return createErrorResponse("could not create project");
-		}
-	}
-
-	@GET
-	@Path("/{accountid}/logout")
-	public Response logout(@DefaultValue("") @PathParam("accountid") String accountId) {
-		try {
-			cloudSessionManager.logout(accountId, sessionId);
-			return createOkResponse("OK");
-		} catch (AccountManagementException e) {
-			logger.error(e.toString());
-			return createErrorResponse("could not logout");
-		}
-	}
-
-	@GET
-	@Path("/anonymous/logout")
-	public Response logoutAnonymous() {
-		try {
-			System.out.println("-----> sessionId: " + sessionId);
-			cloudSessionManager.logoutAnonymous(sessionId);
-			return createOkResponse("OK");
-		} catch (AccountManagementException | IOManagementException e) {
-			logger.error(e.toString());
-			return createErrorResponse("could not logout");
-		}
-	}
-
-	@GET
-	@Path("/{accountid}/projects")
-	public Response projects(@DefaultValue("") @QueryParam("accountid") String accountId) {
-		try {
-			String res = cloudSessionManager.getAccountBuckets(accountId, sessionId);
-			return createOkResponse(res);
-		} catch (AccountManagementException e) {
-			logger.error(e.toString());
-			return createErrorResponse("could not get projects");
-		}
-	}
-
-	@GET
-	@Path("/{accountid}/changepassword")
-	public Response changePassword(@DefaultValue("") @PathParam("accountid") String accountId,
-			@DefaultValue("") @QueryParam("password") String password,
-			@DefaultValue("") @QueryParam("npassword1") String nPassword1,
-			@DefaultValue("") @QueryParam("npassword2") String nPassword2) {
-		try {
-			cloudSessionManager.changePassword(accountId, sessionId, password, nPassword1, nPassword2);
+			cloudSessionManager.changePassword(accountId, sessionId, old_password, new_password1, new_password2);
 			return createOkResponse("OK");
 		} catch (AccountManagementException e) {
 			logger.error(e.toString());
@@ -155,22 +106,8 @@ public class AccountWSServer extends GenericWSServer {
 	}
 
 	@GET
-	@Path("/{accountid}/changeemail")
-	public Response changeEmail(@DefaultValue("") @PathParam("accountid") String accountId,
-			@DefaultValue("") @QueryParam("nemail") String nEmail) {
-		try {
-			cloudSessionManager.changeEmail(accountId, sessionId, nEmail);
-			return createOkResponse("OK");
-		} catch (AccountManagementException e) {
-			logger.error(e.toString());
-			return createErrorResponse("could not change email");
-		}
-	}
-
-	@GET
-	@Path("/{accountid}/resetpassword")
-	public Response resetPassword(@DefaultValue("") @PathParam("accountid") String accountId,
-			@DefaultValue("") @QueryParam("email") String email) {
+	@Path("/profile/reset_password")
+	public Response resetPassword(@DefaultValue("") @QueryParam("email") String email) {
 		try {
 			cloudSessionManager.resetPassword(accountId, email);
 			return createOkResponse("OK");
@@ -179,6 +116,36 @@ public class AccountWSServer extends GenericWSServer {
 			return createErrorResponse("could not reset password");
 		}
 	}
+
+	@GET
+	@Path("/profile/change_email")
+	public Response changeEmail(@DefaultValue("") @QueryParam("new_email") String new_email) {
+		try {
+			cloudSessionManager.changeEmail(accountId, sessionId, new_email);
+			return createOkResponse("OK");
+		} catch (AccountManagementException e) {
+			logger.error(e.toString());
+			return createErrorResponse("could not change email");
+		}
+	}
+	
+	
+//	@GET
+//	@Path("/delete/")
+//	public Response deleteAccount() {
+//		try {
+//			cloudSessionManager.deleteAccount(accountId, sessionId);
+//			return createOkResponse("OK");
+//		} catch (AccountManagementException e) {
+//			logger.error(e.toString());
+//			return createErrorResponse("could not delete the account");
+//		}
+//	}
+	
+	
+	
+	
+	//OLD
 
 	// @GET
 	// @Path("/pipetest/{accountId}/{password}") //Pruebas
