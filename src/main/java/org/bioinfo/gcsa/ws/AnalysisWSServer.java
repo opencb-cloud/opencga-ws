@@ -27,61 +27,73 @@ import org.bioinfo.gcsa.lib.analysis.beans.Analysis;
 import org.bioinfo.gcsa.lib.analysis.beans.Execution;
 import org.bioinfo.gcsa.lib.analysis.beans.InputParam;
 
-@Path("/analysis")
+@Path("/account/{accountId}/analysis/{analysis}")
 public class AnalysisWSServer extends GenericWSServer {
-	AnalysisJobExecuter aje;
-	String baseUrl;
+	private AnalysisJobExecuter aje;
+	private String baseUrl;
+	private String accountId;
+	private String analysis;
+	private boolean analysisError;
+	private String analysisErrorMsg;
 
-	public AnalysisWSServer(@Context UriInfo uriInfo, @Context HttpServletRequest httpServletRequest)
-			throws IOException {
+	public AnalysisWSServer(@Context UriInfo uriInfo, @Context HttpServletRequest httpServletRequest,
+			@DefaultValue("") @PathParam("analysis") String analysis,
+			@DefaultValue("") @PathParam("accountId") String accountId) throws IOException {
 		super(uriInfo, httpServletRequest);
 		baseUrl = uriInfo.getBaseUri().toString();
-	}
-
-	@GET
-	@Path("/{analysis}")
-	public Response help1(@DefaultValue("") @PathParam("analysis") String analysis) {
+		
+		this.accountId = accountId;
+		this.analysis = analysis;
+		
+		analysisError = false;
+		analysisErrorMsg = "analysis not found.";
 		try {
 			aje = new AnalysisJobExecuter(analysis);
 		} catch (Exception e) {
 			logger.error(e.toString());
-			return createErrorResponse("analysis not found.");
+			analysisError = true;
+		}
+	}
+
+	@GET
+	@Path("/")
+	public Response help1() {
+//		try {
+//			aje = new AnalysisJobExecuter(analysis);
+//		} catch (Exception e) {
+//			logger.error(e.toString());
+//			return createErrorResponse("analysis not found.");
+//		}
+		
+		if(analysisError){
+			return createErrorResponse(analysisErrorMsg);
 		}
 		return createOkResponse(aje.help(baseUrl));
 	}
 
 	@GET
-	@Path("/{analysis}/help")
-	public Response help2(@DefaultValue("") @PathParam("analysis") String analysis) {
-		try {
-			aje = new AnalysisJobExecuter(analysis);
-		} catch (Exception e) {
-			logger.error(e.toString());
-			return createErrorResponse("analysis not found.");
+	@Path("/help")
+	public Response help2() {
+		if(analysisError){
+			return createErrorResponse(analysisErrorMsg);
 		}
 		return createOkResponse(aje.help(baseUrl));
 	}
 
 	@GET
-	@Path("/{analysis}/params")
-	public Response showParams(@DefaultValue("") @PathParam("analysis") String analysis) {
-		try {
-			aje = new AnalysisJobExecuter(analysis);
-		} catch (Exception e) {
-			logger.error(e.toString());
-			return createErrorResponse("analysis not found.");
+	@Path("/params")
+	public Response showParams() {
+		if(analysisError){
+			return createErrorResponse(analysisErrorMsg);
 		}
 		return createOkResponse(aje.params());
 	}
 
 	@GET
-	@Path("/{analysis}/test")
-	public Response test(@DefaultValue("") @PathParam("analysis") String analysis) {
-		try {
-			aje = new AnalysisJobExecuter(analysis);
-		} catch (Exception e) {
-			logger.error(e.toString());
-			return createErrorResponse("analysis not found.");
+	@Path("/test")
+	public Response test() {
+		if(analysisError){
+			return createErrorResponse(analysisErrorMsg);
 		}
 
 		// Create job
@@ -97,41 +109,42 @@ public class AnalysisWSServer extends GenericWSServer {
 	}
 
 	@GET
-	@Path("/{analysis}/status")
-	public Response status(@DefaultValue("") @PathParam("analysis") String analysis,
-			@DefaultValue("") @QueryParam("jobid") String jobId) {
+	@Path("/status")
+	public Response status(@DefaultValue("") @QueryParam("jobid") String jobId) {
+//		try {
+//			aje = new AnalysisJobExecuter(analysis);
+//			return createOkResponse(aje.status(jobId));
+//		} catch (Exception e) {
+//			logger.error(e.toString());
+//			return createErrorResponse("analysis not found.");
+//		}
+		
+		if(analysisError){
+			return createErrorResponse(analysisErrorMsg);
+		}
+		
 		try {
-			aje = new AnalysisJobExecuter(analysis);
 			return createOkResponse(aje.status(jobId));
-		} catch (Exception e) {
+		} catch (AnalysisExecutionException e) {
 			logger.error(e.toString());
-			return createErrorResponse("analysis not found.");
+			return createErrorResponse("job id not found.");
 		}
 
 	}
 
 	@GET
-	@Path("/{analysis}/run")
-	public Response analysisGet(@DefaultValue("") @PathParam("analysis") String analysis) {
-		// MultivaluedMap<String, String> params =
-		// this.uriInfo.getQueryParameters();
-		logger.debug("get params: " + params);
-
-		return this.analysis(analysis, params);
+	@Path("/run")
+	public Response analysisGet() {
+		return this.analysis(params);
 	}
 
 	@POST
-	@Path("/{analysis}/run")
-	// @Consumes({ MediaType.MULTIPART_FORM_DATA,
-	// MediaType.APPLICATION_FORM_URLENCODED })
-	public Response analysisPost(@DefaultValue("") @PathParam("analysis") String analysis,
-			MultivaluedMap<String, String> postParams) {
-		logger.debug("post params: " + postParams);
-
-		return this.analysis(analysis, postParams);
+	@Path("/run")
+	public Response analysisPost(MultivaluedMap<String, String> postParams) {
+		return this.analysis(postParams);
 	}
 
-	private Response analysis(String analysisStr, MultivaluedMap<String, String> params) {
+	private Response analysis(MultivaluedMap<String, String> params) {
 		if (params.containsKey("sessionid")) {
 			sessionId = params.get("sessionid").get(0);
 			params.remove("sessionid");
@@ -139,30 +152,22 @@ public class AnalysisWSServer extends GenericWSServer {
 			return createErrorResponse("session is not initialized yet.");
 		}
 
-		String accountId = null;
-		if (params.containsKey("accountid")) {
-			accountId = params.get("accountid").get(0);
-			params.remove("accountid");
-		} else {
-			return createErrorResponse("unknown account.");
-		}
-
-		// String bucket = null;
-		// if (params.containsKey("jobdestinationbucket")) {
-		// bucket = params.get("jobdestinationbucket").get(0);
-		// params.remove("jobdestinationbucket");
-		// } else {
-		// return createErrorResponse("unspecified destination bucket.");
-		// }
+//		String accountId = null;
+//		if (params.containsKey("accountid")) {
+//			accountId = params.get("accountid").get(0);
+//			params.remove("accountid");
+//		} else {
+//			return createErrorResponse("unknown account.");
+//		}
 
 		// Jquery put this parameter and it is sent to the tool
 		if (params.containsKey("_")) {
 			params.remove("_");
 		}
 
-		String analysisName = analysisStr;
-		if (analysisStr.contains(".")) {
-			analysisName = analysisStr.split("\\.")[0];
+		String analysisName = analysis;
+		if (analysis.contains(".")) {
+			analysisName = analysis.split("\\.")[0];
 		}
 
 		String analysisOwner = "system";
@@ -192,10 +197,10 @@ public class AnalysisWSServer extends GenericWSServer {
 			return createErrorResponse("invalid session id.");
 		}
 
-		Analysis analysis = null;
+		Analysis analysisObj = null;
 		try {
-			aje = new AnalysisJobExecuter(analysisStr, analysisOwner);
-			analysis = aje.getAnalysis();
+			aje = new AnalysisJobExecuter(analysis, analysisOwner);
+			analysisObj = aje.getAnalysis();
 		} catch (Exception e) {
 			logger.error(e.toString());
 			return createErrorResponse("analysis not found.");
@@ -227,7 +232,7 @@ public class AnalysisWSServer extends GenericWSServer {
 			example = Boolean.parseBoolean(params.get("example").get(0));
 			params.remove("example");
 		}
-		String toolName = analysis.getId();
+		String toolName = analysisObj.getId();
 
 		// Set input param
 		List<String> dataList = new ArrayList<String>();

@@ -17,7 +17,7 @@ import org.bioinfo.gcsa.lib.utils.networks.Layout;
 import org.bioinfo.gcsa.lib.utils.networks.Layout.LayoutResp;
 
 @Produces("text/plain")
-@Path("/utils/network/layout")
+@Path("/utils")
 public class UtilsWSServer extends GenericWSServer {
 	Layout layout;
 	
@@ -28,14 +28,14 @@ public class UtilsWSServer extends GenericWSServer {
 	}
 	
 	@POST
-	@Path("/{algorithm}.{format}")
+	@Path("/network/layout/{algorithm}.{format}")
 	public Response layout(@PathParam("algorithm") String layoutAlgorithm, @PathParam("format") String outputFormat, @FormParam("dot") String dotData, @DefaultValue("output") @FormParam("filename") String filename, @DefaultValue("false") @FormParam("base64") String base64, @FormParam("jsonp") String jsonpCallback) {
 		LayoutResp resp = layout.layout(layoutAlgorithm, outputFormat, dotData, filename, base64, jsonpCallback);
 		return processResp(resp);
 	}
 
 	@POST
-	@Path("/{algorithm}.coords")
+	@Path("/network/layout/{algorithm}.coords")
 	public Response coordinates(@PathParam("algorithm") String layoutAlgorithm, @FormParam("dot") String dotData, @FormParam("jsonp") String jsonpCallback) {
 		LayoutResp resp = layout.coordinates(layoutAlgorithm, dotData, jsonpCallback);
 		return processResp(resp);
