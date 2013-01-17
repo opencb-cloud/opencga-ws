@@ -128,17 +128,19 @@ public class StorageWSServer extends GenericWSServer {
 	public Response uploadObject(@DefaultValue("") @PathParam("bucketId") String bucketId,
 			@DefaultValue("") @FormDataParam("objectid") String objectIdFromURL,
 			@FormDataParam("file") InputStream fileIs, @FormDataParam("file") FormDataContentDisposition fileInfo,
-			@FormDataParam("name") @DefaultValue("undefined") String name, @FormDataParam("tags") String tags,
+			@DefaultValue("undefined") @FormDataParam("name") String name, @FormDataParam("tags") String tags,
 			@DefaultValue("r") @QueryParam("filetype") String filetype,
-			@FormDataParam("responsible") @DefaultValue("-") String responsible,
-			@FormDataParam("organization") @DefaultValue("-") String organization,
-			@FormDataParam("date") @DefaultValue("-") String date,
-			@FormDataParam("description") @DefaultValue("-") String description,
-			@FormDataParam("jobid") @DefaultValue("-1") String jobid,
+			@DefaultValue("-") @FormDataParam("responsible")  String responsible,
+			@DefaultValue("-")@FormDataParam("organization")  String organization,
+			@DefaultValue("-") @FormDataParam("date")  String date,
+			@DefaultValue("-") @FormDataParam("description") String description,
+			@DefaultValue("-1") @FormDataParam("jobid") String jobid,
 			@DefaultValue("false") @QueryParam("parents") boolean parents) {
 
 		java.nio.file.Path objectId = parseObjectId(objectIdFromURL);
+		System.out.println(bucketId);
 		System.out.println(objectId);
+		System.out.println(parents);
 
 		ObjectItem objectItem = new ObjectItem(null, null, null);// TODO PAKO
 		// COMPROBAR

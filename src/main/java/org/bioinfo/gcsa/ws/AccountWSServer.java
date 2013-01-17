@@ -87,7 +87,7 @@ public class AccountWSServer extends GenericWSServer {
 			return createOkResponse(res);
 		} catch (AccountManagementException e) {
 			logger.error(e.toString());
-			return createErrorResponse("could get account information");
+			return createErrorResponse("could not get account information");
 		}
 	}
 
