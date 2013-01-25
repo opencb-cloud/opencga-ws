@@ -1,11 +1,23 @@
 package org.bioinfo.gcsa.ws;
 
+import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -20,12 +32,15 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import net.sf.samtools.SAMRecord;
+
 import org.bioinfo.commons.utils.StringUtils;
 import org.bioinfo.gcsa.lib.GcsaUtils;
 import org.bioinfo.gcsa.lib.account.beans.Bucket;
 import org.bioinfo.gcsa.lib.account.beans.ObjectItem;
 import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
 import org.bioinfo.gcsa.lib.account.io.IOManagementException;
+import org.bioinfo.gcsa.lib.account.io.IOManagerUtils;
 
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
@@ -130,9 +145,9 @@ public class StorageWSServer extends GenericWSServer {
 			@FormDataParam("file") InputStream fileIs, @FormDataParam("file") FormDataContentDisposition fileInfo,
 			@DefaultValue("undefined") @FormDataParam("name") String name, @FormDataParam("tags") String tags,
 			@DefaultValue("r") @QueryParam("filetype") String filetype,
-			@DefaultValue("-") @FormDataParam("responsible")  String responsible,
-			@DefaultValue("-")@FormDataParam("organization")  String organization,
-			@DefaultValue("-") @FormDataParam("date")  String date,
+			@DefaultValue("-") @FormDataParam("responsible") String responsible,
+			@DefaultValue("-") @FormDataParam("organization") String organization,
+			@DefaultValue("-") @FormDataParam("date") String date,
 			@DefaultValue("-") @FormDataParam("description") String description,
 			@DefaultValue("-1") @FormDataParam("jobid") String jobid,
 			@DefaultValue("false") @QueryParam("parents") boolean parents) {
@@ -302,30 +317,116 @@ public class StorageWSServer extends GenericWSServer {
 	@POST
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Path("/subir")
-	public Response subir(@FormDataParam("content") InputStream contentIs,
-			@FormDataParam("content") FormDataContentDisposition contentDisposition,
-			@FormDataParam("num") @DefaultValue("") String num, @FormDataParam("total") @DefaultValue("") String total,
-			@FormDataParam("filename") @DefaultValue("") String filename) {
-		System.out.println("---------->  subir!!!");
-		System.out.println("num " + num);
-		System.out.println("total " + total);
-		System.out.println("getFileName " + contentDisposition.getFileName());
-		System.out.println("getType " + contentDisposition.getType());
-		System.out.println("getSize " + contentDisposition.getSize());
+	public Response subir(@FormDataParam("chunk_content") byte[] chunkBytes,
+			@FormDataParam("chunk_content") FormDataContentDisposition contentDisposition,
+			@DefaultValue("") @FormDataParam("chunk_id") String chunk_id,
+			@DefaultValue("") @FormDataParam("filename") String filename,
+			@DefaultValue("") @FormDataParam("object_id") String objectIdFromURL,
+			@DefaultValue("") @FormDataParam("bucket_id") String bucketId,
+			@DefaultValue("") @FormDataParam("last_chunk") String last_chunk,
+			@DefaultValue("") @FormDataParam("chunk_total") String chunk_total,
+			@DefaultValue("") @FormDataParam("chunk_size") String chunk_size,
+			@DefaultValue("") @FormDataParam("chunk_hash") String chunkHash,
+			@DefaultValue("false") @FormDataParam("resume_upload") String resume_upload) {
+
+		java.nio.file.Path folderPath = Paths.get("tmp").resolve(parseObjectId(bucketId + "_" + objectIdFromURL));
+		java.nio.file.Path filePath = folderPath.resolve(filename);
+
+		logger.info(objectIdFromURL + "");
+		logger.info(folderPath + "");
+		logger.info(filePath + "");
+		boolean resume = Boolean.parseBoolean(resume_upload);
 
 		try {
-			Files.copy(contentIs, Paths.get("tmp", filename + ".part" + num));
-			if (num.equals(total)) {
-				int tot = Integer.parseInt(total);
-				for (int i = 0; i < tot; i++) {
-
-				}
+			logger.info("---resume is: " + resume);
+			if (resume) {
+				return createOkResponse(getResumeFileJSON(folderPath).toString());
 			}
-		} catch (IOException e) {
+
+			int chunkId = Integer.parseInt(chunk_id);
+			int chunkSize = Integer.parseInt(chunk_size);
+			boolean lastChunk = Boolean.parseBoolean(last_chunk);
+
+			logger.info("---saving chunk: " + chunkId);
+			logger.info("lastChunk: " + lastChunk);
+
+			// WRITE CHUNK FILE
+			if (!Files.exists(folderPath)) {
+				logger.info("createDirectory(): " + folderPath);
+				Files.createDirectory(folderPath);
+			}
+			String hash = StringUtils.sha1(new String(chunkBytes));
+			logger.info("bytesHash: " + hash);
+			logger.info("chunkHash: " + chunkHash);
+			hash = chunkHash;
+			if (chunkHash.equals(hash) && chunkBytes.length == chunkSize) {
+				Files.write(folderPath.resolve(chunkId + "_" + chunkBytes.length + "_" + hash + "_partial"), chunkBytes);
+			}
+
+			if (lastChunk) {
+				logger.info("lastChunk is true...");
+				Files.createFile(filePath);
+				List<java.nio.file.Path> chunks = getSortedChunkList(folderPath);
+				logger.info("----ordered chunks length: " + chunks.size());
+				for (java.nio.file.Path partPath : chunks) {
+					logger.info(partPath.getFileName().toString());
+					Files.write(filePath, Files.readAllBytes(partPath), StandardOpenOption.APPEND);
+				}
+				Files.move(filePath, filePath.getParent().getParent().resolve(filename));
+				IOManagerUtils.deleteDirectory(folderPath);
+			}
+
+		} catch (IOException | NoSuchAlgorithmException e) {
 
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return createOkResponse("ok");
+	}
+
+	private StringBuilder getResumeFileJSON(java.nio.file.Path folderPath) throws IOException {
+		StringBuilder sb = new StringBuilder();
+
+		if (!Files.exists(folderPath)) {
+			sb.append("{}");
+			return sb;
+		}
+
+		String c = "\"";
+		DirectoryStream<java.nio.file.Path> folderStream = Files.newDirectoryStream(folderPath, "*_partial");
+		sb.append("{");
+		for (java.nio.file.Path partPath : folderStream) {
+			String[] nameSplit = partPath.getFileName().toString().split("_");
+			sb.append(c+nameSplit[0]+c+":{");
+			sb.append(c + "size" + c + ":" + nameSplit[1]+",");
+			sb.append(c + "hash" + c + ":" + c + nameSplit[2] + c);
+			sb.append("},");
+		}
+		// Remove last comma
+		if (sb.length() > 1) {
+			sb.replace(sb.length() - 1, sb.length(), "");
+		}
+		sb.append("}");
+		return sb;
+	}
+
+	private List<java.nio.file.Path> getSortedChunkList(java.nio.file.Path folderPath) throws IOException{
+		List<java.nio.file.Path> files = new ArrayList<>();
+		DirectoryStream<java.nio.file.Path> stream = Files.newDirectoryStream(folderPath, "*_partial");
+		for (java.nio.file.Path p : stream) {
+			logger.info("adding to ArrayList: "+p.getFileName());
+			files.add(p);
+		}
+		logger.info("----ordered files length: " + files.size());
+		Collections.sort(files, new Comparator<java.nio.file.Path>() {
+			public int compare(java.nio.file.Path o1, java.nio.file.Path o2) {
+				int id_o1 = Integer.parseInt(o1.getFileName().toString().split("_")[0]);
+				int id_o2 = Integer.parseInt(o2.getFileName().toString().split("_")[0]);
+				logger.info(id_o1+"");
+				logger.info(id_o2+"");
+				return id_o1-id_o2;
+			}
+		});
+		return files;
 	}
 }
