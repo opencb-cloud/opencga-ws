@@ -1,6 +1,8 @@
 package org.bioinfo.gcsa.ws;
 
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -118,12 +120,17 @@ public class AnalysisWSServer extends GenericWSServer {
 	
 	@GET
 	@Path("/job/{jobid}/result")
-	public Response getResultFile(@DefaultValue("") @PathParam("jobid") String jobId) {
+	public Response getResult(@DefaultValue("") @PathParam("jobid") String jobId) {
 		try {
 			String resultManifest = aje.getResult();
 			String jobObj = cloudSessionManager.getJobObject(accountId, jobId);
-			String res = "";
-			return createOkResponse(res);
+			StringBuilder sb = new StringBuilder();
+			String c = "\"";
+			sb.append("{");
+				sb.append(c + "result" + c + ":"+ c + resultManifest + c + ",");
+				sb.append(c + "job" + c + ":" + c + jobObj + c);
+			sb.append("}");
+			return createOkResponse(sb.toString());
 		} catch (Exception e) {
 			logger.error(e.toString());
 			return createErrorResponse("can not get result json.");
