@@ -115,7 +115,21 @@ public class AnalysisWSServer extends GenericWSServer {
 		}
 
 	}
-
+	
+	@GET
+	@Path("/job/{jobid}/result")
+	public Response getResultFile(@DefaultValue("") @PathParam("jobid") String jobId) {
+		try {
+			String resultManifest = aje.getResult();
+			String jobObj = cloudSessionManager.getJobObject(accountId, jobId);
+			String res = "";
+			return createOkResponse(res);
+		} catch (Exception e) {
+			logger.error(e.toString());
+			return createErrorResponse("can not get result json.");
+		}
+	}
+	
 	@GET
 	@Path("/run")
 	public Response analysisGet() {
