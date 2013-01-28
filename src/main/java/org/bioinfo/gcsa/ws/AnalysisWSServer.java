@@ -122,12 +122,14 @@ public class AnalysisWSServer extends GenericWSServer {
 	@Path("/job/{jobid}/result")
 	public Response getResult(@DefaultValue("") @PathParam("jobid") String jobId) {
 		try {
-			String resultManifest = aje.getResult();
+			String resultJson = aje.getResultJsonStr();
+			String resultToUse = aje.getResult();
 			String jobObj = cloudSessionManager.getJobObject(accountId, jobId);
 			StringBuilder sb = new StringBuilder();
 			String c = "\"";
 			sb.append("{");
-				sb.append(c + "result" + c + ":"+ c + resultManifest + c + ",");
+				sb.append(c + "result" + c + ":"+ c + resultJson + c + ",");
+				sb.append(c + "resultToUse" + c + ":"+ c + resultToUse + c + ",");
 				sb.append(c + "job" + c + ":" + c + jobObj + c);
 			sb.append("}");
 			return createOkResponse(sb.toString());
