@@ -1,8 +1,7 @@
 package org.bioinfo.gcsa.ws;
 
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -15,6 +14,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -119,20 +119,23 @@ public class AnalysisWSServer extends GenericWSServer {
 	}
 	
 	@GET
-	@Path("/job/{jobid}/result")
+	@Path("/job/{jobid}/result.js")
 	public Response getResult(@DefaultValue("") @PathParam("jobid") String jobId) {
 		try {
-			String resultJson = aje.getResultJsonStr();
-			String resultToUse = aje.getResult();
-			String jobObj = cloudSessionManager.getJobObject(accountId, jobId);
-			StringBuilder sb = new StringBuilder();
-			String c = "\"";
-			sb.append("{");
-				sb.append(c + "result" + c + ":"+ c + resultJson + c + ",");
-				sb.append(c + "resultToUse" + c + ":"+ c + resultToUse + c + ",");
-				sb.append(c + "job" + c + ":" + c + jobObj + c);
-			sb.append("}");
-			return createOkResponse(sb.toString());
+			InputStream is = aje.getResultInputStream();
+			return createOkResponse(is, MediaType.TEXT_PLAIN_TYPE, "result.js");
+			
+			
+//			String resultToUse = aje.getResult();
+//			String jobObj = cloudSessionManager.getJobObject(accountId, jobId);
+//			StringBuilder sb = new StringBuilder();
+//			String c = "\"";
+//			sb.append("{");
+//				sb.append(c + "result" + c + ":"+ c + resultJson + c + ",");
+//				sb.append(c + "resultToUse" + c + ":"+ c + resultToUse + c + ",");
+//				sb.append(c + "job" + c + ":" + c + jobObj + c);
+//			sb.append("}");
+//			return createOkResponse(sb.toString());
 		} catch (Exception e) {
 			logger.error(e.toString());
 			return createErrorResponse("can not get result json.");
