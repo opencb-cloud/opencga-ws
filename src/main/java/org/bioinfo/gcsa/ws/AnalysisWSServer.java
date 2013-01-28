@@ -43,10 +43,10 @@ public class AnalysisWSServer extends GenericWSServer {
 			@DefaultValue("") @PathParam("accountId") String accountId) throws IOException {
 		super(uriInfo, httpServletRequest);
 		baseUrl = uriInfo.getBaseUri().toString();
-		
+
 		this.accountId = accountId;
 		this.analysis = analysis;
-		
+
 		analysisError = false;
 		analysisErrorMsg = "analysis not found.";
 		try {
@@ -59,7 +59,7 @@ public class AnalysisWSServer extends GenericWSServer {
 
 	@GET
 	public Response help1() {
-		if(analysisError){
+		if (analysisError) {
 			return createErrorResponse(analysisErrorMsg);
 		}
 		return createOkResponse(aje.help(baseUrl));
@@ -68,7 +68,7 @@ public class AnalysisWSServer extends GenericWSServer {
 	@GET
 	@Path("/help")
 	public Response help2() {
-		if(analysisError){
+		if (analysisError) {
 			return createErrorResponse(analysisErrorMsg);
 		}
 		return createOkResponse(aje.help(baseUrl));
@@ -77,7 +77,7 @@ public class AnalysisWSServer extends GenericWSServer {
 	@GET
 	@Path("/params")
 	public Response showParams() {
-		if(analysisError){
+		if (analysisError) {
 			return createErrorResponse(analysisErrorMsg);
 		}
 		return createOkResponse(aje.params());
@@ -86,7 +86,7 @@ public class AnalysisWSServer extends GenericWSServer {
 	@GET
 	@Path("/test")
 	public Response test() {
-		if(analysisError){
+		if (analysisError) {
 			return createErrorResponse(analysisErrorMsg);
 		}
 
@@ -105,10 +105,10 @@ public class AnalysisWSServer extends GenericWSServer {
 	@GET
 	@Path("/status")
 	public Response status(@DefaultValue("") @QueryParam("jobid") String jobId) {
-		if(analysisError){
+		if (analysisError) {
 			return createErrorResponse(analysisErrorMsg);
 		}
-		
+
 		try {
 			return createOkResponse(aje.status(jobId));
 		} catch (AnalysisExecutionException e) {
@@ -117,7 +117,7 @@ public class AnalysisWSServer extends GenericWSServer {
 		}
 
 	}
-	
+
 	@GET
 	@Path("/job/{jobid}/result")
 	public Response getResult(@DefaultValue("") @PathParam("jobid") String jobId) {
@@ -128,9 +128,9 @@ public class AnalysisWSServer extends GenericWSServer {
 			StringBuilder sb = new StringBuilder();
 			String c = "\"";
 			sb.append("{");
-				sb.append(c + "result" + c + ":"+ c + resultJson + c + ",");
-				sb.append(c + "resultToUse" + c + ":"+ c + resultToUse + c + ",");
-				sb.append(c + "job" + c + ":" + c + jobObj + c);
+			sb.append(c + "result" + c + ":" + resultJson + ",");
+			sb.append(c + "resultToUse" + c + ":" + c + resultToUse + c + ",");
+			sb.append(c + "job" + c + ":" + jobObj);
 			sb.append("}");
 			return createOkResponse(sb.toString());
 		} catch (Exception e) {
@@ -138,7 +138,7 @@ public class AnalysisWSServer extends GenericWSServer {
 			return createErrorResponse("can not get result json.");
 		}
 	}
-	
+
 	@GET
 	@Path("/run")
 	public Response analysisGet() {
@@ -159,13 +159,13 @@ public class AnalysisWSServer extends GenericWSServer {
 			return createErrorResponse("session is not initialized yet.");
 		}
 
-//		String accountId = null;
-//		if (params.containsKey("accountid")) {
-//			accountId = params.get("accountid").get(0);
-//			params.remove("accountid");
-//		} else {
-//			return createErrorResponse("unknown account.");
-//		}
+		// String accountId = null;
+		// if (params.containsKey("accountid")) {
+		// accountId = params.get("accountid").get(0);
+		// params.remove("accountid");
+		// } else {
+		// return createErrorResponse("unknown account.");
+		// }
 
 		// Jquery put this parameter and it is sent to the tool
 		if (params.containsKey("_")) {
@@ -283,13 +283,12 @@ public class AnalysisWSServer extends GenericWSServer {
 		// Set output param
 		params.put(execution.getOutputParam(), Arrays.asList(jobFolder));
 
-		
 		// Create commmand line
 		String commandLine = null;
 		try {
 			commandLine = aje.createCommandLine(execution.getExecutable(), params);
 			cloudSessionManager.setJobCommandLine(accountId, jobId, commandLine);
-		} catch ( AnalysisExecutionException | AccountManagementException e) {
+		} catch (AnalysisExecutionException | AccountManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse(e.getMessage());
 		}
