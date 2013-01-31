@@ -123,6 +123,7 @@ public class AnalysisWSServer extends GenericWSServer {
 	public Response getResult(@DefaultValue("") @PathParam("jobid") String jobId) {
 		try {
 			InputStream is = aje.getResultInputStream();
+			cloudSessionManager.incJobVisites(accountId, jobId, sessionId);
 			return createOkResponse(is, MediaType.valueOf("text/javascript"), "result.js");
 			
 			
