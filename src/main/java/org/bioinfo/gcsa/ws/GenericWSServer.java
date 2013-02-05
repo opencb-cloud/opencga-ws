@@ -22,8 +22,9 @@ import nl.bitwalker.useragentutils.Browser;
 import nl.bitwalker.useragentutils.OperatingSystem;
 import nl.bitwalker.useragentutils.UserAgent;
 
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 import org.bioinfo.commons.Config;
-import org.bioinfo.commons.log.Logger;
 import org.bioinfo.gcsa.lib.account.CloudSessionManager;
 import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
 //import org.bioinfo.gcsa.lib.users.CloudSessionManager;
@@ -39,7 +40,7 @@ import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
 public class GenericWSServer {
 
 	protected UriInfo uriInfo;
-	protected Logger logger;
+	protected Logger logger = Logger.getLogger(this.getClass());
 	protected ResourceBundle properties;
 	protected Config config;
 
@@ -76,8 +77,6 @@ public class GenericWSServer {
 		this.sessionId = (this.params.get("sessionid") != null) ? this.params.get("sessionid").get(0) : "";
 		this.of = (this.params.get("of") != null) ? this.params.get("of").get(0) : "";
 		this.sessionIp = httpServletRequest.getRemoteAddr();
-		logger = new Logger();
-		logger.setLevel(Logger.INFO_LEVEL);
 
 		UserAgent userAgent = UserAgent.parseUserAgentString(httpServletRequest.getHeader("User-Agent"));
 
@@ -111,9 +110,9 @@ public class GenericWSServer {
 
 	protected java.nio.file.Path parseObjectId(String objectIdFromURL) {
 		String[] tokens = objectIdFromURL.split(":");
-//		if(tokens.length == 0){
-//			return Paths.get(objectIdFromURL);
-//		}
+		// if(tokens.length == 0){
+		// return Paths.get(objectIdFromURL);
+		// }
 		java.nio.file.Path objectPath = Paths.get("");
 		for (int i = 0; i < tokens.length; i++) {
 			objectPath = objectPath.resolve(Paths.get(tokens[i]));

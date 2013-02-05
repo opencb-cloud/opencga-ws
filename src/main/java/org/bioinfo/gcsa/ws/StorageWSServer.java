@@ -245,7 +245,7 @@ public class StorageWSServer extends GenericWSServer {
 	@Path("/job/{jobid}/result.{format}")
 	public Response getResultFile(@DefaultValue("") @PathParam("jobid") String jobId, @PathParam("format") String format) {
 		try {
-			String res = cloudSessionManager.getJobResult(accountId, jobId);
+			String res = cloudSessionManager.getJobResult(accountId, jobId, sessionId);
 			return createOkResponse(res);
 		} catch (Exception e) {
 			logger.error(e.toString());
@@ -265,7 +265,7 @@ public class StorageWSServer extends GenericWSServer {
 
 		try {
 			String res = cloudSessionManager.getFileTableFromJob(accountId, jobId, filename, start, limit, colNames,
-					colVisibility, callback, sort);
+					colVisibility, callback, sort, sessionId);
 			return createOkResponse(res);
 		} catch (Exception e) {
 			logger.error(e.toString());
@@ -273,13 +273,6 @@ public class StorageWSServer extends GenericWSServer {
 		}
 	}
 
-	// @GET
-	// @Path("{jobId}/poll")
-	// public Response pollJobFile(@PathParam("jobId") String jobId,
-	// @QueryParam("filename") String filename, @DefaultValue("true")
-	// @QueryParam("zip") String zip) {
-	// logger.debug("POLLING "+ filename + "...");
-	//
 	@GET
 	@Path("/job/{jobid}/poll")
 	public Response pollJobFile(@DefaultValue("") @PathParam("jobid") String jobId,
@@ -287,7 +280,7 @@ public class StorageWSServer extends GenericWSServer {
 			@DefaultValue("true") @QueryParam("zip") String zip) {
 
 		try {
-			DataInputStream is = cloudSessionManager.getFileFromJob(accountId, jobId, filename, zip);
+			DataInputStream is = cloudSessionManager.getFileFromJob(accountId, jobId, filename, zip, sessionId);
 			String name = null;
 			if (zip.compareTo("true") != 0) {// PAKO zip != true
 				name = filename;
@@ -313,6 +306,30 @@ public class StorageWSServer extends GenericWSServer {
 		}
 	}
 
+	@GET
+	@Path("/job/{jobid}/delete")
+	public Response deleteJob(@DefaultValue("") @PathParam("jobid") String jobId) {
+		try {
+			cloudSessionManager.deleteJob(accountId, jobId, sessionId);
+			return createOkResponse("OK");
+		} catch (Exception e) {
+			logger.error(e.toString());
+			return createErrorResponse(e.getMessage());
+		}
+	}
+	
+	@GET
+	@Path("/job/{jobid}/download")
+	public Response downloadJob(@DefaultValue("") @PathParam("jobid") String jobId) {
+		try {
+			InputStream is = cloudSessionManager.getJobZipped(accountId, jobId, sessionId);
+			return createOkResponse(is, MediaType.valueOf("application/zip"), jobId+".zip");
+		} catch (Exception e) {
+			logger.error(e.toString());
+			return createErrorResponse(e.getMessage());
+		}
+	}
+	
 	/*******************/
 	@POST
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
