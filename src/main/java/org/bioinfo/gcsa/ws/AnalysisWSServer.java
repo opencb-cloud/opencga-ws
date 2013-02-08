@@ -109,9 +109,21 @@ public class AnalysisWSServer extends GenericWSServer {
 		if (analysisError) {
 			return createErrorResponse(analysisErrorMsg);
 		}
-		
 		try {
 			return createOkResponse(SgeManager.status(analysis+"_"+jobId));
+		} catch (Exception e) {
+			logger.error(e.toString());
+			return createErrorResponse("job id not found.");
+		}
+
+	}
+	
+	@GET
+	@Path("/index")
+	public Response index(@DefaultValue("") @QueryParam("object") String object) throws Exception {
+		try {
+			cloudSessionManager.indexFileObjects(accountId, parseObjectId(object));
+			return createOkResponse("OK");
 		} catch (Exception e) {
 			logger.error(e.toString());
 			return createErrorResponse("job id not found.");
