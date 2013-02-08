@@ -25,6 +25,7 @@ import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
 import org.bioinfo.gcsa.lib.account.io.IOManagementException;
 import org.bioinfo.gcsa.lib.analysis.AnalysisExecutionException;
 import org.bioinfo.gcsa.lib.analysis.AnalysisJobExecuter;
+import org.bioinfo.gcsa.lib.analysis.SgeManager;
 import org.bioinfo.gcsa.lib.analysis.beans.Analysis;
 import org.bioinfo.gcsa.lib.analysis.beans.Execution;
 import org.bioinfo.gcsa.lib.analysis.beans.InputParam;
@@ -85,7 +86,7 @@ public class AnalysisWSServer extends GenericWSServer {
 
 	@GET
 	@Path("/test")
-	public Response test() {
+	public Response test() throws IOException {
 		if (analysisError) {
 			return createErrorResponse(analysisErrorMsg);
 		}
@@ -104,14 +105,14 @@ public class AnalysisWSServer extends GenericWSServer {
 
 	@GET
 	@Path("/status")
-	public Response status(@DefaultValue("") @QueryParam("jobid") String jobId) {
+	public Response status(@DefaultValue("") @QueryParam("jobid") String jobId) throws Exception {
 		if (analysisError) {
 			return createErrorResponse(analysisErrorMsg);
 		}
-
+		
 		try {
-			return createOkResponse(aje.status(jobId));
-		} catch (AnalysisExecutionException e) {
+			return createOkResponse(SgeManager.status(analysis+"_"+jobId));
+		} catch (Exception e) {
 			logger.error(e.toString());
 			return createErrorResponse("job id not found.");
 		}
@@ -146,17 +147,17 @@ public class AnalysisWSServer extends GenericWSServer {
 
 	@GET
 	@Path("/run")
-	public Response analysisGet() {
+	public Response analysisGet() throws IOException {
 		return this.analysis(params);
 	}
 
 	@POST
 	@Path("/run")
-	public Response analysisPost(MultivaluedMap<String, String> postParams) {
+	public Response analysisPost(MultivaluedMap<String, String> postParams) throws IOException {
 		return this.analysis(postParams);
 	}
 
-	private Response analysis(MultivaluedMap<String, String> params) {
+	private Response analysis(MultivaluedMap<String, String> params) throws IOException {
 		if (params.containsKey("sessionid")) {
 			sessionId = params.get("sessionid").get(0);
 			params.remove("sessionid");

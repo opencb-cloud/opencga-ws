@@ -12,7 +12,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.bioinfo.gcsa.lib.account.beans.Bucket;
 import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
 import org.bioinfo.gcsa.lib.account.io.IOManagementException;
 
@@ -24,9 +23,6 @@ public class AccountWSServer extends GenericWSServer {
 			@DefaultValue("") @PathParam("accountId") String accountId) throws IOException, AccountManagementException {
 		super(uriInfo, httpServletRequest);
 		this.accountId = accountId;
-
-		logger.info("HOST: " + uriInfo.getRequestUri().getHost());
-		logger.info("----------------------------------->");
 	}
 
 	@GET

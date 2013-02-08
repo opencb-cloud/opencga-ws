@@ -1,7 +1,6 @@
 package org.bioinfo.gcsa.ws;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ResourceBundle;
@@ -23,18 +22,9 @@ import nl.bitwalker.useragentutils.OperatingSystem;
 import nl.bitwalker.useragentutils.UserAgent;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 import org.bioinfo.commons.Config;
 import org.bioinfo.gcsa.lib.account.CloudSessionManager;
-import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
-//import org.bioinfo.gcsa.lib.users.CloudSessionManager;
-//import org.bioinfo.gcsa.lib.users.beans.Data;
-//import org.bioinfo.gcsa.lib.users.persistence.AccountManagementException;
 
-/**
- * @author fsalavert
- * 
- */
 @Path("/")
 @Produces("text/plain")
 public class GenericWSServer {
@@ -58,14 +48,7 @@ public class GenericWSServer {
 	static {
 		try {
 			cloudSessionManager = new CloudSessionManager();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (AccountManagementException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		System.out.println("AccountWSServer: static cloudSessionManager");
@@ -84,6 +67,7 @@ public class GenericWSServer {
 
 		OperatingSystem op = userAgent.getOperatingSystem();
 
+		logger.info("---------------------------------------");
 		// logger.info("------------------->" + br.getName());
 		// logger.info("------------------->" + br.getBrowserType().getName());
 		// logger.info("------------------->" + op.getName());

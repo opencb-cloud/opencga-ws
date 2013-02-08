@@ -1,20 +1,14 @@
 package org.bioinfo.gcsa.ws;
 
-import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -32,15 +26,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import net.sf.samtools.SAMRecord;
-
 import org.bioinfo.commons.utils.StringUtils;
-import org.bioinfo.gcsa.lib.GcsaUtils;
 import org.bioinfo.gcsa.lib.account.beans.Bucket;
 import org.bioinfo.gcsa.lib.account.beans.ObjectItem;
 import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
 import org.bioinfo.gcsa.lib.account.io.IOManagementException;
-import org.bioinfo.gcsa.lib.account.io.IOManagerUtils;
+import org.bioinfo.gcsa.lib.utils.IOUtils;
+import org.bioinfo.gcsa.lib.utils.TimeUtils;
 
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
@@ -53,9 +45,6 @@ public class StorageWSServer extends GenericWSServer {
 			@DefaultValue("") @PathParam("accountId") String accountId) throws IOException, AccountManagementException {
 		super(uriInfo, httpServletRequest);
 		this.accountId = accountId;
-
-		logger.info("HOST: " + uriInfo.getRequestUri().getHost());
-		logger.info("----------------------------------->");
 	}
 
 	/********************
@@ -164,7 +153,7 @@ public class StorageWSServer extends GenericWSServer {
 		objectItem.setFileType(filetype);
 		objectItem.setResponsible(responsible);
 		objectItem.setOrganization(organization);
-		objectItem.setDate(GcsaUtils.getTime());
+		objectItem.setDate(TimeUtils.getTime());
 		objectItem.setDescription(description);
 
 		try {
@@ -193,7 +182,7 @@ public class StorageWSServer extends GenericWSServer {
 
 		ObjectItem objectItem = new ObjectItem(null, null, null);
 		objectItem.setFileType("dir");
-		objectItem.setDate(GcsaUtils.getTime());
+		objectItem.setDate(TimeUtils.getTime());
 		try {
 			String res = cloudSessionManager.createFolderToBucket(accountId, bucketId, objectId, objectItem, parents,
 					sessionId);
@@ -317,19 +306,19 @@ public class StorageWSServer extends GenericWSServer {
 			return createErrorResponse(e.getMessage());
 		}
 	}
-	
+
 	@GET
 	@Path("/job/{jobid}/download")
 	public Response downloadJob(@DefaultValue("") @PathParam("jobid") String jobId) {
 		try {
 			InputStream is = cloudSessionManager.getJobZipped(accountId, jobId, sessionId);
-			return createOkResponse(is, MediaType.valueOf("application/zip"), jobId+".zip");
+			return createOkResponse(is, MediaType.valueOf("application/zip"), jobId + ".zip");
 		} catch (Exception e) {
 			logger.error(e.toString());
 			return createErrorResponse(e.getMessage());
 		}
 	}
-	
+
 	/*******************/
 	@POST
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -345,8 +334,10 @@ public class StorageWSServer extends GenericWSServer {
 			@DefaultValue("") @FormDataParam("chunk_size") String chunk_size,
 			@DefaultValue("") @FormDataParam("chunk_hash") String chunkHash,
 			@DefaultValue("false") @FormDataParam("resume_upload") String resume_upload) {
-
-		java.nio.file.Path folderPath = Paths.get("tmp").resolve(parseObjectId(bucketId + "_" + objectIdFromURL));
+		
+		long t = System.currentTimeMillis();
+		
+		java.nio.file.Path folderPath = Paths.get("/tmp/subir/").resolve(parseObjectId(bucketId + "_" + objectIdFromURL));
 		java.nio.file.Path filePath = folderPath.resolve(filename);
 
 		logger.info(objectIdFromURL + "");
@@ -357,6 +348,7 @@ public class StorageWSServer extends GenericWSServer {
 		try {
 			logger.info("---resume is: " + resume);
 			if (resume) {
+				logger.info("Resume ms :"+(System.currentTimeMillis()-t));
 				return createOkResponse(getResumeFileJSON(folderPath).toString());
 			}
 
@@ -372,12 +364,13 @@ public class StorageWSServer extends GenericWSServer {
 				logger.info("createDirectory(): " + folderPath);
 				Files.createDirectory(folderPath);
 			}
-			String hash = StringUtils.sha1(new String(chunkBytes));
-			logger.info("bytesHash: " + hash);
-			logger.info("chunkHash: " + chunkHash);
-			hash = chunkHash;
-			if (chunkHash.equals(hash) && chunkBytes.length == chunkSize) {
-				Files.write(folderPath.resolve(chunkId + "_" + chunkBytes.length + "_" + hash + "_partial"), chunkBytes);
+			logger.info("check dir "+Files.exists(folderPath));
+//			String hash = StringUtils.sha1(new String(chunkBytes));
+//			logger.info("bytesHash: " + hash);
+//			logger.info("chunkHash: " + chunkHash);
+//			hash = chunkHash;
+			if (chunkBytes.length == chunkSize) {
+				Files.write(folderPath.resolve(chunkId + "_" + chunkBytes.length + "_partial"), chunkBytes);
 			}
 
 			if (lastChunk) {
@@ -390,14 +383,15 @@ public class StorageWSServer extends GenericWSServer {
 					Files.write(filePath, Files.readAllBytes(partPath), StandardOpenOption.APPEND);
 				}
 				Files.move(filePath, filePath.getParent().getParent().resolve(filename));
-				IOManagerUtils.deleteDirectory(folderPath);
+				IOUtils.deleteDirectory(folderPath);
 			}
 
-		} catch (IOException | NoSuchAlgorithmException e) {
+		} catch (IOException e) {
 
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		logger.info("chunk saved ms :"+(System.currentTimeMillis()-t));
 		return createOkResponse("ok");
 	}
 
@@ -414,9 +408,9 @@ public class StorageWSServer extends GenericWSServer {
 		sb.append("{");
 		for (java.nio.file.Path partPath : folderStream) {
 			String[] nameSplit = partPath.getFileName().toString().split("_");
-			sb.append(c+nameSplit[0]+c+":{");
-			sb.append(c + "size" + c + ":" + nameSplit[1]+",");
-			sb.append(c + "hash" + c + ":" + c + nameSplit[2] + c);
+			sb.append(c + nameSplit[0] + c + ":{");
+			sb.append(c + "size" + c + ":" + nameSplit[1]);
+//			sb.append(c + "hash" + c + ":" + c + nameSplit[2] + c);
 			sb.append("},");
 		}
 		// Remove last comma
@@ -427,11 +421,11 @@ public class StorageWSServer extends GenericWSServer {
 		return sb;
 	}
 
-	private List<java.nio.file.Path> getSortedChunkList(java.nio.file.Path folderPath) throws IOException{
+	private List<java.nio.file.Path> getSortedChunkList(java.nio.file.Path folderPath) throws IOException {
 		List<java.nio.file.Path> files = new ArrayList<>();
 		DirectoryStream<java.nio.file.Path> stream = Files.newDirectoryStream(folderPath, "*_partial");
 		for (java.nio.file.Path p : stream) {
-			logger.info("adding to ArrayList: "+p.getFileName());
+			logger.info("adding to ArrayList: " + p.getFileName());
 			files.add(p);
 		}
 		logger.info("----ordered files length: " + files.size());
@@ -439,9 +433,9 @@ public class StorageWSServer extends GenericWSServer {
 			public int compare(java.nio.file.Path o1, java.nio.file.Path o2) {
 				int id_o1 = Integer.parseInt(o1.getFileName().toString().split("_")[0]);
 				int id_o2 = Integer.parseInt(o2.getFileName().toString().split("_")[0]);
-				logger.info(id_o1+"");
-				logger.info(id_o2+"");
-				return id_o1-id_o2;
+				logger.info(id_o1 + "");
+				logger.info(id_o2 + "");
+				return id_o1 - id_o2;
 			}
 		});
 		return files;

@@ -11,7 +11,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.bioinfo.gcsa.lib.storage.alignment.BamManager;
+import org.bioinfo.gcsa.lib.storage.feature.BamManager;
 import org.bioinfo.infrared.lib.common.Region;
 
 
