@@ -79,7 +79,7 @@ public class AccountWSServer extends GenericWSServer {
 	@Path("/info")
 	public Response getInfoAccount(@DefaultValue("") @QueryParam("last_activity") String lastActivity) {
 		try {
-			String res = cloudSessionManager.getAccountInfo(accountId, sessionId, lastActivity);
+			String res = cloudSessionManager.getAccountInfo(accountId, lastActivity, sessionId);
 			return createOkResponse(res);
 		} catch (AccountManagementException e) {
 			logger.error(e.toString());
@@ -93,7 +93,7 @@ public class AccountWSServer extends GenericWSServer {
 			@DefaultValue("") @QueryParam("new_password1") String new_password1,
 			@DefaultValue("") @QueryParam("new_password2") String new_password2) {
 		try {
-			cloudSessionManager.changePassword(accountId, sessionId, old_password, new_password1, new_password2);
+			cloudSessionManager.changePassword(accountId, old_password, new_password1, new_password2, sessionId);
 			return createOkResponse("OK");
 		} catch (AccountManagementException e) {
 			logger.error(e.toString());
@@ -117,31 +117,27 @@ public class AccountWSServer extends GenericWSServer {
 	@Path("/profile/change_email")
 	public Response changeEmail(@DefaultValue("") @QueryParam("new_email") String new_email) {
 		try {
-			cloudSessionManager.changeEmail(accountId, sessionId, new_email);
+			cloudSessionManager.changeEmail(accountId, new_email, sessionId);
 			return createOkResponse("OK");
 		} catch (AccountManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("could not change email");
 		}
 	}
-	
-	
-//	@GET
-//	@Path("/delete/")
-//	public Response deleteAccount() {
-//		try {
-//			cloudSessionManager.deleteAccount(accountId, sessionId);
-//			return createOkResponse("OK");
-//		} catch (AccountManagementException e) {
-//			logger.error(e.toString());
-//			return createErrorResponse("could not delete the account");
-//		}
-//	}
-	
-	
-	
-	
-	//OLD
+
+	// @GET
+	// @Path("/delete/")
+	// public Response deleteAccount() {
+	// try {
+	// cloudSessionManager.deleteAccount(accountId, sessionId);
+	// return createOkResponse("OK");
+	// } catch (AccountManagementException e) {
+	// logger.error(e.toString());
+	// return createErrorResponse("could not delete the account");
+	// }
+	// }
+
+	// OLD
 
 	// @GET
 	// @Path("/pipetest/{accountId}/{password}") //Pruebas
