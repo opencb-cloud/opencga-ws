@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.bioinfo.gcsa.lib.account.beans.Bucket;
+import org.bioinfo.gcsa.lib.account.beans.Project;
 import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
 import org.bioinfo.gcsa.lib.account.io.IOManagementException;
 
@@ -126,8 +127,9 @@ public class AdminWSServer extends GenericWSServer {
 	@Path("/projects/{projectId}/create")
 	public Response createProject(@DefaultValue("") @PathParam("projectId") String projectId,
 			@DefaultValue("") @QueryParam("description") String description) {
-		Project project = new Project(projectId);
-		projectId.setId(projectId.toLowerCase());
+		Project project = new Project();
+		project.setName(projectId);
+		project.setId(projectId.toLowerCase());
 		try {
 			cloudSessionManager.createProject(accountId, project, sessionId);
 			return createOkResponse("OK");

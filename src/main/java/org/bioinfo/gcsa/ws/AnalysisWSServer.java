@@ -286,7 +286,7 @@ public class AnalysisWSServer extends GenericWSServer {
 
 		String jobId;
 		try {
-			jobId = cloudSessionManager.createJob(jobName, jobFolder, toolName, dataList, "", sessionId);
+			jobId = cloudSessionManager.createJob(jobName, params.get("projectId").get(0), jobFolder, toolName, dataList, "", sessionId);
 		} catch (AccountManagementException | IOManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("could not create job.");
