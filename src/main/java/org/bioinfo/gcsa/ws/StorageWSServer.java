@@ -46,7 +46,7 @@ public class StorageWSServer extends GenericWSServer {
 		super(uriInfo, httpServletRequest);
 		this.accountId = accountId;
 	}
-	
+
 	@POST
 	@Path("/{bucketId}/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -145,100 +145,7 @@ public class StorageWSServer extends GenericWSServer {
 		}
 	}
 
-	/********************
-	 * 
-	 * JOB METHODS
-	 * 
-	 ********************/
-
-	@GET
-	@Path("/job/{jobid}/result.{format}")
-	public Response getResultFile(@DefaultValue("") @PathParam("jobid") String jobId, @PathParam("format") String format) {
-		try {
-			String res = cloudSessionManager.getJobResult(accountId, jobId, sessionId);
-			return createOkResponse(res);
-		} catch (Exception e) {
-			logger.error(e.toString());
-			return createErrorResponse(e.getMessage());
-		}
-	}
-
-	@GET
-	@Path("/job/{jobid}/table")
-	public Response table(@DefaultValue("") @PathParam("jobid") String jobId,
-			@DefaultValue("") @QueryParam("filename") String filename,
-			@DefaultValue("") @QueryParam("start") String start, @DefaultValue("") @QueryParam("limit") String limit,
-			@DefaultValue("") @QueryParam("colNames") String colNames,
-			@DefaultValue("") @QueryParam("colVisibility") String colVisibility,
-			@DefaultValue("") @QueryParam("callback") String callback,
-			@QueryParam("sort") @DefaultValue("false") String sort) {
-
-		try {
-			String res = cloudSessionManager.getFileTableFromJob(accountId, jobId, filename, start, limit, colNames,
-					colVisibility, callback, sort, sessionId);
-			return createOkResponse(res);
-		} catch (Exception e) {
-			logger.error(e.toString());
-			return createErrorResponse(e.getMessage());
-		}
-	}
-
-	@GET
-	@Path("/job/{jobid}/poll")
-	public Response pollJobFile(@DefaultValue("") @PathParam("jobid") String jobId,
-			@DefaultValue("") @QueryParam("filename") String filename,
-			@DefaultValue("true") @QueryParam("zip") String zip) {
-
-		try {
-			DataInputStream is = cloudSessionManager.getFileFromJob(accountId, jobId, filename, zip, sessionId);
-			String name = null;
-			if (zip.compareTo("true") != 0) {// PAKO zip != true
-				name = filename;
-			} else {
-				name = filename + ".zip";
-			}
-			return createOkResponse(is, MediaType.APPLICATION_OCTET_STREAM_TYPE, name);
-		} catch (Exception e) {
-			logger.error(e.toString());
-			return createErrorResponse(e.getMessage());
-		}
-	}
-
-	@GET
-	@Path("/job/{jobid}/status")
-	public Response getJobStatus(@DefaultValue("") @PathParam("jobid") String jobId) {
-		try {
-			String res = cloudSessionManager.checkJobStatus(accountId, jobId, sessionId);
-			return createOkResponse(res);
-		} catch (Exception e) {
-			logger.error(e.toString());
-			return createErrorResponse(e.getMessage());
-		}
-	}
-
-	@GET
-	@Path("/job/{jobid}/delete")
-	public Response deleteJob(@DefaultValue("") @PathParam("jobid") String jobId) {
-		try {
-			cloudSessionManager.deleteJob(accountId, jobId, sessionId);
-			return createOkResponse("OK");
-		} catch (Exception e) {
-			logger.error(e.toString());
-			return createErrorResponse(e.getMessage());
-		}
-	}
-
-	@GET
-	@Path("/job/{jobid}/download")
-	public Response downloadJob(@DefaultValue("") @PathParam("jobid") String jobId) {
-		try {
-			InputStream is = cloudSessionManager.getJobZipped(accountId, jobId, sessionId);
-			return createOkResponse(is, MediaType.valueOf("application/zip"), jobId + ".zip");
-		} catch (Exception e) {
-			logger.error(e.toString());
-			return createErrorResponse(e.getMessage());
-		}
-	}
+	
 
 	/*******************/
 	@POST
@@ -255,10 +162,11 @@ public class StorageWSServer extends GenericWSServer {
 			@DefaultValue("") @FormDataParam("chunk_size") String chunk_size,
 			@DefaultValue("") @FormDataParam("chunk_hash") String chunkHash,
 			@DefaultValue("false") @FormDataParam("resume_upload") String resume_upload) {
-		
+
 		long t = System.currentTimeMillis();
-		
-		java.nio.file.Path folderPath = Paths.get("/tmp/subir/").resolve(parseObjectId(bucketId + "_" + objectIdFromURL));
+
+		java.nio.file.Path folderPath = Paths.get("/tmp/subir/").resolve(
+				parseObjectId(bucketId + "_" + objectIdFromURL));
 		java.nio.file.Path filePath = folderPath.resolve(filename);
 
 		logger.info(objectIdFromURL + "");
@@ -269,7 +177,7 @@ public class StorageWSServer extends GenericWSServer {
 		try {
 			logger.info("---resume is: " + resume);
 			if (resume) {
-				logger.info("Resume ms :"+(System.currentTimeMillis()-t));
+				logger.info("Resume ms :" + (System.currentTimeMillis() - t));
 				return createOkResponse(getResumeFileJSON(folderPath).toString());
 			}
 
@@ -285,11 +193,11 @@ public class StorageWSServer extends GenericWSServer {
 				logger.info("createDirectory(): " + folderPath);
 				Files.createDirectory(folderPath);
 			}
-			logger.info("check dir "+Files.exists(folderPath));
-//			String hash = StringUtils.sha1(new String(chunkBytes));
-//			logger.info("bytesHash: " + hash);
-//			logger.info("chunkHash: " + chunkHash);
-//			hash = chunkHash;
+			logger.info("check dir " + Files.exists(folderPath));
+			// String hash = StringUtils.sha1(new String(chunkBytes));
+			// logger.info("bytesHash: " + hash);
+			// logger.info("chunkHash: " + chunkHash);
+			// hash = chunkHash;
 			if (chunkBytes.length == chunkSize) {
 				Files.write(folderPath.resolve(chunkId + "_" + chunkBytes.length + "_partial"), chunkBytes);
 			}
@@ -312,7 +220,7 @@ public class StorageWSServer extends GenericWSServer {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		logger.info("chunk saved ms :"+(System.currentTimeMillis()-t));
+		logger.info("chunk saved ms :" + (System.currentTimeMillis() - t));
 		return createOkResponse("ok");
 	}
 
@@ -331,7 +239,7 @@ public class StorageWSServer extends GenericWSServer {
 			String[] nameSplit = partPath.getFileName().toString().split("_");
 			sb.append(c + nameSplit[0] + c + ":{");
 			sb.append(c + "size" + c + ":" + nameSplit[1]);
-//			sb.append(c + "hash" + c + ":" + c + nameSplit[2] + c);
+			// sb.append(c + "hash" + c + ":" + c + nameSplit[2] + c);
 			sb.append("},");
 		}
 		// Remove last comma

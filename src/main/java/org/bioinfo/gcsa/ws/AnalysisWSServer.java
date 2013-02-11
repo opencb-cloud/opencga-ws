@@ -94,7 +94,8 @@ public class AnalysisWSServer extends GenericWSServer {
 		// Create job
 		String jobId;
 		try {
-			jobId = cloudSessionManager.createJob("", null, "", new ArrayList<String>(), "", sessionId);
+			jobId = cloudSessionManager.createJob("", params.get("projectId").get(0), null, "",
+					new ArrayList<String>(), "", sessionId);
 			String jobFolder = "/tmp/";
 			return createOkResponse(aje.test(jobId, jobFolder));
 		} catch (AccountManagementException | IOManagementException | AnalysisExecutionException e) {
@@ -110,14 +111,14 @@ public class AnalysisWSServer extends GenericWSServer {
 			return createErrorResponse(analysisErrorMsg);
 		}
 		try {
-			return createOkResponse(SgeManager.status(analysis+"_"+jobId));
+			return createOkResponse(SgeManager.status(analysis + "_" + jobId));
 		} catch (Exception e) {
 			logger.error(e.toString());
 			return createErrorResponse("job id not found.");
 		}
 
 	}
-	
+
 	@GET
 	@Path("/index")
 	public Response index(@DefaultValue("") @QueryParam("object") String object) throws Exception {
@@ -130,32 +131,6 @@ public class AnalysisWSServer extends GenericWSServer {
 		}
 
 	}
-
-	@GET
-	@Path("/job/{jobid}/result.js")
-	public Response getResult(@DefaultValue("") @PathParam("jobid") String jobId) {
-		try {
-			InputStream is = aje.getResultInputStream();
-			cloudSessionManager.incJobVisites(accountId, jobId, sessionId);
-			return createOkResponse(is, MediaType.valueOf("text/javascript"), "result.js");
-			
-			
-//			String resultToUse = aje.getResult();
-//			String jobObj = cloudSessionManager.getJobObject(accountId, jobId);
-//			StringBuilder sb = new StringBuilder();
-//			String c = "\"";
-//			sb.append("{");
-//				sb.append(c + "result" + c + ":"+ c + resultJson + c + ",");
-//				sb.append(c + "resultToUse" + c + ":"+ c + resultToUse + c + ",");
-//				sb.append(c + "job" + c + ":" + c + jobObj + c);
-//			sb.append("}");
-//			return createOkResponse(sb.toString());
-		} catch (Exception e) {
-			logger.error(e.toString());
-			return createErrorResponse("can not get result json.");
-		}
-	}
-
 
 	@GET
 	@Path("/run")
@@ -286,14 +261,15 @@ public class AnalysisWSServer extends GenericWSServer {
 
 		String jobId;
 		try {
-			jobId = cloudSessionManager.createJob(jobName, params.get("projectId").get(0), jobFolder, toolName, dataList, "", sessionId);
+			jobId = cloudSessionManager.createJob(jobName, params.get("projectId").get(0), jobFolder, toolName,
+					dataList, "", sessionId);
 		} catch (AccountManagementException | IOManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("could not create job.");
 		}
 
 		if (jobFolder == null) {
-			jobFolder = cloudSessionManager.getJobFolder(accountId, jobId);
+			jobFolder = cloudSessionManager.getJobFolder(accountId, params.get("projectId").get(0), jobId);
 		} else {
 			jobFolder = cloudSessionManager.getAccountPath(accountId).resolve(jobFolder).toString();
 		}
@@ -305,7 +281,7 @@ public class AnalysisWSServer extends GenericWSServer {
 		String commandLine = null;
 		try {
 			commandLine = aje.createCommandLine(execution.getExecutable(), params);
-			cloudSessionManager.setJobCommandLine(accountId, jobId, commandLine);
+			cloudSessionManager.setJobCommandLine(accountId, params.get("projectId").get(0), jobId, commandLine);
 		} catch (AnalysisExecutionException | AccountManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse(e.getMessage());
