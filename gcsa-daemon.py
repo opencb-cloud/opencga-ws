@@ -58,21 +58,42 @@ def getSGEjobs():
     return sgeJobs
 
 def getMongojobs():
-    return collection.aggregate([{"$project":{"accountId":1,"jobs":1,"_id":0}},{"$unwind":"$jobs"},{"$match":{"jobs.visites":{"$lt":0}}}])["result"]
+    projects = collection.aggregate([{"$project":{"accountId":1,"projects.jobs":1,"_id":0}},{"$unwind":"$projects"},{"$match":{"projects.jobs.visites":{"$lt":0}}}])["result"];
+    jobs = []
+    for project in projects:
+        for job in project["projects"]["jobs"]:
+            job["accountId"] = project["accountId"]
+            jobs.append(job)
+    return jobs
+
+def getMongoJobIndex(job):
+    jobs = collection.find_one({"accountId":job["accountId"],"projects.jobs.id": job["id"]},{"projects.$":1})["projects"][0]["jobs"]
+    position = 0;
+    for j in jobs:
+        print(j["id"])
+        print(job["id"])
+        print(position)
+        if j["id"] == job["id"]:
+            return position
+        position += 1
+        #position = position+1
+
+
 
 def task():
     sgeJobs = getSGEjobs()
-    mongoResults = getMongojobs()
-    for mongoResult in mongoResults:
-        mongoJob = mongoResult["jobs"];
-        mongoAccountId = mongoResult["accountId"]
+    mongoJobs = getMongojobs()
+    for mongoJob in mongoJobs:
+
+        mongoAccountId = mongoJob["accountId"]
+
         if mongoJob["id"] in sgeJobs:
             sgeJob = sgeJobs[mongoJob["id"]];
             sys.stdout.write(getLogTime()+"\t"+mongoJob["id"]+"\t"+sgeJob["s"]+"\t"+mongoAccountId+"\t")
             if sgeJob["s"] == "r" and mongoJob["status"]!="running":
-                print(collection.update({"accountId":mongoAccountId,"jobs.id":mongoJob["id"]},{"$set":{"jobs.$.status":"running","jobs.$.visites":-1,"lastActivity":getTimeMillis()}}))
+                print(collection.update({"accountId":mongoAccountId,"projects.jobs.id":mongoJob["id"]},{"$set":{"projects.$.jobs."+position+".status":"running","projects.$.jobs."+position+".visites":-1,"lastActivity":getTimeMillis()}}))
             elif sgeJob["s"] == "Eqw":
-                print(collection.update({"accountId":mongoAccountId,"jobs.id":mongoJob["id"]},{"$set":{"jobs.$.status":"error","jobs.$.visites":0,"lastActivity":getTimeMillis()}}))
+                print(collection.update({"accountId":mongoAccountId,"projects.jobs.id":mongoJob["id"]},{"$set":{"jobs.$.status":"error","jobs.$.visites":0,"lastActivity":getTimeMillis()}}))
             #elif sgeJob["s"] == "qw":
                 #print("qw")
             else:

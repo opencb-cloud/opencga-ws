@@ -17,7 +17,7 @@ import org.bioinfo.gcsa.lib.account.beans.Project;
 import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
 import org.bioinfo.gcsa.lib.account.io.IOManagementException;
 
-@Path("/account/{accountId}/manage")
+@Path("/account/{accountId}/admin")
 public class AdminWSServer extends GenericWSServer {
 	private String accountId;
 
@@ -27,13 +27,11 @@ public class AdminWSServer extends GenericWSServer {
 		this.accountId = accountId;
 	}
 
-	/********************
-	 * 
-	 * BUCKET WEB SERVICES
-	 * 
-	 ********************/
+	/**
+	 * Bucket methods
+	 *****************************/
 	@GET
-	@Path("/buckets/list")
+	@Path("/bucket/list")
 	public Response getBucketsList() {
 		try {
 			String res = cloudSessionManager.getBucketsList(accountId, sessionId);
@@ -45,11 +43,11 @@ public class AdminWSServer extends GenericWSServer {
 	}
 
 	@GET
-	@Path("/buckets/{bucketId}/create")
+	@Path("/bucket/{bucketId}/create")
 	public Response createBucket(@DefaultValue("") @PathParam("bucketId") String bucketId,
 			@DefaultValue("") @QueryParam("description") String description) {
 		Bucket bucket = new Bucket(bucketId);
-		bucket.setId(bucketId.toLowerCase());
+		bucket.setOwnerId(accountId);
 		bucket.setDescripcion(description);
 		try {
 			cloudSessionManager.createBucket(accountId, bucket, sessionId);
@@ -106,13 +104,11 @@ public class AdminWSServer extends GenericWSServer {
 	// }
 	// }
 
-	/********************
-	 * 
-	 * PROJECT WEB SERVICES
-	 * 
-	 ********************/
+	/**
+	 * Project methods
+	 *****************************/
 	@GET
-	@Path("/projects/list")
+	@Path("/project/list")
 	public Response getProjectsList() {
 		try {
 			String res = cloudSessionManager.getProjectsList(accountId, sessionId);
@@ -124,18 +120,59 @@ public class AdminWSServer extends GenericWSServer {
 	}
 
 	@GET
-	@Path("/projects/{projectId}/create")
+	@Path("/project/{projectId}/create")
 	public Response createProject(@DefaultValue("") @PathParam("projectId") String projectId,
 			@DefaultValue("") @QueryParam("description") String description) {
-		Project project = new Project();
-		project.setName(projectId);
-		project.setId(projectId.toLowerCase());
+		Project project = new Project(projectId);
+		project.setOwnerId(accountId);
 		try {
 			cloudSessionManager.createProject(accountId, project, sessionId);
 			return createOkResponse("OK");
 		} catch (AccountManagementException | IOManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse("could not create project");
+		}
+	}
+	
+	
+	/**
+	 * Profile methods
+	 *****************************/
+	@GET
+	@Path("/profile/change_password")
+	public Response changePassword(@DefaultValue("") @QueryParam("old_password") String old_password,
+			@DefaultValue("") @QueryParam("new_password1") String new_password1,
+			@DefaultValue("") @QueryParam("new_password2") String new_password2) {
+		try {
+			cloudSessionManager.changePassword(accountId, old_password, new_password1, new_password2, sessionId);
+			return createOkResponse("OK");
+		} catch (AccountManagementException e) {
+			logger.error(e.toString());
+			return createErrorResponse("could not change password");
+		}
+	}
+
+	@GET
+	@Path("/profile/reset_password")
+	public Response resetPassword(@DefaultValue("") @QueryParam("email") String email) {
+		try {
+			cloudSessionManager.resetPassword(accountId, email);
+			return createOkResponse("OK");
+		} catch (AccountManagementException e) {
+			logger.error(e.toString());
+			return createErrorResponse("could not reset password");
+		}
+	}
+
+	@GET
+	@Path("/profile/change_email")
+	public Response changeEmail(@DefaultValue("") @QueryParam("new_email") String new_email) {
+		try {
+			cloudSessionManager.changeEmail(accountId, new_email, sessionId);
+			return createOkResponse("OK");
+		} catch (AccountManagementException e) {
+			logger.error(e.toString());
+			return createErrorResponse("could not change email");
 		}
 	}
 }

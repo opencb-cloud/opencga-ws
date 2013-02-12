@@ -38,15 +38,19 @@ public class AnalysisWSServer extends GenericWSServer {
 	private String analysis;
 	private boolean analysisError;
 	private String analysisErrorMsg;
+	private String projectId;
 
 	public AnalysisWSServer(@Context UriInfo uriInfo, @Context HttpServletRequest httpServletRequest,
 			@DefaultValue("") @PathParam("analysis") String analysis,
-			@DefaultValue("") @PathParam("accountId") String accountId) throws IOException {
+			@DefaultValue("") @PathParam("accountId") String accountId,
+			@DefaultValue("default") @QueryParam("projectId") String projectId) throws IOException {
 		super(uriInfo, httpServletRequest);
 		baseUrl = uriInfo.getBaseUri().toString();
 
 		this.accountId = accountId;
 		this.analysis = analysis;
+		logger.info(message);
+		this.projectId = projectId;
 
 		analysisError = false;
 		analysisErrorMsg = "analysis not found.";
@@ -56,6 +60,8 @@ public class AnalysisWSServer extends GenericWSServer {
 			logger.error(e.toString());
 			analysisError = true;
 		}
+		
+		
 	}
 
 	@GET
@@ -94,7 +100,7 @@ public class AnalysisWSServer extends GenericWSServer {
 		// Create job
 		String jobId;
 		try {
-			jobId = cloudSessionManager.createJob("", params.get("projectId").get(0), null, "",
+			jobId = cloudSessionManager.createJob("", projectId, null, "",
 					new ArrayList<String>(), "", sessionId);
 			String jobFolder = "/tmp/";
 			return createOkResponse(aje.test(jobId, jobFolder));
@@ -134,17 +140,17 @@ public class AnalysisWSServer extends GenericWSServer {
 
 	@GET
 	@Path("/run")
-	public Response analysisGet() throws IOException {
+	public Response analysisGet() throws IOException, AccountManagementException {
 		return this.analysis(params);
 	}
 
 	@POST
 	@Path("/run")
-	public Response analysisPost(MultivaluedMap<String, String> postParams) throws IOException {
+	public Response analysisPost(MultivaluedMap<String, String> postParams) throws IOException, AccountManagementException {
 		return this.analysis(postParams);
 	}
 
-	private Response analysis(MultivaluedMap<String, String> params) throws IOException {
+	private Response analysis(MultivaluedMap<String, String> params) throws IOException, AccountManagementException {
 		if (params.containsKey("sessionid")) {
 			sessionId = params.get("sessionid").get(0);
 			params.remove("sessionid");
@@ -261,7 +267,7 @@ public class AnalysisWSServer extends GenericWSServer {
 
 		String jobId;
 		try {
-			jobId = cloudSessionManager.createJob(jobName, params.get("projectId").get(0), jobFolder, toolName,
+			jobId = cloudSessionManager.createJob(jobName, projectId, jobFolder, toolName,
 					dataList, "", sessionId);
 		} catch (AccountManagementException | IOManagementException e) {
 			logger.error(e.toString());
@@ -269,7 +275,7 @@ public class AnalysisWSServer extends GenericWSServer {
 		}
 
 		if (jobFolder == null) {
-			jobFolder = cloudSessionManager.getJobFolder(accountId, params.get("projectId").get(0), jobId);
+			jobFolder = cloudSessionManager.getJobFolder(accountId, jobId, sessionId);
 		} else {
 			jobFolder = cloudSessionManager.getAccountPath(accountId).resolve(jobFolder).toString();
 		}
@@ -281,7 +287,7 @@ public class AnalysisWSServer extends GenericWSServer {
 		String commandLine = null;
 		try {
 			commandLine = aje.createCommandLine(execution.getExecutable(), params);
-			cloudSessionManager.setJobCommandLine(accountId, params.get("projectId").get(0), jobId, commandLine);
+			cloudSessionManager.setJobCommandLine(accountId, jobId, commandLine, sessionId);
 		} catch (AnalysisExecutionException | AccountManagementException e) {
 			logger.error(e.toString());
 			return createErrorResponse(e.getMessage());

@@ -37,22 +37,27 @@ import org.bioinfo.gcsa.lib.utils.TimeUtils;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
 
-@Path("/account/{accountId}/storage")
+@Path("/account/{accountId}/storage/{bucketId}/{objectId}")
 public class StorageWSServer extends GenericWSServer {
 	private String accountId;
+	private String bucketId;
+	private java.nio.file.Path objectId;
 
 	public StorageWSServer(@Context UriInfo uriInfo, @Context HttpServletRequest httpServletRequest,
-			@DefaultValue("") @PathParam("accountId") String accountId) throws IOException, AccountManagementException {
+			@DefaultValue("") @PathParam("accountId") String accountId,
+			@DefaultValue("") @PathParam("bucketId") String bucketId,
+			@DefaultValue("") @PathParam("objectId") String objectId) throws IOException, AccountManagementException {
 		super(uriInfo, httpServletRequest);
 		this.accountId = accountId;
+		this.bucketId = bucketId;
+		this.objectId = parseObjectId(objectId);
 	}
 
 	@POST
-	@Path("/{bucketId}/upload")
+	@Path("/upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response uploadObject(@DefaultValue("") @PathParam("bucketId") String bucketId,
-			@DefaultValue("") @FormDataParam("objectid") String objectIdFromURL,
-			@FormDataParam("file") InputStream fileIs, @FormDataParam("file") FormDataContentDisposition fileInfo,
+	public Response uploadObject(@FormDataParam("file") InputStream fileIs,
+			@FormDataParam("file") FormDataContentDisposition fileInfo,
 			@DefaultValue("undefined") @FormDataParam("name") String name, @FormDataParam("tags") String tags,
 			@DefaultValue("r") @QueryParam("filetype") String filetype,
 			@DefaultValue("-") @FormDataParam("responsible") String responsible,
@@ -62,7 +67,6 @@ public class StorageWSServer extends GenericWSServer {
 			@DefaultValue("-1") @FormDataParam("jobid") String jobid,
 			@DefaultValue("false") @QueryParam("parents") boolean parents) {
 
-		java.nio.file.Path objectId = parseObjectId(objectIdFromURL);
 		System.out.println(bucketId);
 		System.out.println(objectId);
 		System.out.println(parents);
@@ -78,8 +82,8 @@ public class StorageWSServer extends GenericWSServer {
 		objectItem.setDescription(description);
 
 		try {
-			String res = cloudSessionManager.createObjectToBucket(accountId, bucketId, objectId, objectItem, fileIs,
-					parents, sessionId);
+			String res = cloudSessionManager.createObjectToBucket(accountId, bucketId, objectId, objectItem,
+					fileIs, parents, sessionId);
 			return createOkResponse(res);
 		} catch (Exception e) {
 			logger.error(e.toString());
@@ -94,19 +98,14 @@ public class StorageWSServer extends GenericWSServer {
 	 ********************/
 
 	@GET
-	@Path("/{bucketId}/create_directory")
-	public Response createDirectory(@DefaultValue("") @PathParam("bucketId") String bucketId,
-			@DefaultValue("") @QueryParam("objectid") String objectIdFromURL,
-			@DefaultValue("false") @QueryParam("parents") boolean parents) {
-
-		java.nio.file.Path objectId = parseObjectId(objectIdFromURL);
-
+	@Path("/create_directory")
+	public Response createDirectory(@DefaultValue("false") @QueryParam("parents") boolean parents) {
 		ObjectItem objectItem = new ObjectItem(null, null, null);
 		objectItem.setFileType("dir");
 		objectItem.setDate(TimeUtils.getTime());
 		try {
-			String res = cloudSessionManager.createFolderToBucket(accountId, bucketId, objectId, objectItem, parents,
-					sessionId);
+			String res = cloudSessionManager.createFolderToBucket(accountId, bucketId, objectId, objectItem,
+					parents, sessionId);
 			return createOkResponse(res);
 		} catch (Exception e) {
 			logger.error(e.toString());
@@ -115,11 +114,8 @@ public class StorageWSServer extends GenericWSServer {
 	}
 
 	@GET
-	@Path("/{bucketId}/{objectId}/delete")
-	public Response deleteData(@DefaultValue("") @PathParam("bucketId") String bucketId,
-			@DefaultValue("") @PathParam("objectId") String objectIdFromURL) {
-
-		java.nio.file.Path objectId = parseObjectId(objectIdFromURL);
+	@Path("/delete")
+	public Response deleteData() {
 		try {
 			cloudSessionManager.deleteDataFromBucket(accountId, bucketId, objectId, sessionId);
 			return createOkResponse("OK");
@@ -131,11 +127,9 @@ public class StorageWSServer extends GenericWSServer {
 
 	// TODO for now, only region filter allowed
 	@GET
-	@Path("/{bucketId}/{objectId}/fetch/")
-	public Response region(@DefaultValue("") @PathParam("bucketId") String bucketId,
-			@DefaultValue("") @PathParam("objectId") String objectIdFromURL,
+	@Path("/fetch")
+	public Response region(@DefaultValue("") @PathParam("objectId") String objectIdFromURL,
 			@DefaultValue("") @QueryParam("region") String regionStr) {
-		java.nio.file.Path objectId = parseObjectId(objectIdFromURL);
 		try {
 			String res = cloudSessionManager.region(accountId, bucketId, objectId, regionStr, params, sessionId);
 			return createOkResponse(res);
@@ -144,8 +138,6 @@ public class StorageWSServer extends GenericWSServer {
 			return createErrorResponse(e.getMessage());
 		}
 	}
-
-	
 
 	/*******************/
 	@POST
@@ -165,8 +157,7 @@ public class StorageWSServer extends GenericWSServer {
 
 		long t = System.currentTimeMillis();
 
-		java.nio.file.Path folderPath = Paths.get("/tmp/subir/").resolve(
-				parseObjectId(bucketId + "_" + objectIdFromURL));
+		java.nio.file.Path folderPath = Paths.get("/tmp/subir/").resolve(bucketId + "_" + objectId);
 		java.nio.file.Path filePath = folderPath.resolve(filename);
 
 		logger.info(objectIdFromURL + "");

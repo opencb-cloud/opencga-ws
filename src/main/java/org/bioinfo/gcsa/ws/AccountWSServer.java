@@ -87,43 +87,6 @@ public class AccountWSServer extends GenericWSServer {
 		}
 	}
 
-	@GET
-	@Path("/profile/change_password")
-	public Response changePassword(@DefaultValue("") @QueryParam("old_password") String old_password,
-			@DefaultValue("") @QueryParam("new_password1") String new_password1,
-			@DefaultValue("") @QueryParam("new_password2") String new_password2) {
-		try {
-			cloudSessionManager.changePassword(accountId, old_password, new_password1, new_password2, sessionId);
-			return createOkResponse("OK");
-		} catch (AccountManagementException e) {
-			logger.error(e.toString());
-			return createErrorResponse("could not change password");
-		}
-	}
-
-	@GET
-	@Path("/profile/reset_password")
-	public Response resetPassword(@DefaultValue("") @QueryParam("email") String email) {
-		try {
-			cloudSessionManager.resetPassword(accountId, email);
-			return createOkResponse("OK");
-		} catch (AccountManagementException e) {
-			logger.error(e.toString());
-			return createErrorResponse("could not reset password");
-		}
-	}
-
-	@GET
-	@Path("/profile/change_email")
-	public Response changeEmail(@DefaultValue("") @QueryParam("new_email") String new_email) {
-		try {
-			cloudSessionManager.changeEmail(accountId, new_email, sessionId);
-			return createOkResponse("OK");
-		} catch (AccountManagementException e) {
-			logger.error(e.toString());
-			return createErrorResponse("could not change email");
-		}
-	}
 
 	// @GET
 	// @Path("/delete/")
