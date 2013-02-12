@@ -49,7 +49,6 @@ public class AnalysisWSServer extends GenericWSServer {
 
 		this.accountId = accountId;
 		this.analysis = analysis;
-		logger.info(message);
 		this.projectId = projectId;
 
 		analysisError = false;
