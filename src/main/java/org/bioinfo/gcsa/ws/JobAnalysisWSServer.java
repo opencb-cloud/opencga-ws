@@ -57,9 +57,9 @@ public class JobAnalysisWSServer extends GenericWSServer {
 			@QueryParam("sort") @DefaultValue("false") String sort) {
 
 		try {
-			String res = cloudSessionManager.getFileTableFromJob(accountId, jobId, filename, start, limit,
-					colNames, colVisibility, callback, sort, sessionId);
-			return createOkResponse(res);
+			String res = cloudSessionManager.getFileTableFromJob(accountId, jobId, filename, start, limit, colNames,
+					colVisibility, callback, sort, sessionId);
+			return createOkResponse(res, MediaType.valueOf("text/javascript"));
 		} catch (Exception e) {
 			logger.error(e.toString());
 			return createErrorResponse(e.getMessage());
@@ -72,8 +72,7 @@ public class JobAnalysisWSServer extends GenericWSServer {
 			@DefaultValue("true") @QueryParam("zip") String zip) {
 
 		try {
-			DataInputStream is = cloudSessionManager.getFileFromJob(accountId, jobId, filename, zip,
-					sessionId);
+			DataInputStream is = cloudSessionManager.getFileFromJob(accountId, jobId, filename, zip, sessionId);
 			String name = null;
 			if (zip.compareTo("true") != 0) {// PAKO zip != true
 				name = filename;
@@ -127,9 +126,9 @@ public class JobAnalysisWSServer extends GenericWSServer {
 	@Path("/result.js")
 	public Response getResult() {
 		try {
-			
-//			AnalysisJobExecuter aje = new AnalysisJobExecuter(analysis);
-//			cloudSessionManager.get
+
+			// AnalysisJobExecuter aje = new AnalysisJobExecuter(analysis);
+			// cloudSessionManager.get
 			Job job = cloudSessionManager.getJob(accountId, jobId, sessionId);
 			AnalysisJobExecuter aje = new AnalysisJobExecuter(job.getToolName());
 			InputStream is = aje.getResultInputStream();

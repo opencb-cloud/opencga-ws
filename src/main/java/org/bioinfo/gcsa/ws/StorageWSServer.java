@@ -1,13 +1,11 @@
 package org.bioinfo.gcsa.ws;
 
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,11 +24,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.bioinfo.commons.utils.StringUtils;
-import org.bioinfo.gcsa.lib.account.beans.Bucket;
 import org.bioinfo.gcsa.lib.account.beans.ObjectItem;
 import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
-import org.bioinfo.gcsa.lib.account.io.IOManagementException;
 import org.bioinfo.gcsa.lib.utils.IOUtils;
 import org.bioinfo.gcsa.lib.utils.TimeUtils;
 
@@ -82,8 +77,8 @@ public class StorageWSServer extends GenericWSServer {
 		objectItem.setDescription(description);
 
 		try {
-			String res = cloudSessionManager.createObjectToBucket(accountId, bucketId, objectId, objectItem,
-					fileIs, parents, sessionId);
+			String res = cloudSessionManager.createObjectToBucket(accountId, bucketId, objectId, objectItem, fileIs,
+					parents, sessionId);
 			return createOkResponse(res);
 		} catch (Exception e) {
 			logger.error(e.toString());
@@ -104,8 +99,8 @@ public class StorageWSServer extends GenericWSServer {
 		objectItem.setFileType("dir");
 		objectItem.setDate(TimeUtils.getTime());
 		try {
-			String res = cloudSessionManager.createFolderToBucket(accountId, bucketId, objectId, objectItem,
-					parents, sessionId);
+			String res = cloudSessionManager.createFolderToBucket(accountId, bucketId, objectId, objectItem, parents,
+					sessionId);
 			return createOkResponse(res);
 		} catch (Exception e) {
 			logger.error(e.toString());

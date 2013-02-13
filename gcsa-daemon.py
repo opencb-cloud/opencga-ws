@@ -58,53 +58,70 @@ def getSGEjobs():
     return sgeJobs
 
 def getMongojobs():
-    projects = collection.aggregate([{"$project":{"accountId":1,"projects.jobs":1,"_id":0}},{"$unwind":"$projects"},{"$match":{"projects.jobs.visites":{"$lt":0}}}])["result"];
+    projects = collection.aggregate([{"$project":{"accountId":1,"projects.jobs":1,"_id":0}},{"$unwind":"$projects"},{"$match":{"projects.jobs.visites":{"$lt":0}}}])["result"]
     jobs = []
     for project in projects:
         for job in project["projects"]["jobs"]:
-            job["accountId"] = project["accountId"]
-            jobs.append(job)
+            if job["visites"] < 0:
+                job["accountId"] = project["accountId"]
+                jobs.append(job)
     return jobs
 
 def getMongoJobIndex(job):
     jobs = collection.find_one({"accountId":job["accountId"],"projects.jobs.id": job["id"]},{"projects.$":1})["projects"][0]["jobs"]
     position = 0;
     for j in jobs:
-        print(j["id"])
-        print(job["id"])
-        print(position)
         if j["id"] == job["id"]:
-            return position
-        position += 1
-        #position = position+1
+            break
+        position +=1
+    return str(position)
 
+def updateRuning(job,position):
+    accountId = job["accountId"]
+    jobId = job["id"]
+    res = collection.update({"accountId":accountId,"projects.jobs.id":jobId},{"$set":{"projects.$.jobs."+position+".status":"running","projects.$.jobs."+position+".visites":-1,"lastActivity":getTimeMillis()}})
+    print(res)
 
+def updateEqw(job,position):
+    accountId = job["accountId"]
+    jobId = job["id"]
+    res = collection.update({"accountId":accountId,"projects.jobs.id":jobId},{"$set":{"projects.$.jobs."+position+".status":"error","projects.$.jobs."+position+".visites":0,"lastActivity":getTimeMillis()}})
+    print(res)
+
+def updateFinished(job,position):
+    accountId = job["accountId"]
+    jobId = job["id"]
+    jobOutdir = job["outdir"]
+    outdir = GCSA_ACCOUNTS+"/"+accountId+"/"+jobOutdir
+    status, output = commands.getstatusoutput("ls "+outdir+" | grep -v result.xml | grep -v sge_err.log | grep -v sge_out.log")
+
+    sys.stdout.write(getLogTime()+"\t"+jobId+"\t"+accountId+"\t")
+    res = collection.update({"accountId":accountId,"projects.jobs.id":jobId},{"$set":{"projects.$.jobs."+position+".status":"finished","projects.$.jobs."+position+".outputData":output.split("\n"),"projects.$.jobs."+position+".visites":0,"lastActivity":getTimeMillis()}})
+    print(res)
+    sys.stdout.write(outdir+"\t")
+    print("")
 
 def task():
     sgeJobs = getSGEjobs()
     mongoJobs = getMongojobs()
     for mongoJob in mongoJobs:
-
+        position = getMongoJobIndex(mongoJob)
         mongoAccountId = mongoJob["accountId"]
-
+        print(mongoJob["id"])
         if mongoJob["id"] in sgeJobs:
             sgeJob = sgeJobs[mongoJob["id"]];
             sys.stdout.write(getLogTime()+"\t"+mongoJob["id"]+"\t"+sgeJob["s"]+"\t"+mongoAccountId+"\t")
             if sgeJob["s"] == "r" and mongoJob["status"]!="running":
-                print(collection.update({"accountId":mongoAccountId,"projects.jobs.id":mongoJob["id"]},{"$set":{"projects.$.jobs."+position+".status":"running","projects.$.jobs."+position+".visites":-1,"lastActivity":getTimeMillis()}}))
+                updateRuning(mongoJob,position);
             elif sgeJob["s"] == "Eqw":
-                print(collection.update({"accountId":mongoAccountId,"projects.jobs.id":mongoJob["id"]},{"$set":{"jobs.$.status":"error","jobs.$.visites":0,"lastActivity":getTimeMillis()}}))
+                updateEqw(mongoJob,position)
             #elif sgeJob["s"] == "qw":
                 #print("qw")
             else:
                 print("")
         else:
-            sys.stdout.write(getLogTime()+"\t"+mongoJob["id"]+"\t"+mongoAccountId+"\t")
             #actualizar mongo, pq el job no esta en la sge, marcar como terminado, y ok o error  ----> esto no se sabe
-            outdir = GCSA_ACCOUNTS+"/"+mongoAccountId+"/"+mongoJob["outdir"]
-            status, output = commands.getstatusoutput("ls "+outdir+" | grep -v result.xml | grep -v sge_err.log | grep -v sge_out.log")
-            sys.stdout.write(outdir+"\t")
-            print(collection.update({"accountId":mongoAccountId,"jobs.id":mongoJob["id"]},{"$set":{"jobs.$.status":"finished","jobs.$.outputData":output.split("\n"),"jobs.$.visites":0,"lastActivity":getTimeMillis()}}))
+            updateFinished(mongoJob,position)
 
 def mongoDisconnect():
     connection.disconnect()
