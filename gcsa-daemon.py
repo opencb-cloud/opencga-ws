@@ -93,7 +93,7 @@ def updateFinished(job,position):
     jobId = job["id"]
     jobOutdir = job["outdir"]
     outdir = GCSA_ACCOUNTS+"/"+accountId+"/"+jobOutdir
-    status, output = commands.getstatusoutput("ls "+outdir+" | grep -v result.xml | grep -v sge_err.log | grep -v sge_out.log")
+    status, output = commands.getstatusoutput("ls -r "+outdir+" | grep -v result.xml | grep -v sge_err.log | grep -v sge_out.log")
 
     sys.stdout.write(getLogTime()+"\t"+jobId+"\t"+accountId+"\t")
     res = collection.update({"accountId":accountId,"projects.jobs.id":jobId},{"$set":{"projects.$.jobs."+position+".status":"finished","projects.$.jobs."+position+".outputData":output.split("\n"),"projects.$.jobs."+position+".visites":0,"lastActivity":getTimeMillis()}})
