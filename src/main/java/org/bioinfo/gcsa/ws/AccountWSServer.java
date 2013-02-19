@@ -88,6 +88,18 @@ public class AccountWSServer extends GenericWSServer {
 	}
 
 
+	@GET
+	@Path("/index")
+	public Response index(@DefaultValue("") @QueryParam("object") String object) throws Exception {
+		try {
+			cloudSessionManager.indexFileObjects(accountId, parseObjectId(object));
+			return createOkResponse("OK");
+		} catch (Exception e) {
+			logger.error(e.toString());
+			return createErrorResponse("job id not found.");
+		}
+
+	}
 	// @GET
 	// @Path("/delete/")
 	// public Response deleteAccount() {

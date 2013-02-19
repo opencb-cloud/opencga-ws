@@ -51,7 +51,6 @@ public class GenericWSServer {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		System.out.println("AccountWSServer: static cloudSessionManager");
 	}
 
 	public GenericWSServer(@Context UriInfo uriInfo, @Context HttpServletRequest httpServletRequest) throws IOException {
@@ -67,7 +66,7 @@ public class GenericWSServer {
 
 		OperatingSystem op = userAgent.getOperatingSystem();
 
-		logger.info("---------------------------------------");
+		logger.debug(uriInfo.getRequestUri());
 		// logger.info("------------------->" + br.getName());
 		// logger.info("------------------->" + br.getBrowserType().getName());
 		// logger.info("------------------->" + op.getName());

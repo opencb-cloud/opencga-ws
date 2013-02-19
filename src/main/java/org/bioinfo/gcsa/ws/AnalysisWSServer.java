@@ -125,19 +125,6 @@ public class AnalysisWSServer extends GenericWSServer {
 	}
 
 	@GET
-	@Path("/index")
-	public Response index(@DefaultValue("") @QueryParam("object") String object) throws Exception {
-		try {
-			cloudSessionManager.indexFileObjects(accountId, parseObjectId(object));
-			return createOkResponse("OK");
-		} catch (Exception e) {
-			logger.error(e.toString());
-			return createErrorResponse("job id not found.");
-		}
-
-	}
-
-	@GET
 	@Path("/run")
 	public Response analysisGet() throws IOException, AccountManagementException {
 		return this.analysis(params);
