@@ -2,10 +2,10 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.bioinfo</groupId>
-	<artifactId>gcsa-ws</artifactId>
+	<artifactId>opencga-ws</artifactId>
 	<version>0.1.0</version>
 	<packaging>war</packaging>
-	<name>gcsa-ws</name>
+	<name>opencga-ws</name>
 
 	<dependencies>
 		<dependency>
@@ -49,7 +49,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.bioinfo</groupId>
-			<artifactId>gcsa-lib</artifactId>
+			<artifactId>opencga-lib</artifactId>
 			<version>0.1.0</version>
 			<scope>compile</scope>
 		</dependency>
@@ -79,7 +79,7 @@
 
 	<build>
 		<sourceDirectory>src</sourceDirectory>
-		<finalName>gcsa</finalName>
+		<finalName>opencga</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>

@@ -1,4 +1,4 @@
-package org.bioinfo.gcsa.ws;
+package org.bioinfo.opencga.ws;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +23,7 @@ import nl.bitwalker.useragentutils.UserAgent;
 
 import org.apache.log4j.Logger;
 import org.bioinfo.commons.Config;
-import org.bioinfo.gcsa.lib.account.CloudSessionManager;
+import org.bioinfo.opencga.lib.account.CloudSessionManager;
 
 @Path("/")
 @Produces("text/plain")
