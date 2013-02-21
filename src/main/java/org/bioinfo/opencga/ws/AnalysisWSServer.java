@@ -27,6 +27,7 @@ import org.bioinfo.opencga.lib.analysis.SgeManager;
 import org.bioinfo.opencga.lib.analysis.beans.Analysis;
 import org.bioinfo.opencga.lib.analysis.beans.Execution;
 import org.bioinfo.opencga.lib.analysis.beans.InputParam;
+import org.bioinfo.opencga.lib.utils.StringUtils;
 
 @Path("/account/{accountId}/analysis/{analysis}")
 public class AnalysisWSServer extends GenericWSServer {
@@ -213,7 +214,7 @@ public class AnalysisWSServer extends GenericWSServer {
 		String jobFolder = null;
 		if (params.containsKey("outdir")) {
 			jobFolder = "buckets:" + params.get("outdir").get(0);
-			jobFolder = parseObjectId(jobFolder).toString();
+			jobFolder = StringUtils.parseObjectId(jobFolder).toString();
 			params.remove("outdir");
 		}
 
@@ -235,7 +236,7 @@ public class AnalysisWSServer extends GenericWSServer {
 					if (example) { // is a example
 						dataPath = aje.getExamplePath(dataId);
 					} else { // is a dataId
-						dataPath = cloudSessionManager.getObjectPath(accountId, null, parseObjectId(dataId));
+						dataPath = cloudSessionManager.getObjectPath(accountId, null, StringUtils.parseObjectId(dataId));
 					}
 
 					if (dataPath.contains("ERROR")) {

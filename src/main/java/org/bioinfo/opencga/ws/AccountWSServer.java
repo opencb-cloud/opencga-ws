@@ -14,6 +14,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.bioinfo.opencga.lib.account.db.AccountManagementException;
 import org.bioinfo.opencga.lib.account.io.IOManagementException;
+import org.bioinfo.opencga.lib.utils.StringUtils;
 
 @Path("/account/{accountId}")
 public class AccountWSServer extends GenericWSServer {
@@ -92,7 +93,7 @@ public class AccountWSServer extends GenericWSServer {
 	@Path("/index")
 	public Response index(@DefaultValue("") @QueryParam("object") String object) throws Exception {
 		try {
-			cloudSessionManager.indexFileObjects(accountId, parseObjectId(object));
+			cloudSessionManager.indexFileObjects(accountId, StringUtils.parseObjectId(object));
 			return createOkResponse("OK");
 		} catch (Exception e) {
 			logger.error(e.toString());

@@ -27,6 +27,7 @@ import javax.ws.rs.core.UriInfo;
 import org.bioinfo.opencga.lib.account.beans.ObjectItem;
 import org.bioinfo.opencga.lib.account.db.AccountManagementException;
 import org.bioinfo.opencga.lib.utils.IOUtils;
+import org.bioinfo.opencga.lib.utils.StringUtils;
 import org.bioinfo.opencga.lib.utils.TimeUtils;
 
 import com.sun.jersey.core.header.FormDataContentDisposition;
@@ -45,7 +46,7 @@ public class StorageWSServer extends GenericWSServer {
 		super(uriInfo, httpServletRequest);
 		this.accountId = accountId;
 		this.bucketId = bucketId;
-		this.objectId = parseObjectId(objectId);
+		this.objectId = StringUtils.parseObjectId(objectId);
 	}
 
 	@POST
