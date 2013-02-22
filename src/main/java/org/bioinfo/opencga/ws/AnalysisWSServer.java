@@ -1,7 +1,6 @@
-package org.bioinfo.gcsa.ws;
+package org.bioinfo.opencga.ws;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -14,21 +13,21 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.bioinfo.gcsa.lib.account.beans.Acl;
-import org.bioinfo.gcsa.lib.account.beans.AnalysisPlugin;
-import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
-import org.bioinfo.gcsa.lib.account.io.IOManagementException;
-import org.bioinfo.gcsa.lib.analysis.AnalysisExecutionException;
-import org.bioinfo.gcsa.lib.analysis.AnalysisJobExecuter;
-import org.bioinfo.gcsa.lib.analysis.SgeManager;
-import org.bioinfo.gcsa.lib.analysis.beans.Analysis;
-import org.bioinfo.gcsa.lib.analysis.beans.Execution;
-import org.bioinfo.gcsa.lib.analysis.beans.InputParam;
+import org.bioinfo.opencga.lib.account.beans.Acl;
+import org.bioinfo.opencga.lib.account.beans.AnalysisPlugin;
+import org.bioinfo.opencga.lib.account.db.AccountManagementException;
+import org.bioinfo.opencga.lib.account.io.IOManagementException;
+import org.bioinfo.opencga.lib.analysis.AnalysisExecutionException;
+import org.bioinfo.opencga.lib.analysis.AnalysisJobExecuter;
+import org.bioinfo.opencga.lib.analysis.SgeManager;
+import org.bioinfo.opencga.lib.analysis.beans.Analysis;
+import org.bioinfo.opencga.lib.analysis.beans.Execution;
+import org.bioinfo.opencga.lib.analysis.beans.InputParam;
+import org.bioinfo.opencga.lib.utils.StringUtils;
 
 @Path("/account/{accountId}/analysis/{analysis}")
 public class AnalysisWSServer extends GenericWSServer {
@@ -215,7 +214,7 @@ public class AnalysisWSServer extends GenericWSServer {
 		String jobFolder = null;
 		if (params.containsKey("outdir")) {
 			jobFolder = "buckets:" + params.get("outdir").get(0);
-			jobFolder = parseObjectId(jobFolder).toString();
+			jobFolder = StringUtils.parseObjectId(jobFolder).toString();
 			params.remove("outdir");
 		}
 
@@ -237,7 +236,7 @@ public class AnalysisWSServer extends GenericWSServer {
 					if (example) { // is a example
 						dataPath = aje.getExamplePath(dataId);
 					} else { // is a dataId
-						dataPath = cloudSessionManager.getObjectPath(accountId, null, parseObjectId(dataId));
+						dataPath = cloudSessionManager.getObjectPath(accountId, null, StringUtils.parseObjectId(dataId));
 					}
 
 					if (dataPath.contains("ERROR")) {

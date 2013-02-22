@@ -2,7 +2,7 @@ package org.bioinfo.gcsa.lib.feature;
 
 import java.io.IOException;
 
-import org.bioinfo.gcsa.lib.storage.feature.FeatureManager;
+import org.bioinfo.opencga.lib.storage.feature.FeatureManager;
 import org.junit.Test;
 
 

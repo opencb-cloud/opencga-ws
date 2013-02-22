@@ -5,16 +5,19 @@ from pymongo import MongoClient
 from seth import Daemon
 
 INTERVAL = 3
-GCSA_ACCOUNTS = "/httpd/bioinfo/gcsa/accounts"
+OPENCGA_ACCOUNTS = "/httpd/bioinfo/opencga/accounts"
 
 #Mongo configuration
-mongoHost = "mem15"
+mongoHost = "webmaster"
 mongoPort = 27017
-mongoDatabase = "usertest"
-mongoCollection = "users"
+mongoDatabase = "opencga"
+mongoCollection = "accounts"
+mongouser = "opencga_user"
+mongopass = "Opencga_Pass"
 
 connection = MongoClient(mongoHost, mongoPort)
 db = connection[mongoDatabase]
+db.authenticate(mongouser,mongopass);
 collection = db[mongoCollection]
 
 
@@ -92,7 +95,7 @@ def updateFinished(job,position):
     accountId = job["accountId"]
     jobId = job["id"]
     jobOutdir = job["outdir"]
-    outdir = GCSA_ACCOUNTS+"/"+accountId+"/"+jobOutdir
+    outdir = OPENCGA_ACCOUNTS+"/"+accountId+"/"+jobOutdir
     status, output = commands.getstatusoutput("ls -r "+outdir+" | grep -v result.xml | grep -v sge_err.log | grep -v sge_out.log")
 
     sys.stdout.write(getLogTime()+"\t"+jobId+"\t"+accountId+"\t")
@@ -151,7 +154,7 @@ class MyDaemon(Daemon):
         print("Stopping Daemon!")  # message issued on self.stdout
 
 if __name__ == '__main__':
-    daemon = MyDaemon('/opt/gcsa-daemon/gcsa-daemon.pid','/opt/gcsa-daemon/gcsa-daemon.log')
+    daemon = MyDaemon('/opt/opencga/opencga-daemon.pid','/opt/opencga/opencga-daemon.log')
     if len(sys.argv) == 2:
         if 'start' == sys.argv[1]:
             daemon.start()

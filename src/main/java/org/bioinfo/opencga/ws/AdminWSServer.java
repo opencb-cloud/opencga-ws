@@ -1,4 +1,4 @@
-package org.bioinfo.gcsa.ws;
+package org.bioinfo.opencga.ws;
 
 import java.io.IOException;
 
@@ -12,10 +12,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.bioinfo.gcsa.lib.account.beans.Bucket;
-import org.bioinfo.gcsa.lib.account.beans.Project;
-import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
-import org.bioinfo.gcsa.lib.account.io.IOManagementException;
+import org.bioinfo.opencga.lib.account.beans.Bucket;
+import org.bioinfo.opencga.lib.account.beans.Project;
+import org.bioinfo.opencga.lib.account.db.AccountManagementException;
+import org.bioinfo.opencga.lib.account.io.IOManagementException;
 
 @Path("/account/{accountId}/admin")
 public class AdminWSServer extends GenericWSServer {

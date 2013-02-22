@@ -1,8 +1,7 @@
-package org.bioinfo.gcsa.ws;
+package org.bioinfo.opencga.ws;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ResourceBundle;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,7 +22,7 @@ import nl.bitwalker.useragentutils.UserAgent;
 
 import org.apache.log4j.Logger;
 import org.bioinfo.commons.Config;
-import org.bioinfo.gcsa.lib.account.CloudSessionManager;
+import org.bioinfo.opencga.lib.account.CloudSessionManager;
 
 @Path("/")
 @Produces("text/plain")
@@ -89,18 +88,6 @@ public class GenericWSServer {
 	@Path("/echo/{message}")
 	public Response echoGet(@PathParam("message") String message) {
 		return createOkResponse(message);
-	}
-
-	protected java.nio.file.Path parseObjectId(String objectIdFromURL) {
-		String[] tokens = objectIdFromURL.split(":");
-		// if(tokens.length == 0){
-		// return Paths.get(objectIdFromURL);
-		// }
-		java.nio.file.Path objectPath = Paths.get("");
-		for (int i = 0; i < tokens.length; i++) {
-			objectPath = objectPath.resolve(Paths.get(tokens[i]));
-		}
-		return objectPath;
 	}
 
 	protected Response createErrorResponse(Object o) {

@@ -1,4 +1,4 @@
-package org.bioinfo.gcsa.ws;
+package org.bioinfo.opencga.ws;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,10 +24,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.bioinfo.gcsa.lib.account.beans.ObjectItem;
-import org.bioinfo.gcsa.lib.account.db.AccountManagementException;
-import org.bioinfo.gcsa.lib.utils.IOUtils;
-import org.bioinfo.gcsa.lib.utils.TimeUtils;
+import org.bioinfo.opencga.lib.account.beans.ObjectItem;
+import org.bioinfo.opencga.lib.account.db.AccountManagementException;
+import org.bioinfo.opencga.lib.utils.IOUtils;
+import org.bioinfo.opencga.lib.utils.StringUtils;
+import org.bioinfo.opencga.lib.utils.TimeUtils;
 
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
@@ -45,7 +46,7 @@ public class StorageWSServer extends GenericWSServer {
 		super(uriInfo, httpServletRequest);
 		this.accountId = accountId;
 		this.bucketId = bucketId;
-		this.objectId = parseObjectId(objectId);
+		this.objectId = StringUtils.parseObjectId(objectId);
 	}
 
 	@POST

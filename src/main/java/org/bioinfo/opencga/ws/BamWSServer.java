@@ -1,4 +1,4 @@
-package org.bioinfo.gcsa.ws;
+package org.bioinfo.opencga.ws;
 
 import java.io.IOException;
 
@@ -11,8 +11,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.bioinfo.gcsa.lib.storage.feature.BamManager;
-import org.bioinfo.infrared.lib.common.Region;
+import org.bioinfo.opencga.lib.storage.feature.BamManager;
 
 
 @Path("/bam")

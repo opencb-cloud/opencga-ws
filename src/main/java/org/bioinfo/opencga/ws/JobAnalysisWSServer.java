@@ -1,4 +1,4 @@
-package org.bioinfo.gcsa.ws;
+package org.bioinfo.opencga.ws;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -15,8 +15,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.bioinfo.gcsa.lib.account.beans.Job;
-import org.bioinfo.gcsa.lib.analysis.AnalysisJobExecuter;
+import org.bioinfo.opencga.lib.account.beans.Job;
+import org.bioinfo.opencga.lib.analysis.AnalysisJobExecuter;
 
 @Path("/account/{accountId}/analysis/job/{jobId}")
 public class JobAnalysisWSServer extends GenericWSServer {
