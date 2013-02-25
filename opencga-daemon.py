@@ -40,6 +40,8 @@ def getXMLtag(node, tag):
 
 def getSGEJobInfo(JB_name):
     arr = JB_name.split('_',2)
+    if len(arr) < 2:
+        return (arr[0],arr[0])
     return (arr[0],arr[1])
 
 def getSGEjobs():
