@@ -13,7 +13,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.bioinfo.opencga.lib.storage.feature.BamManager;
 
-
+@Deprecated
 @Path("/bam")
 public class BamWSServer extends GenericWSServer {
 
