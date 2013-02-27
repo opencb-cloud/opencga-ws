@@ -54,7 +54,7 @@ public class StorageWSServer extends GenericWSServer {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response uploadObject(@FormDataParam("file") InputStream fileIs,
 			@FormDataParam("file") FormDataContentDisposition fileInfo,
-			@DefaultValue("undefined") @FormDataParam("name") String name, @FormDataParam("tags") String tags,
+			@DefaultValue("undefined") @FormDataParam("name") String name, @FormDataParam("fileFormat") String fileFormat,
 			@DefaultValue("r") @QueryParam("filetype") String filetype,
 			@DefaultValue("-") @FormDataParam("responsible") String responsible,
 			@DefaultValue("-") @FormDataParam("organization") String organization,
@@ -70,7 +70,7 @@ public class StorageWSServer extends GenericWSServer {
 		ObjectItem objectItem = new ObjectItem(null, null, null);// TODO PAKO
 		// COMPROBAR
 		// CONSTRUCTOR
-		objectItem.setFileFormat(tags);
+		objectItem.setFileFormat(fileFormat);
 		objectItem.setFileType(filetype);
 		objectItem.setResponsible(responsible);
 		objectItem.setOrganization(organization);

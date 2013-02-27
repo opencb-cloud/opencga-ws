@@ -23,6 +23,7 @@ import nl.bitwalker.useragentutils.UserAgent;
 import org.apache.log4j.Logger;
 import org.bioinfo.commons.Config;
 import org.bioinfo.opencga.lib.account.CloudSessionManager;
+import org.bioinfo.opencga.lib.account.io.IOManagementException;
 
 @Path("/")
 @Produces("text/plain")
@@ -47,7 +48,7 @@ public class GenericWSServer {
 	static {
 		try {
 			cloudSessionManager = new CloudSessionManager();
-		} catch (IOException e) {
+		} catch (IOException | IOManagementException e) {
 			e.printStackTrace();
 		}
 	}

@@ -6,7 +6,7 @@
 	<version>0.1.0</version>
 	<packaging>war</packaging>
 	<name>opencga-ws</name>
-
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.bioinfo</groupId>
@@ -99,6 +99,27 @@
 				<configuration>
 					<encoding>UTF-8</encoding>
 				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.7</version>
+				<executions>
+					<execution>
+						<id>server-tgz</id>
+						<phase>install</phase>
+						<configuration>
+							<target>
+								<exec executable="cp">
+									<arg value="target/opencga.war" />
+									<arg value="target/opencga-${project.version}.war" />
+								</exec>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 		<extensions>
