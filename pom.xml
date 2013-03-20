@@ -138,8 +138,12 @@
 			<url>http://download.java.net/maven/2/</url>
 			<layout>default</layout>
 		</repository>
-
-
+		<repository>
+			<id>BioinfoSDK</id>
+			<name>Repository for Bioinfo SDK builds</name>
+			<url>http://repos.bioinfo.cipf.es/maven2</url>
+			<layout>default</layout>
+		</repository>
 	</repositories>
 
 	<distributionManagement>

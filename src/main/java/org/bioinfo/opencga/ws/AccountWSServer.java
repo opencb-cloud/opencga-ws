@@ -87,20 +87,33 @@ public class AccountWSServer extends GenericWSServer {
 			return createErrorResponse("could not get account information");
 		}
 	}
-
+	
 
 	@GET
 	@Path("/index")
 	public Response index(@DefaultValue("") @QueryParam("object") String object) throws Exception {
 		try {
-			cloudSessionManager.indexFileObjects(accountId, StringUtils.parseObjectId(object));
-			return createOkResponse("OK");
+			String res = cloudSessionManager.indexFileObjects(accountId, StringUtils.parseObjectId(object));
+			return createOkResponse(res);
 		} catch (Exception e) {
 			logger.error(e.toString());
 			return createErrorResponse("job id not found.");
 		}
+		
+	}
+	@GET
+	@Path("/index_status")
+	public Response indexStatus(@DefaultValue("") @QueryParam("index_job") String index_job) throws Exception {
+		try {
+			String res = cloudSessionManager.indexJobStatus(accountId, index_job);
+			return createOkResponse(res);
+		} catch (Exception e) {
+			logger.error(e.toString());
+			return createErrorResponse("index_job id not found.");
+		}
 
 	}
+	
 	// @GET
 	// @Path("/delete/")
 	// public Response deleteAccount() {

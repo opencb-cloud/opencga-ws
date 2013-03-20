@@ -57,6 +57,18 @@ public class AdminWSServer extends GenericWSServer {
 			return createErrorResponse("could not create bucket");
 		}
 	}
+	
+	@GET
+	@Path("/bucket/{bucketId}/refresh")
+	public Response refreshBucket(@DefaultValue("") @PathParam("bucketId") String bucketId) {
+		try {
+			cloudSessionManager.refreshBucket(accountId, bucketId, sessionId);
+			return createOkResponse("Ok");
+		} catch (AccountManagementException | IOException e) {
+			logger.error(e.toString());
+			return createErrorResponse("could not refresh bucket");
+		}
+	}
 
 	// TODO
 	// @GET
