@@ -3,6 +3,7 @@ target*
 .settings*
 .classpath
 .project
+.buildpath
 *.class
 *.iml
 
