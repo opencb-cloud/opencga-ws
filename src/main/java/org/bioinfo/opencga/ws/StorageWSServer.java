@@ -219,8 +219,8 @@ public class StorageWSServer extends GenericWSServer {
 			return sb;
 		}
 
-		String c = "\"";
-		DirectoryStream<java.nio.file.Path> folderStream = Files.newDirectoryStream(folderPath, "*_partial");
+        String c = "\"";
+        DirectoryStream<java.nio.file.Path> folderStream = Files.newDirectoryStream(folderPath, "*_partial");
 		sb.append("{");
 		for (java.nio.file.Path partPath : folderStream) {
 			String[] nameSplit = partPath.getFileName().toString().split("_");

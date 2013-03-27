@@ -1,5 +1,3 @@
-package org.bioinfo.gcsa.lib.feature;
-
 import java.io.IOException;
 
 import org.bioinfo.opencga.lib.storage.feature.FeatureManager;
