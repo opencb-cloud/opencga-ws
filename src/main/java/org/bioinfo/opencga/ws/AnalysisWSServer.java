@@ -236,7 +236,7 @@ public class AnalysisWSServer extends GenericWSServer {
 					if (example) { // is a example
 						dataPath = aje.getExamplePath(dataId);
 					} else { // is a dataId
-						dataPath = cloudSessionManager.getObjectPath(accountId, null, StringUtils.parseObjectId(dataId));
+						dataPath = cloudSessionManager.getObjectPath(accountId, null, StringUtils.parseObjectId(dataId)).toString();
 					}
 
 					if (dataPath.contains("ERROR")) {

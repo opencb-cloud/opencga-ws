@@ -1,21 +1,16 @@
 package org.bioinfo.opencga.ws;
 
-import java.io.IOException;
+import org.bioinfo.opencga.lib.analysis.SgeManager;
+import org.bioinfo.opencga.lib.utils.networks.Layout;
+import org.bioinfo.opencga.lib.utils.networks.Layout.LayoutResp;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-
-import org.bioinfo.opencga.lib.utils.networks.Layout;
-import org.bioinfo.opencga.lib.utils.networks.Layout.LayoutResp;
+import java.io.IOException;
 
 @Produces("text/plain")
 @Path("/utils")
@@ -27,8 +22,18 @@ public class UtilsWSServer extends GenericWSServer {
 		super(uriInfo, httpServletRequest);
 		layout = new Layout();
 	}
-	
-	
+
+//    @GET
+//    @Path("/job_status")
+//    public Response indexStatus(@DefaultValue("") @QueryParam("jobId") String jobId) throws Exception {
+//        try {
+//            return createOkResponse(SgeManager.status(jobId));
+//        } catch (Exception e) {
+//            logger.error(e.toString());
+//            return createErrorResponse("job id not found.");
+//        }
+//    }
+
 	@POST
 	@Path("/network/layout/{algorithm}.{format}")
 	public Response layout(@PathParam("algorithm") String layoutAlgorithm, @PathParam("format") String outputFormat, @FormParam("dot") String dotData, @DefaultValue("output") @FormParam("filename") String filename, @DefaultValue("false") @FormParam("base64") String base64, @FormParam("jsonp") String jsonpCallback) {
