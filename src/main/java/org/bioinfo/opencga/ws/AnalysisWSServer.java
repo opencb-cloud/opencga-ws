@@ -233,7 +233,8 @@ public class AnalysisWSServer extends GenericWSServer {
 				List<String> dataPaths = new ArrayList<String>();
 				for (String dataId : dataIds) {
 					String dataPath = null;
-					if (example) { // is a example
+					if (dataId.contains("example_")) { // is a example
+                        dataId = dataId.replace("example_","");
 						dataPath = aje.getExamplePath(dataId);
 					} else { // is a dataId
 						dataPath = cloudSessionManager.getObjectPath(accountId, null, StringUtils.parseObjectId(dataId)).toString();
