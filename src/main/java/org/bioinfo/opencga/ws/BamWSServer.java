@@ -11,7 +11,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.bioinfo.opencga.lib.storage.feature.BamManager;
+import org.bioinfo.opencga.lib.storage.datamanagers.bam.BamManager;
 
 @Deprecated
 @Path("/bam")

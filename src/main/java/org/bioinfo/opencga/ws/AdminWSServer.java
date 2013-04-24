@@ -71,20 +71,17 @@ public class AdminWSServer extends GenericWSServer {
 	}
 
 	// TODO
-	// @GET
-	// @Path("/{bucketname}/rename/{newName}")
-	// public Response renameBucket(@DefaultValue("") @PathParam("bucket_name")
-	// String bucketId,
-	// @DefaultValue("") @PathParam("newName") String newName) {
-	// try {
-	// cloudSessionManager.renameBucket(accountId, bucketId, newName,
-	// sessionId);
-	// return createOkResponse("OK");
-	// } catch (AccountManagementException | IOManagementException e) {
-	// logger.error(e.toString());
-	// return createErrorResponse("could not rename bucket");
-	// }
-	// }
+    @GET
+    @Path("/bucket/{bucketId}/rename/{newName}")
+    public Response renameBucket(@DefaultValue("") @PathParam("bucketId") String bucketId, @DefaultValue("") @PathParam("newName") String newName) {
+        try {
+            cloudSessionManager.renameBucket(accountId, bucketId, newName, sessionId);
+            return createOkResponse("OK");
+        } catch (AccountManagementException | IOManagementException e) {
+            logger.error(e.toString());
+            return createErrorResponse("could not rename bucket");
+        }
+    }
 
 	// TODO
 	// @GET

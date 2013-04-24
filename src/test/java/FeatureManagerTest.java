@@ -1,6 +1,6 @@
 import java.io.IOException;
 
-import org.bioinfo.opencga.lib.storage.feature.FeatureManager;
+import org.bioinfo.opencga.lib.storage.datamanagers.FeatureManager;
 import org.junit.Test;
 
 
