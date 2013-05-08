@@ -131,6 +131,7 @@ public class StorageWSServer extends GenericWSServer {
             return createOkResponse(res);
         } catch (Exception e) {
             logger.error(e.toString());
+            e.printStackTrace();
             return createErrorResponse(e.getMessage());
         }
     }
@@ -287,9 +288,9 @@ public class StorageWSServer extends GenericWSServer {
 
     @GET
     @Path("/index")
-    public Response index() throws Exception {
+    public Response index(@DefaultValue("false") @QueryParam("force") boolean force) throws Exception {
         try {
-            String res = cloudSessionManager.indexFileObject(accountId, bucketId, objectId, sessionId);
+            String res = cloudSessionManager.indexFileObject(accountId, bucketId, objectId, force, sessionId);
             return createOkResponse(res);
         } catch (Exception e) {
             logger.error(e.toString());

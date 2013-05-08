@@ -62,6 +62,21 @@ def getSGEjobs():
         #print (getXMLtag(node,"slots"))
     return sgeJobs
 
+def checkSGEAccounting(name):
+    status, output = commands.getstatusoutput("qacct -j "+name + " | grep failed")
+    if "error:" in output:
+        return False
+    value = output.split()[1]
+    if value != "0":
+        return False
+    status, output = commands.getstatusoutput("qacct -j "+name + " | grep exit_status")
+    value = output.split()[1]
+    if value != "0":
+        return False
+    else:
+        return True
+
+
 def getMongojobs():
     projects = collection.aggregate([{"$project":{"accountId":1,"projects.jobs":1,"_id":0}},{"$unwind":"$projects"},{"$match":{"projects.jobs.visites":{"$lt":0}}}])["result"]
     jobs = []
@@ -72,8 +87,27 @@ def getMongojobs():
                 jobs.append(job)
     return jobs
 
+def getMongoObjects():
+    buckets = collection.aggregate([{"$project":{"accountId":1,"buckets.objects":1,"_id":0}},{"$unwind":"$buckets"},{"$match":{"buckets.objects.status":{"$regex":"indexer_*"}}}])["result"]
+    objects = []
+    for project in buckets:
+        for job in project["buckets"]["objects"]:
+            if "indexer_" in job["status"]:
+                job["accountId"] = project["accountId"]
+                objects.append(job)
+    return objects
+
 def getMongoJobIndex(job):
     jobs = collection.find_one({"accountId":job["accountId"],"projects.jobs.id": job["id"]},{"projects.$":1})["projects"][0]["jobs"]
+    position = 0;
+    for j in jobs:
+        if j["id"] == job["id"]:
+            break
+        position +=1
+    return str(position)
+
+def getMongoObjectIndex(job):
+    jobs = collection.find_one({"accountId":job["accountId"],"buckets.objects.id": job["id"]},{"buckets.$":1})["buckets"][0]["objects"]
     position = 0;
     for j in jobs:
         if j["id"] == job["id"]:
@@ -106,6 +140,12 @@ def updateFinished(job,position):
     sys.stdout.write(outdir+"\t")
     print("")
 
+
+def updateIndexFinished(object,position):
+    accountId = object["accountId"]
+    objectId = object["id"]
+    res = collection.update({"accountId":accountId,"buckets.objects.id":objectId},{"$set":{"buckets.$.objects."+position+".status":"ready","lastActivity":getTimeMillis()}})
+
 def task():
     sgeJobs = getSGEjobs()
     mongoJobs = getMongojobs()
@@ -127,6 +167,13 @@ def task():
         else:
             #actualizar mongo, pq el job no esta en la sge, marcar como terminado, y ok o error  ----> esto no se sabe
             updateFinished(mongoJob,position)
+
+    mongoObjects = getMongoObjects()
+    for mongoObject in mongoObjects:
+        print mongoObject["status"]
+        if checkSGEAccounting(mongoObject["status"]):
+            position = getMongoObjectIndex(mongoObject)
+            updateIndexFinished(mongoObject,position)
 
 def mongoDisconnect():
     connection.disconnect()
