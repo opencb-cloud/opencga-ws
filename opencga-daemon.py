@@ -62,19 +62,27 @@ def getSGEjobs():
         #print (getXMLtag(node,"slots"))
     return sgeJobs
 
-def checkSGEAccounting(name):
+def checkSGEAccounting(mongoObject):
+    name = mongoObject["status"]
+
     status, output = commands.getstatusoutput("qacct -j "+name + " | grep failed")
-    if "error:" in output:
-        return False
-    value = output.split()[1]
-    if value != "0":
-        return False
-    status, output = commands.getstatusoutput("qacct -j "+name + " | grep exit_status")
-    value = output.split()[1]
-    if value != "0":
-        return False
-    else:
-        return True
+    #print output
+    if "error: job name" not in output:
+        value = output.split()[1]
+        if value != "0":
+            position = getMongoObjectIndex(mongoObject)
+            updateIndexStatus(mongoObject,position,"error")
+            return
+        status, output = commands.getstatusoutput("qacct -j "+name + " | grep exit_status")
+        print output
+        value = output.split()[1]
+        if value != "0":
+            position = getMongoObjectIndex(mongoObject)
+            updateIndexStatus(mongoObject,position,"error")
+            return
+        else:
+            position = getMongoObjectIndex(mongoObject)
+            updateIndexStatus(mongoObject,position,"ready")
 
 
 def getMongojobs():
@@ -141,10 +149,10 @@ def updateFinished(job,position):
     print("")
 
 
-def updateIndexFinished(object,position):
+def updateIndexStatus(object,position,status):
     accountId = object["accountId"]
     objectId = object["id"]
-    res = collection.update({"accountId":accountId,"buckets.objects.id":objectId},{"$set":{"buckets.$.objects."+position+".status":"ready","lastActivity":getTimeMillis()}})
+    res = collection.update({"accountId":accountId,"buckets.objects.id":objectId},{"$set":{"buckets.$.objects."+position+".status":status,"lastActivity":getTimeMillis()}})
 
 def task():
     sgeJobs = getSGEjobs()
@@ -171,9 +179,7 @@ def task():
     mongoObjects = getMongoObjects()
     for mongoObject in mongoObjects:
         print mongoObject["status"]
-        if checkSGEAccounting(mongoObject["status"]):
-            position = getMongoObjectIndex(mongoObject)
-            updateIndexFinished(mongoObject,position)
+        checkSGEAccounting(mongoObject)
 
 def mongoDisconnect():
     connection.disconnect()
