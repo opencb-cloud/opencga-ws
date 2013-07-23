@@ -173,7 +173,7 @@ def task():
             else:
                 print("")
         else:
-            #actualizar mongo, pq el job no esta en la sge, marcar como terminado, y ok o error  ----> esto no se sabe
+            #actualizar mongodb, pq el job no esta en la sge, marcar como terminado, y ok o error  ----> esto no se sabe
             updateFinished(mongoJob,position)
 
     mongoObjects = getMongoObjects()
