@@ -30,6 +30,8 @@ public class AccountWSServer extends GenericWSServer {
 	@Path("/create")
 	public Response create(@DefaultValue("") @QueryParam("password") String password,
 			@DefaultValue("") @QueryParam("name") String name, @DefaultValue("") @QueryParam("email") String email) {
+
+
 		try {
 			if (accountId.toLowerCase().equals("anonymous")) {
 				cloudSessionManager.createAnonymousAccount(sessionIp);
@@ -83,6 +85,7 @@ public class AccountWSServer extends GenericWSServer {
 			String res = cloudSessionManager.getAccountInfo(accountId, lastActivity, sessionId);
 			return createOkResponse(res);
 		} catch (AccountManagementException e) {
+			logger.error(accountId);
 			logger.error(e.toString());
 			return createErrorResponse("could not get account information");
 		}
