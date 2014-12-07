@@ -27,15 +27,16 @@ public class AccountWSServer extends GenericWSServer {
 
 	@GET
 	@Path("/{accountid}/create")
-	public Response register(@DefaultValue("") @PathParam("accountid") String accountId,
+	public Response create(@DefaultValue("") @PathParam("accountid") String accountId,
 			@DefaultValue("") @QueryParam("password") String password,
 			@DefaultValue("") @QueryParam("accountname") String accountName,
 			@DefaultValue("") @QueryParam("email") String email) {
 		try {
-			cloudSessionManager.createUser(accountId, password, accountName, email, sessionIp);
+			cloudSessionManager.createAccount(accountId, password, accountName, email, sessionIp);
 			return createOkResponse("OK");
 		} catch (AccountManagementException e) {
-			return createErrorResponse(e.toString());
+			logger.error(e.toString());
+			return createErrorResponse("could not create the account");
 		}
 	}
 

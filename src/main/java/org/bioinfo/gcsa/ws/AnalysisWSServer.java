@@ -127,7 +127,7 @@ public class AnalysisWSServer extends GenericWSServer {
 
 		// TODO Comprobar mas cosas antes de crear el analysis job executer
 		// (permisos, etc..)
-		
+
 		if (params.containsKey("sessionid")) {
 			sessionId = params.get("sessionid").get(0);
 			params.remove("sessionid");
@@ -147,17 +147,17 @@ public class AnalysisWSServer extends GenericWSServer {
 		if (params.containsKey("_")) {
 			params.remove("_");
 		}
-		
+
 		String analysisName = analysisStr;
 		if (analysisStr.contains(".")) {
 			analysisName = analysisStr.split("\\.")[0];
 		}
-		
+
 		String analysisOwner = "system";
 		try {
 			List<Plugin> userAnalysis = cloudSessionManager.getUserAnalysis(sessionId);
-			for(Plugin a: userAnalysis) {
-				if(a.getName().equals(analysisName)) {
+			for (Plugin a : userAnalysis) {
+				if (a.getName().equals(analysisName)) {
 					analysisOwner = a.getOwnerId();
 					break;
 				}
@@ -200,7 +200,8 @@ public class AnalysisWSServer extends GenericWSServer {
 				List<String> dataIds = Arrays.asList(params.get(inputParam.getName()).get(0).split(","));
 				List<String> dataPaths = new ArrayList<String>();
 				for (String dataId : dataIds) {
-					String dataPath = cloudSessionManager.getDataPath(dataId, sessionId);
+					String dataPath = null;
+					dataPath = cloudSessionManager.getDataPath(dataId, sessionId);
 					if (dataPath.contains("ERROR")) {
 						return createErrorResponse(dataPath);
 					} else {
